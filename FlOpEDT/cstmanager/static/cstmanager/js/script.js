@@ -1182,23 +1182,24 @@ let buildConstraintsSections = () => {
     if (group_by_class) {
         Object.values(constraints).forEach(cst => {
             if (filtered_constraint_list.includes(cst.pageid)) {
-                if (!dict[cst.name]) {
-                    dict[cst.name] = {
+                let localName = findConstraintLocalNameFromClass(cst.name)
+                if (!dict[localName]) {
+                    dict[localName] = {
                         'active': [],
                         'inactive': [],
                     };
                 }
-                dict[cst.name][cst.is_active ? 'active' : 'inactive'].push(cst.pageid);
+                dict[localName][cst.is_active ? 'active' : 'inactive'].push(cst.pageid);
             }
         });
     } else {
-        dict['All constraints'] = {
+        dict[gettext("All constraints")] = {
             'active': [],
             'inactive': [],
         };
         Object.values(constraints).forEach(cst => {
             if (filtered_constraint_list.includes(cst.pageid)) {
-                dict["All constraints"][cst.is_active ? 'active' : 'inactive'].push(cst.pageid);
+                dict[gettext("All constraints")][cst.is_active ? 'active' : 'inactive'].push(cst.pageid);
             }
         });
     }

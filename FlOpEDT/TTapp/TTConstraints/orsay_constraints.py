@@ -40,7 +40,7 @@ from TTapp.TTConstraints.TTConstraint import TTConstraint
 from TTapp.TTConstraints.groups_constraints import considered_basic_groups
 from TTapp.slots import Slot
 from TTapp.TTConstraints.tutors_constraints import considered_tutors
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext as _
 
 
 class GroupsLunchBreak(TTConstraint):
@@ -54,6 +54,10 @@ class GroupsLunchBreak(TTConstraint):
     weekdays = ArrayField(models.CharField(max_length=2, choices=Day.CHOICES), blank=True, null=True)
     lunch_length = models.PositiveSmallIntegerField()
     groups = models.ManyToManyField('base.StructuralGroup', blank=True, related_name='lunch_breaks_constraints')
+
+    class Meta:
+        verbose_name = _('Lunch break for groups')
+        verbose_name_plural = verbose_name
 
     def enrich_ttmodel(self, ttmodel, week, ponderation=100):
         considered_groups = considered_basic_groups(self, ttmodel)
@@ -126,6 +130,10 @@ class TutorsLunchBreak(TTConstraint):
     weekdays = ArrayField(models.CharField(max_length=2, choices=Day.CHOICES), blank=True, null=True)
     lunch_length = models.PositiveSmallIntegerField()
     tutors = models.ManyToManyField('people.Tutor', blank=True, related_name='lunch_breaks_constraints')
+
+    class Meta:
+        verbose_name = _('Lunch break for tutors')
+        verbose_name_plural = verbose_name
 
     def enrich_ttmodel(self, ttmodel, week, ponderation=100):
         tutors_to_be_considered = considered_tutors(self, ttmodel)
@@ -223,6 +231,10 @@ class BreakAroundCourseType(TTConstraint):
     groups = models.ManyToManyField('base.StructuralGroup', blank=True, related_name='amphi_break_constraint')
     course_type = models.ForeignKey('base.CourseType', related_name='amphi_break_constraint', on_delete=models.CASCADE)
     min_break_length = models.PositiveSmallIntegerField(default=15)
+
+    class Meta:
+        verbose_name = _('A break around some type courses')
+        verbose_name_plural = verbose_name
 
     def enrich_ttmodel(self, ttmodel, week, ponderation=1000):
         considered_groups = considered_basic_groups(self, ttmodel)

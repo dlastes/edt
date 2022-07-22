@@ -1,4 +1,8 @@
-{% extends "base.html" %} {% block title %} EDT {% endblock %} {% load static %} {% block content %}
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %} {% trans "Constraints manager" %} {% endblock %}
+{% load static %}
+{% block content %}
     <link rel="stylesheet" href="{% static 'cstmanager/css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'cstmanager/css/style.css' %}">
     <script>
@@ -23,22 +27,22 @@
             <div class="col col-2 border-end border-top border-dark pt-5">
                 <div class="mb-3">
                     <button id="nav-new-constraint" type="button" class="btn btn-primary w-100">
-                        New Constraint
+                        {% trans "New Constraint" %}
                     </button>
                 </div>
                 <div class="mb-3">
                     <button id="discard-changes" type="button" class="btn btn-danger w-100">
-                        Discard Changes
+                        {% trans "Discard Changes" %}
                     </button>
                 </div>
                 <div class="mb-3">
                     <button id="apply-changes" type="button" class="btn btn-success w-100">
-                        Commit Changes
+                        {% trans "Commit Changes" %}
                     </button>
                 </div>
                 <div class="mb-3">
                     <button id="fetch-constraints" type="button" class="btn btn-primary w-100">
-                        Reload Constraints
+                        {% trans "Reload Constraints" %}
                     </button>
                 </div>
                 <div class="search-bar mb-3">
@@ -52,13 +56,13 @@
                 </div>
                 <div class="mb-3 text-center">
                     <button class="btn btn-info" id="clear-filters">
-                        Clear Filters
+                        {% trans "Clear Filters" %}
                     </button>
                 </div>
                 <div class="search-bar mb-3">
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" id="constraints-group-by-class">
-                        <label class="form-check-label" for="constraints-group-by-class">Group by class name</label>
+                        <label class="form-check-label" for="constraints-group-by-class">{% trans "Group by class name" %}</label>
                     </div>
                 </div>
             </div>
@@ -69,7 +73,7 @@
                 <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="constraint-edit-popup-label">Edit constraint</h5>
+                            <h5 class="modal-title" id="constraint-edit-popup-label">{% trans "Edit constraint" %}</h5>
                         </div>
                         <div class="modal-body">
                             <div id="constraint-edit-alert-container"></div>
@@ -77,18 +81,18 @@
                             <div class="mb-3">
                                 <select id="constraint-edit-type" class="form-select" aria-label="Type de contrainte"
                                         onchange="updateParamsListNewConstraint()">
-                                    <option selected disabled>Select type...</option>
+                                    <option selected disabled>{% trans "Select type..." %}</option>
                                 </select>
                             </div>
                             <!-- Title -->
                             <div class="form-floating mb-3">
                                 <input type="text" class="form-control" id="constraint-edit-title">
-                                <label for="constraint-edit-title">Title</label>
+                                <label for="constraint-edit-title">{% trans "Title" %}</label>
                             </div>
                             <!-- Comment -->
                             <div class="form-floating mb-3">
                                 <input type="text" class="form-control" id="constraint-edit-comment"></input>
-                                <label for="constraint-edit-comment">Comment</label>
+                                <label for="constraint-edit-comment">{% trans "Comment" %}</label>
                             </div>
                             <!-- Parameters -->
                             <div id="constraint-edit-params" class="accordion mb-3">
@@ -99,13 +103,13 @@
                                 <input class="form-check-input" type="checkbox" role="switch" value=""
                                        id="constraint-edit-activation">
                                 <label class="form-check-label ps-1" for="constraint-edit-activation">
-                                    Activated?
+                                    {% trans "Activated?" %}
                                 </label>
                             </div>
                             <!-- Weight -->
                             <div class="mb-3">
                                 <label for="constraint-edit-weight-slider"
-                                       class="form-label text-center">Weight:</label>
+                                       class="form-label text-center">{% trans "Weight :" %}</label>
                                 <input type="range" class="form-range" min="1" max="9" step="1"
                                        id="constraint-edit-weight-slider"
                                        oninput="updateEditConstraintWeightDisplay('constraint-edit-weight-value', value)"
@@ -114,8 +118,11 @@
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" id="cancel-edit-constraint" class="btn btn-secondary">Cancel</button>
-                            <button type="button" id="confirm-edit-constraint" class="btn btn-primary">Save changes
+                            <button type="button" id="cancel-edit-constraint" class="btn btn-secondary">
+                                {% trans "Cancel" %}
+                            </button>
+                            <button type="button" id="confirm-edit-constraint" class="btn btn-primary">
+                                {% trans "Save changes" %}
                             </button>
                         </div>
                     </div>
@@ -123,8 +130,8 @@
             </div>
             <!-- Constraints column -->
             <div class="col container w-auto" id="constraints-body">
-                <button id="show-disabled" class="float">Show Disabled</button>
-                <button id="show-solver" class="float">Preanalyse</button>
+                <button id="show-disabled" class="float">{% trans "Show Disabled" %}</button>
+                <button id="show-solver" class="float">{% trans "Preanalyse" %}</button>
                 <!-- Header -->
                 <div id="constraints-header" class="row border-top border-bottom border-dark">
                     <div id="constraint-info" hidden="hidden">
@@ -132,19 +139,19 @@
                             <div class="row h-100">
                                 <!-- Title -->
                                 <div class="col-auto border border-dark">
-                                    <label for="constraint-header-title" class="form-label">Title</label>
+                                    <label for="constraint-header-title" class="form-label">{% trans "Title" %}</label>
                                     <input type="text" readonly id="constraint-header-title"
                                            class="form-control-plaintext">
                                 </div>
                                 <!-- Comment -->
                                 <div class="col-auto border border-dark">
-                                    <label for="constraint-header-comment" class="form-label">Comments</label>
+                                    <label for="constraint-header-comment" class="form-label">{% trans "Comments" %}</label>
                                     <input type="text" readonly id="constraint-header-comment"
                                            class="form-control-plaintext">
                                 </div>
                                 <!-- Parameters -->
                                 <div class="col border border-dark">
-                                    <label class="form-label">Parameters</label>
+                                    <label class="form-label">{% trans "Parameters" %}</label>
                                     <div id="params" class="form">
                                     </div>
                                 </div>
@@ -158,7 +165,7 @@
                                 <!-- Weight -->
                                 <div class="col-auto border border-dark text-center">
                                     <div class="form">
-                                        <label class="form-label">Weight</label>
+                                        <label class="form-label">{% trans "Weight" %}</label>
                                         <br/>
                                         <label id="constraint-header-weight" class="form-label">
                                         </label>
@@ -170,7 +177,7 @@
                                         <button id="constraint-header-edit" type="button" class="btn btn-primary">Edit
                                         </button>
                                         <button id="constraint-header-delete" type="button" class="btn btn-danger">
-                                            Delete
+                                            {% trans "Delete" %}
                                         </button>
                                     </div>
                                 </div>
@@ -192,12 +199,12 @@
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" value="" id="constraints-select-all">
                     <label class="form-check-label" for="constraints-select-all">
-                        Select all
+                        {% trans "Select all" %}
                     </label>
                 </div>
             </div>
             <div class="col">
-                <div>Selected constraints :</div>
+                <div>{% trans "Selected constraints :" %}</div>
                 <div id="num-selected-constraints">0</div>
             </div>
             <div class="col-auto">
@@ -205,7 +212,7 @@
                     <div class="row">
                         <div class="col-auto">
                             <label for="selected-constraints-edit-weight-slider"
-                                   class="form-label text-center">Weight:</label>
+                                   class="form-label text-center">{% trans "Weight :" %}</label>
                         </div>
                         <div class="col-auto">
                             <div id="selected-constraints-edit-weight-value" class="text-center">1</div>
@@ -223,10 +230,10 @@
             <div class="col-auto">
                 <div class="btn-group" role="group" aria-label="Edit selected constraints">
                     <button class="btn btn-primary w-auto" id="selected-constraints-edit-weight">
-                        Set weight
+                        {% trans "Set weight" %}
                     </button>
                     <button class="btn btn-danger w-auto" id="selected-constraints-delete">
-                        Delete
+                        {% trans "Delete" %}
                     </button>
                 </div>
             </div>

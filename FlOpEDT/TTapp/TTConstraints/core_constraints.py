@@ -53,6 +53,10 @@ class NoSimultaneousGroupCourses(TTConstraint):
     """
     groups = models.ManyToManyField('base.StructuralGroup', blank=True)
 
+    class Meta:
+        verbose_name = _('No simultaneous courses for groups')
+        verbose_name_plural = verbose_name
+
     @timer
     def pre_analyse(self, week):
         """Pre analysis of the Constraint 
@@ -215,6 +219,10 @@ class ScheduleAllCourses(TTConstraint):
                                     blank=True)
     tutors = models.ManyToManyField('people.Tutor', blank=True)
     course_types = models.ManyToManyField('base.CourseType', blank=True)
+
+    class Meta:
+        verbose_name = _('Schedule once all considered courses')
+        verbose_name_plural = verbose_name
                                 
     def enrich_ttmodel(self, ttmodel, week, ponderation=1):
         relevant_basic_groups = considered_basic_groups(self, ttmodel)
@@ -266,6 +274,10 @@ class AssignAllCourses(TTConstraint):
     course_types = models.ManyToManyField('base.CourseType', blank=True)
     pre_assigned_only = models.BooleanField(default=False, verbose_name=_('Pre-assigned courses only'))
 
+    class Meta:
+        verbose_name = _('Each course is assigned to one tutor (max)')
+        verbose_name_plural = verbose_name
+
     def enrich_ttmodel(self, ttmodel, week, ponderation=100):
         relevant_basic_groups = considered_basic_groups(self, ttmodel)
         considered_courses = set(c for bg in relevant_basic_groups
@@ -313,6 +325,10 @@ class AssignAllCourses(TTConstraint):
 
 class ConsiderTutorsUnavailability(TTConstraint):
     tutors = models.ManyToManyField('people.Tutor', blank=True)
+
+    class Meta:
+        verbose_name = _("Consider tutors' unvailabilities")
+        verbose_name_plural = verbose_name
 
     @timer
     def pre_analyse(self, week, spec_tutor = None):
