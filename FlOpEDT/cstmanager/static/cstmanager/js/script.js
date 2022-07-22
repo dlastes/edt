@@ -155,9 +155,12 @@ let visibility = {
         visibility.setElementVisible(htmlElements.constraintsInfo, false);
     },
     showPopover: (popover) => {
-        visibility.hidePopover();
         if (!popover) {
             return;
+        }
+        if (currentPopover !== popover) {
+            // Hide previous popover
+            visibility.hidePopover();
         }
         currentPopover = popover;
         popover.show();
@@ -176,33 +179,6 @@ let changeEvents = {
         actionChanges.add[constraint.pageid] = constraint;
         constraint_list = Object.keys(constraints);
         filter_functions.reset_filtered_constraint_list();
-    },
-    duplicateConstraint: (pageid) => {
-        let copy_org_cst = copyObj(constraints[pageid]);
-        let rand = getRandomInt(100000);
-        let id = "-ADD-" + copy_org_cst['name'] + rand.toString();
-        let obj = {
-            policy: 'ADD',
-            table: copy_org_cst['name'],
-            tempid: id,
-            constraint: {
-                is_active: copy_org_cst['is_active'],
-                comment: copy_org_cst['comment'],
-                title: copy_org_cst['title'],
-                parameters: copyObj(copy_org_cst['parameters']),
-                weight: copy_org_cst['weight'],
-            },
-        };
-        actionChanges['ADD'].push(obj);
-        constraints[id] = {
-            ...copyObj(obj['constraint']),
-            id: rand,
-            pageid: id,
-            name: obj['table'],
-        };
-        constraint_list = Object.keys(constraints);
-        filter_functions.reset_filtered_constraint_list();
-        return id;
     },
     deleteConstraint: (pageid) => {
         let constraint = constraints[pageid];
@@ -665,6 +641,7 @@ let fillEditConstraintPopup = constraint => {
         activation.checked = constraint.is_active;
         weightSlider.value = constraint.weight;
         weightValue.innerText = constraint.weight;
+        updateParamsListExistingConstraint(constraint);
     }
 };
 
@@ -1371,16 +1348,23 @@ let toggleConstraint = (e) => {
     refreshConstraints();
 }
 
-let openNewConstraintPopup = () => {
+// Open the popup. If baseConstraint is provided then its data will be used to fill the popup.
+let openNewConstraintPopup = (baseConstraint) => {
     setState(State.CreateNewConstraint);
     const modal = new bootstrap.Modal(htmlElements.constraintsEditPopup, null);
 
-    resetNewConstraint();
-    fillEditConstraintPopup(null);
+    visibility.hidePopover();
+
+    if (!baseConstraint) {
+        resetNewConstraint();
+    } else {
+        newConstraint = baseConstraint;
+    }
+    fillEditConstraintPopup(baseConstraint);
 
     modal.show();
 };
-htmlElements.newConstraintButton.addEventListener('click', openNewConstraintPopup);
+htmlElements.newConstraintButton.addEventListener('click', _ => openNewConstraintPopup(null));
 
 let editSelectedConstraint = (pageid) => {
     if (!pageid) {
@@ -1393,7 +1377,7 @@ let editSelectedConstraint = (pageid) => {
     const modal = new bootstrap.Modal(htmlElements.constraintsEditPopup, null);
 
     editConstraint = copyObj(constraints[pageid]);
-    updateEditConstraintPopup(editConstraint);
+    fillEditConstraintPopup(editConstraint);
 
     modal.show();
 };
@@ -1411,6 +1395,23 @@ let deleteSelectedConstraints = () => {
     });
 };
 
+// duplicate a constraint
+let duplicateSelectedConstraint = (pageid) => {
+    if (!pageid) {
+        return;
+    }
+    let constraint = constraints[pageid];
+    if (!constraint) {
+        console.error('Constraint not found');
+        return;
+    }
+    let newConstraint = copyObj(constraint);
+    newConstraint.id = getNewConstraintID(newConstraint.name);
+    newConstraint.pageid = newConstraint.name + newConstraint.id;
+    console.log(newConstraint);
+    openNewConstraintPopup(newConstraint);
+}
+
 // builds the card for the constraint
 let constraintCardBuilder = (constraint) => {
     const wrapper = divBuilder({
@@ -1427,8 +1428,9 @@ let constraintCardBuilder = (constraint) => {
     let popover_id = `popover-${constraint.pageid}`;
     let editButton = `<button type="button" class="btn btn-primary" onclick="editSelectedConstraint('${constraint.pageid}')">${gettext('Edit')}</button>`;
     let deleteButton = `<button type="button" class="btn btn-danger" onclick="deleteSelectedConstraint('${constraint.pageid}')">${gettext('Delete')}</button>`;
+    let duplicateButton = `<button type="button" class="btn btn-info" onclick="duplicateSelectedConstraint('${constraint.pageid}')">${gettext('Duplicate')}</button>`;
 
-    let buttonGroup = `<div class="btn-group" role="group" aria-label="Constraint edit">${editButton}${deleteButton}`;
+    let buttonGroup = `<div class="btn-group" role="group" aria-label="Constraint edit">${duplicateButton}${editButton}${deleteButton}`;
     let popover_content = buttonGroup;
 
     let popover = divBuilder({
@@ -1507,19 +1509,6 @@ let editSelectedConstraintsWeight = () => {
 
 htmlElements.selectedConstraintsEditWeightButton.onclick = editSelectedConstraintsWeight;
 htmlElements.selectedConstraintsDeleteButton.onclick = deleteSelectedConstraints;
-
-// duplicate a constraint
-let duplicateSelectedConstraint = (e) => {
-    if (!lastSelectedConstraint) {
-        return;
-    }
-    let constr = constraints[`${lastSelectedConstraint}`];
-    let newid = changeEvents.duplicateConstraint(constr['pageid']);
-    // constraints[copy['pageid']] = copy;
-    selected_constraints = [];
-    refreshConstraints();
-    clickConstraint(newid);
-}
 
 let constraint_list = null;
 let filtered_constraint_list = null;
