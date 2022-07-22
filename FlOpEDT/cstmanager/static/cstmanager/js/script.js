@@ -910,6 +910,7 @@ let createSelectedParameterPopup = (constraint, parameter) => {
         divs.append(form);
     }
 
+    /* Do not consider parameters buttons for now
     let divButtons = divBuilder({
         class: 'buttons-for-parameters',
     });
@@ -930,7 +931,7 @@ let createSelectedParameterPopup = (constraint, parameter) => {
 
     divButtons.append(cancelButton, deleteButton);
 
-    divs.append(divButtons);
+    divs.append(divButtons);*/
 
     return divs;
 }
