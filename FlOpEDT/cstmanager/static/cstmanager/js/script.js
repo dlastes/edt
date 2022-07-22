@@ -1461,6 +1461,7 @@ let constraintCardBuilder = (constraint) => {
         }
         e.preventDefault();
     }, false);
+    wrapper.addEventListener('dblclick', function (e) {editSelectedConstraint(constraint.pageid)});
 
     return wrapper;
 }
