@@ -660,7 +660,6 @@ let discardChanges = (e) => {
     constraint_list = Object.keys(constraints);
     selected_constraints = [];
     lastSelectedConstraint = null;
-    filter.reset();
     refreshConstraints();
 }
 document.getElementById('discard-changes').addEventListener('click', discardChanges);
@@ -858,6 +857,7 @@ let createSelectedParameterPopup = (constraint, parameter) => {
         let temp_id = 'acceptable' + ele.toString();
         let db = getCorrespondantDatabase(parameter);
         let str = getCorrespondantInfo(ele, parameter, db);
+
         let checked = isParameterValueSelectedInConstraint(constraint, parameter, ele);
 
         let form = divBuilder({
@@ -978,6 +978,10 @@ let buttonWithDropBuilder = (constraint, parameter) => {
             'id': checkID,
         });
 
+        if (isParameterValueSelectedInConstraint(constraint, parameter.name, 'true')) {
+            check.checked = true;
+        }
+
         let label = elementBuilder('label', {
             'class': 'form-check-label',
             'for': checkID,
@@ -1048,22 +1052,21 @@ let buildConstraintsSections = () => {
 
     let dict = {};
 
-    let group_mode =  htmlElements.constraintsGroupMode.value;
-    if(group_mode==='class'){
-            Object.values(constraints).forEach(cst => {
-                if (filtered_constraint_list.includes(cst.pageid)) {
-                    let localName = findConstraintLocalNameFromClass(cst.name)
-                    if (!dict[localName]) {
-                        dict[localName] = {
-                            'active': [],
-                            'inactive': [],
-                        };
-                    }
-                    dict[localName][cst.is_active ? 'active' : 'inactive'].push(cst.pageid);
+    let group_mode = htmlElements.constraintsGroupMode.value;
+    if (group_mode === 'class') {
+        Object.values(constraints).forEach(cst => {
+            if (filtered_constraint_list.includes(cst.pageid)) {
+                let localName = findConstraintLocalNameFromClass(cst.name)
+                if (!dict[localName]) {
+                    dict[localName] = {
+                        'active': [],
+                        'inactive': [],
+                    };
                 }
-            });
-    }
-    else if (group_mode==="status"){
+                dict[localName][cst.is_active ? 'active' : 'inactive'].push(cst.pageid);
+            }
+        });
+    } else if (group_mode === "status") {
         dict[gettext("Strong constraints")] = {
             'active': [],
             'inactive': [],
@@ -1073,15 +1076,14 @@ let buildConstraintsSections = () => {
             'inactive': [],
         };
         Object.values(constraints).forEach(cst => {
-                if (filtered_constraint_list.includes(cst.pageid)) {
-                    if (cst.weight === null){
-                        dict[gettext("Strong constraints")][cst.is_active ? 'active' : 'inactive'].push(cst.pageid);
-                    }
-                    else {
-                        dict[gettext("Preferences")][cst.is_active ? 'active' : 'inactive'].push(cst.pageid);
-                    }
+            if (filtered_constraint_list.includes(cst.pageid)) {
+                if (cst.weight === null) {
+                    dict[gettext("Strong constraints")][cst.is_active ? 'active' : 'inactive'].push(cst.pageid);
+                } else {
+                    dict[gettext("Preferences")][cst.is_active ? 'active' : 'inactive'].push(cst.pageid);
                 }
-            });
+            }
+        });
 
 
     }
@@ -1330,7 +1332,9 @@ let constraintCardBuilder = (constraint) => {
         }
         e.preventDefault();
     }, false);
-    wrapper.addEventListener('dblclick', function (e) {editSelectedConstraint(constraint.pageid)});
+    wrapper.addEventListener('dblclick', function (e) {
+        editSelectedConstraint(constraint.pageid)
+    });
 
     return wrapper;
 }
