@@ -1270,7 +1270,6 @@ let constraintClicked = (e) => {
 
         lastSelectedConstraint = id;
     }
-    e.stopPropagation();
     refreshSelectedFromList(selected_constraints);
     updateBroadcastConstraint(id);
 }
@@ -1414,37 +1413,30 @@ let duplicateSelectedConstraint = (pageid) => {
 
 // builds the card for the constraint
 let constraintCardBuilder = (constraint) => {
-    const wrapper = divBuilder({
-        'class': 'card border border-3 border-primary me-1 mb-1 constraint-card h-25',
-        'style': 'width: 18rem;',
-        'data-cst-id': constraint.pageid,
-        'draggable': true,
-    });
-
     let localName = findConstraintLocalNameFromClass(constraint.name);
-
-    let checkText = constraint.is_active ? 'checked' : "";
 
     let popover_id = `popover-${constraint.pageid}`;
     let editButton = `<button type="button" class="btn btn-primary" onclick="editSelectedConstraint('${constraint.pageid}')">${gettext('Edit')}</button>`;
     let deleteButton = `<button type="button" class="btn btn-danger" onclick="deleteSelectedConstraint('${constraint.pageid}')">${gettext('Delete')}</button>`;
     let duplicateButton = `<button type="button" class="btn btn-info" onclick="duplicateSelectedConstraint('${constraint.pageid}')">${gettext('Duplicate')}</button>`;
+    let popover_content = `<div class="btn-group" role="group" aria-label="Constraint edit">${duplicateButton}${editButton}${deleteButton}`;
 
-    let buttonGroup = `<div class="btn-group" role="group" aria-label="Constraint edit">${duplicateButton}${editButton}${deleteButton}`;
-    let popover_content = buttonGroup;
-
-    let popover = divBuilder({
+    const wrapper = divBuilder({
+        'class': 'card border border-3 border-primary me-1 mb-1 constraint-card h-25',
+        'style': 'width: 18rem;',
+        'data-cst-id': constraint.pageid,
+        'draggable': true,
         'id': popover_id,
-        'data-bs-toggle': 'popover',
         'data-bs-title': `${(constraint.title || localName)}`,
         'data-bs-html': true,
         'data-bs-content': popover_content,
         'data-bs-container': '#constraints-body',
     });
 
+    let checkText = constraint.is_active ? 'checked' : "";
+
     wrapper.innerHTML = [
         `<h6 class="card-header py-1">${constraint.title || localName}</h6>`,
-        popover.outerHTML,
         '<div class="card-body py-0">',
         `    <h7 class="card-subtitle mt-0 mb-1 text-muted">${constraint.comment ?? ''}</h7>`,
         `    <div class="container-fluid">`,
