@@ -1,3 +1,8 @@
+const popoverAllowList = bootstrap.Tooltip.Default.allowList;
+popoverAllowList.button = [];
+popoverAllowList['*'].push('onclick');
+
+
 // helper function to extract a parameter object from a given constraint
 let get_parameter_from_constraint = (cst, name) => {
     let ret = {};
@@ -58,6 +63,8 @@ let setState = (newState) => {
     }
     currentState = newState;
 };
+
+let currentPopover;
 
 // object containing functions that involve filtering
 let filter_functions = {
@@ -146,6 +153,19 @@ let visibility = {
     },
     hideConstraintInfo: _ => {
         visibility.setElementVisible(htmlElements.constraintsInfo, false);
+    },
+    showPopover: (popover) => {
+        visibility.hidePopover();
+        if (!popover) {
+            return;
+        }
+        currentPopover = popover;
+        popover.show();
+    },
+    hidePopover: _ => {
+        if (currentPopover) {
+            currentPopover.hide();
+        }
     },
 };
 
@@ -1154,6 +1174,7 @@ let refreshConstraints = () => {
 
     buildConstraintsSections();
     refreshSelectedFromList(selected_constraints);
+    visibility.hidePopover();
 }
 
 // main section builder
@@ -1361,25 +1382,27 @@ let openNewConstraintPopup = () => {
 };
 htmlElements.newConstraintButton.addEventListener('click', openNewConstraintPopup);
 
-let editSelectedConstraint = () => {
-    if (!lastSelectedConstraint) {
+let editSelectedConstraint = (pageid) => {
+    if (!pageid) {
         return;
     }
     setState(State.EditConstraint);
 
+    visibility.hidePopover();
+
     const modal = new bootstrap.Modal(htmlElements.constraintsEditPopup, null);
 
-    editConstraint = copyObj(constraints[lastSelectedConstraint]);
+    editConstraint = copyObj(constraints[pageid]);
     updateEditConstraintPopup(editConstraint);
 
     modal.show();
 };
 
-let deleteSelectedConstraint = () => {
-    if (!lastSelectedConstraint) {
+let deleteSelectedConstraint = (pageid) => {
+    if (!pageid) {
         return;
     }
-    changeEvents.deleteConstraint(lastSelectedConstraint);
+    changeEvents.deleteConstraint(pageid);
 };
 
 let deleteSelectedConstraints = () => {
@@ -1401,8 +1424,25 @@ let constraintCardBuilder = (constraint) => {
 
     let checkText = constraint.is_active ? 'checked' : "";
 
+    let popover_id = `popover-${constraint.pageid}`;
+    let editButton = `<button type="button" class="btn btn-primary" onclick="editSelectedConstraint('${constraint.pageid}')">${gettext('Edit')}</button>`;
+    let deleteButton = `<button type="button" class="btn btn-danger" onclick="deleteSelectedConstraint('${constraint.pageid}')">${gettext('Delete')}</button>`;
+
+    let buttonGroup = `<div class="btn-group" role="group" aria-label="Constraint edit">${editButton}${deleteButton}`;
+    let popover_content = buttonGroup;
+
+    let popover = divBuilder({
+        'id': popover_id,
+        'data-bs-toggle': 'popover',
+        'data-bs-title': `${(constraint.title || localName)}`,
+        'data-bs-html': true,
+        'data-bs-content': popover_content,
+        'data-bs-container': '#constraints-body',
+    });
+
     wrapper.innerHTML = [
         `<h6 class="card-header py-1">${constraint.title || localName}</h6>`,
+        popover.outerHTML,
         '<div class="card-body py-0">',
         `    <h7 class="card-subtitle mt-0 mb-1 text-muted">${constraint.comment ?? ''}</h7>`,
         `    <div class="container-fluid">`,
@@ -1420,6 +1460,13 @@ let constraintCardBuilder = (constraint) => {
         // Add the target element's id to the data transfer object
         ev.dataTransfer.setData("text/plain", ev.target.id);
     });
+    wrapper.addEventListener('contextmenu', function (e) {
+        const popover = bootstrap.Popover.getOrCreateInstance(`#${popover_id}`);
+        if (popover) {
+            visibility.showPopover(popover);
+        }
+        e.preventDefault();
+    }, false);
 
     return wrapper;
 }
@@ -1461,9 +1508,6 @@ let editSelectedConstraintsWeight = () => {
 htmlElements.selectedConstraintsEditWeightButton.onclick = editSelectedConstraintsWeight;
 htmlElements.selectedConstraintsDeleteButton.onclick = deleteSelectedConstraints;
 
-htmlElements.constraintHeaderDeleteButton.onclick = deleteSelectedConstraint;
-htmlElements.constraintHeaderEditButton.onclick = editSelectedConstraint;
-
 // duplicate a constraint
 let duplicateSelectedConstraint = (e) => {
     if (!lastSelectedConstraint) {
@@ -1493,3 +1537,9 @@ fetchers.fetchTutorsIDs(null);
 fetchers.fetchWeeks();
 fetchers.fetchConstraintTypes();
 fetchers.fetchConstraints(null);
+
+document.addEventListener('click', (e) => {
+    if (currentPopover && !currentPopover.tip.contains(e.target)) {
+        visibility.hidePopover();
+    }
+});

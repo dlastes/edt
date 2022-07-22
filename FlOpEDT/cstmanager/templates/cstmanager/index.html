@@ -175,16 +175,6 @@
                                         </label>
                                     </div>
                                 </div>
-                                <!-- Control buttons -->
-                                <div class="col-auto border border-dark d-flex align-items-center">
-                                    <div class="btn-group" role="group" aria-label="Control selected contraint">
-                                        <button id="constraint-header-edit" type="button" class="btn btn-primary">Edit
-                                        </button>
-                                        <button id="constraint-header-delete" type="button" class="btn btn-danger">
-                                            {% trans "Delete" %}
-                                        </button>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -247,6 +237,7 @@
         <img id="icon-check" style="display: none;" src="{% static 'cstmanager/icons/icon_check.png' %}">
     </div>
 {% endblock %} {% block javascript %}
+    <script type="text/javascript" src="{% static 'cstmanager/js/popper.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'cstmanager/js/bootstrap.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'base/helpers.js' %}"></script>
     <script type="text/javascript" src="{% static 'cstmanager/js/mockup_request.js' %}"></script>
