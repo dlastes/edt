@@ -40,7 +40,7 @@ from TTapp.TTConstraints.TTConstraint import TTConstraint
 from TTapp.TTConstraints.groups_constraints import considered_basic_groups
 from TTapp.slots import Slot
 from TTapp.TTConstraints.tutors_constraints import considered_tutors
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as _
 
 
 class GroupsLunchBreak(TTConstraint):

@@ -29,7 +29,7 @@ from TTapp.slots import days_filter, slots_filter
 from TTapp.ilp_constraints.constraint import Constraint
 from TTapp.ilp_constraints.constraint_type import ConstraintType
 from TTapp.TTConstraints.groups_constraints import considered_basic_groups
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as _
 
 
 def build_period_slots(ttmodel, day, period):

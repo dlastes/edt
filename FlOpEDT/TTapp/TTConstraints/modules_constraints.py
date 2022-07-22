@@ -29,7 +29,7 @@ from django.db import models
 from TTapp.helpers.minhalfdays import MinHalfDaysHelperModule
 
 from TTapp.TTConstraints.TTConstraint import TTConstraint
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as _
 
 
 class MinModulesHalfDays(TTConstraint):
