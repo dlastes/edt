@@ -147,7 +147,10 @@ def serializer_factory(mdl: models.Model, fields=None, **kwargss):
                 if 'id_list' in parameter:
                     # Handle single value parameters
                     if not parameter['multiple']:
-                        value = parameter['id_list'][0]
+                        if not parameter['id_list']:
+                            value = None
+                        else:
+                            value = parameter['id_list'][0]
                     else:
                         value = parameter['id_list']
                     formatted_data[parameter['name']] = value
@@ -191,17 +194,25 @@ class FlopConstraintSerializer(serializers.ModelSerializer):
         fields = self.Meta.fields
 
         for field in obj._meta.get_fields():
-            if(field.name not in fields):
+            if field.name not in fields:
                 parameters = {}
                 id_list = []
                 multiple = False
 
-                if(not field.many_to_one and not field.many_to_many):
+                if not field.many_to_one and not field.many_to_many:
                     typename = type(field).__name__
 
-                    if(type(field)==ArrayField):
+                    if type(field)==ArrayField:
                         multiple = True
                         typename = type(field.base_field).__name__
+                        # Remplace la liste vide par la liste des valeurs
+                        attr = getattr(obj, field.name)
+                        id_list = attr
+
+                    else:
+                        # Insère la valeur de l'attribut unitaire
+                        attr = getattr(obj,field.name)
+                        id_list = [attr]
 
                 else :
                     #Récupère le modele en relation avec un ManyToManyField ou un ForeignKey
