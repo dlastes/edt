@@ -10,7 +10,7 @@ let htmlElements = {
     iconGears: document.getElementById('icon-gears'),
     iconCheck: document.getElementById('icon-check'),
     newConstraintButton: document.getElementById('nav-new-constraint'),
-    constraintsGroupByClass: document.getElementById('constraints-group-by-class'),
+    constraintsGroupMode: document.getElementById('constraints-group-mode'),
     constraintsSelectAll: document.getElementById('constraints-select-all'),
     constraintsInfo: document.getElementById('constraint-info'),
     constraintsInfoBody: document.getElementById('constraint-info-body'),
@@ -1178,21 +1178,45 @@ let buildConstraintsSections = () => {
 
     let dict = {};
 
-    let group_by_class = htmlElements.constraintsGroupByClass.checked;
-    if (group_by_class) {
-        Object.values(constraints).forEach(cst => {
-            if (filtered_constraint_list.includes(cst.pageid)) {
-                let localName = findConstraintLocalNameFromClass(cst.name)
-                if (!dict[localName]) {
-                    dict[localName] = {
-                        'active': [],
-                        'inactive': [],
-                    };
+    let group_mode =  htmlElements.constraintsGroupMode.value;
+    if(group_mode==='class'){
+            Object.values(constraints).forEach(cst => {
+                if (filtered_constraint_list.includes(cst.pageid)) {
+                    let localName = findConstraintLocalNameFromClass(cst.name)
+                    if (!dict[localName]) {
+                        dict[localName] = {
+                            'active': [],
+                            'inactive': [],
+                        };
+                    }
+                    dict[localName][cst.is_active ? 'active' : 'inactive'].push(cst.pageid);
                 }
-                dict[localName][cst.is_active ? 'active' : 'inactive'].push(cst.pageid);
-            }
-        });
-    } else {
+            });
+    }
+    else if (group_mode==="status"){
+        dict[gettext("Strong constraints")] = {
+            'active': [],
+            'inactive': [],
+        };
+        dict[gettext("Preferences")] = {
+            'active': [],
+            'inactive': [],
+        };
+        Object.values(constraints).forEach(cst => {
+                if (filtered_constraint_list.includes(cst.pageid)) {
+                    if (cst.weight === null){
+                        dict[gettext("Strong constraints")][cst.is_active ? 'active' : 'inactive'].push(cst.pageid);
+                    }
+                    else {
+                        dict[gettext("Preferences")][cst.is_active ? 'active' : 'inactive'].push(cst.pageid);
+                    }
+                }
+            });
+
+
+    }
+    //(group_mode==='none')
+    else {
         dict[gettext("All constraints")] = {
             'active': [],
             'inactive': [],
@@ -1224,7 +1248,7 @@ let buildConstraintsSections = () => {
     });
     htmlElements.disabledConstraintsList.append(...Object.values(inactiveConstraintsElements));
 }
-htmlElements.constraintsGroupByClass.addEventListener('click', refreshConstraints);
+htmlElements.constraintsGroupMode.addEventListener('change', refreshConstraints);
 
 // event handler when clicking on a constraint
 let constraintClicked = (e) => {
