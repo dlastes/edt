@@ -990,14 +990,14 @@ let createSelectedParameterPopup = (constraint, parameter) => {
         type: 'button',
         class: 'btn btn-danger',
     });
-    deleteButton.innerHTML = 'Delete';
+    deleteButton.innerHTML = gettext('Delete');
     deleteButton.addEventListener('click', deleteConstraintParameter);
 
     let cancelButton = elementBuilder('button', {
         type: 'button',
         class: 'btn btn-secondary',
     });
-    cancelButton.innerHTML = 'Cancel';
+    cancelButton.innerHTML = gettext('Cancel');
     cancelButton.addEventListener('click', cancelConstraintParameter);
 
     divButtons.append(cancelButton, deleteButton);
@@ -1018,7 +1018,7 @@ let buttonWithDropBuilder = (constraint, parameter) => {
         badge = elementBuilder('span', {
             'class': 'badge text-bg-danger ms-1',
         });
-        badge.innerText = "Required";
+        badge.innerText = gettext("Required");
     }
 
     let button;

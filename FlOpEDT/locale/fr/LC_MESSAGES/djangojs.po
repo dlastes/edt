@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-07-22 08:01+0000\n"
+"POT-Creation-Date: 2022-07-22 15:40+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -354,10 +354,40 @@ msgstr "Semaines : "
 msgid "All"
 msgstr "Toutes"
 
-#: cstmanager/static/cstmanager/js/script.js:1196
-#: cstmanager/static/cstmanager/js/script.js:1202
+#: cstmanager/static/cstmanager/js/script.js:993
+msgid "Delete"
+msgstr "Supprimer"
+
+#: cstmanager/static/cstmanager/js/script.js:1000
+msgid "Cancel"
+msgstr "Annuler"
+
+#: cstmanager/static/cstmanager/js/script.js:1021
+msgid "Required"
+msgstr "Requis"
+
+#: cstmanager/static/cstmanager/js/script.js:1195
+#: cstmanager/static/cstmanager/js/script.js:1206
+msgid "Strong constraints"
+msgstr "Contraintes fortes"
+
+#: cstmanager/static/cstmanager/js/script.js:1199
+#: cstmanager/static/cstmanager/js/script.js:1209
+msgid "Preferences"
+msgstr "Préférences"
+
+#: cstmanager/static/cstmanager/js/script.js:1218
+#: cstmanager/static/cstmanager/js/script.js:1224
 msgid "All constraints"
 msgstr "Toutes les contraintes"
+
+#: cstmanager/static/cstmanager/js/script.js:1419
+msgid "Edit"
+msgstr "Modifier"
+
+#: cstmanager/static/cstmanager/js/script.js:1421
+msgid "Duplicate"
+msgstr "Dupliquer"
 
 #: people/static/people/student_preferences.js:9
 msgid "Start early in order to end up early"

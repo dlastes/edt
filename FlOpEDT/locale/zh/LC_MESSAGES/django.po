@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-07-22 07:11+0000\n"
+"POT-Creation-Date: 2022-07-22 15:30+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -372,7 +372,7 @@ msgid "Consider pivots"
 msgstr "约束条件"
 
 #: TTapp/TTConstraints/slots_constraints.py:489
-msgid "Avoid both times"
+msgid "Avoid using both times"
 msgstr ""
 
 #: TTapp/TTConstraints/slots_constraints.py:540 ics/templates/ics/index.html:66
@@ -1024,7 +1024,7 @@ msgstr "编辑"
 
 #: configuration/templates/configuration/configuration.html:48
 #: configuration/templates/configuration/configuration.html:150
-#: templates/base.html:115
+#: templates/base.html:116
 msgid "Import"
 msgstr "输入"
 
@@ -1133,87 +1133,96 @@ msgstr "约束条件"
 msgid "Clear Filters"
 msgstr ""
 
-#: cstmanager/templates/cstmanager/index.html:65
-#, fuzzy
-#| msgid "Group"
-msgid "Group by class name"
-msgstr "组"
+#: cstmanager/templates/cstmanager/index.html:64
+msgid "Gathering :"
+msgstr ""
 
-#: cstmanager/templates/cstmanager/index.html:76
+#: cstmanager/templates/cstmanager/index.html:66
+msgid "None"
+msgstr ""
+
+#: cstmanager/templates/cstmanager/index.html:67
+msgid "by class"
+msgstr ""
+
+#: cstmanager/templates/cstmanager/index.html:68
+msgid "by status"
+msgstr ""
+
+#: cstmanager/templates/cstmanager/index.html:80
 #, fuzzy
 #| msgid "Constraints"
 msgid "Edit constraint"
 msgstr "约束条件"
 
-#: cstmanager/templates/cstmanager/index.html:84
+#: cstmanager/templates/cstmanager/index.html:88
 msgid "Select type..."
 msgstr ""
 
-#: cstmanager/templates/cstmanager/index.html:90
-#: cstmanager/templates/cstmanager/index.html:142
+#: cstmanager/templates/cstmanager/index.html:94
+#: cstmanager/templates/cstmanager/index.html:146
 msgid "Title"
 msgstr ""
 
-#: cstmanager/templates/cstmanager/index.html:95
+#: cstmanager/templates/cstmanager/index.html:99
 msgid "Comment"
 msgstr ""
 
-#: cstmanager/templates/cstmanager/index.html:106
+#: cstmanager/templates/cstmanager/index.html:110
 msgid "Activated?"
 msgstr ""
 
-#: cstmanager/templates/cstmanager/index.html:112
-#: cstmanager/templates/cstmanager/index.html:215
+#: cstmanager/templates/cstmanager/index.html:116
+#: cstmanager/templates/cstmanager/index.html:209
 msgid "Weight :"
 msgstr ""
 
-#: cstmanager/templates/cstmanager/index.html:122
+#: cstmanager/templates/cstmanager/index.html:126
 #, fuzzy
 #| msgid "Move/Cancel"
 msgid "Cancel"
 msgstr "移动/取消"
 
-#: cstmanager/templates/cstmanager/index.html:125
+#: cstmanager/templates/cstmanager/index.html:129
 msgid "Save changes"
 msgstr ""
 
-#: cstmanager/templates/cstmanager/index.html:133
+#: cstmanager/templates/cstmanager/index.html:137
 msgid "Show Disabled"
 msgstr ""
 
-#: cstmanager/templates/cstmanager/index.html:134
+#: cstmanager/templates/cstmanager/index.html:138
 msgid "Preanalyse"
 msgstr ""
 
-#: cstmanager/templates/cstmanager/index.html:148
+#: cstmanager/templates/cstmanager/index.html:152
 msgid "Comments"
 msgstr ""
 
-#: cstmanager/templates/cstmanager/index.html:154
+#: cstmanager/templates/cstmanager/index.html:158
 msgid "Parameters"
 msgstr ""
 
-#: cstmanager/templates/cstmanager/index.html:168
+#: cstmanager/templates/cstmanager/index.html:172
 msgid "Weight"
 msgstr ""
 
-#: cstmanager/templates/cstmanager/index.html:180
-#: cstmanager/templates/cstmanager/index.html:236
-msgid "Delete"
-msgstr ""
-
-#: cstmanager/templates/cstmanager/index.html:202
+#: cstmanager/templates/cstmanager/index.html:196
 msgid "Select all"
 msgstr ""
 
-#: cstmanager/templates/cstmanager/index.html:207
+#: cstmanager/templates/cstmanager/index.html:201
 #, fuzzy
 #| msgid "Constraints"
 msgid "Selected constraints :"
 msgstr "约束条件"
 
-#: cstmanager/templates/cstmanager/index.html:233
+#: cstmanager/templates/cstmanager/index.html:227
 msgid "Set weight"
+msgstr ""
+
+#: cstmanager/templates/cstmanager/index.html:230
+msgid "Delete"
 msgstr ""
 
 #: ics/templates/ics/index.html:35
@@ -1465,7 +1474,7 @@ msgstr "类别 "
 msgid "Schedule Generation"
 msgstr "时间表生成"
 
-#: solve_board/templates/solve_board/main-board.html:66
+#: solve_board/templates/solve_board/main-board.html:66 templates/base.html:112
 msgid "Constraints"
 msgstr "约束条件"
 
@@ -1551,21 +1560,17 @@ msgstr "留言"
 msgid "Modules"
 msgstr "模块"
 
-#: templates/base.html:112
+#: templates/base.html:113
 msgid "Generate"
 msgstr "生成"
 
-#: templates/base.html:113
+#: templates/base.html:114
 msgid "flop!EDITOR"
 msgstr ""
 
-#: templates/base.html:116
+#: templates/base.html:117
 msgid "Admin"
 msgstr "管理"
-
-#: templates/base.html:118
-msgid "MyApp"
-msgstr ""
 
 #: templates/base.html:123 templates/base.html:125 templates/base.html:127
 msgid "Sign out"
@@ -1574,6 +1579,11 @@ msgstr "登出"
 #: templates/base.html:134
 msgid "Signed in as "
 msgstr "登入为"
+
+#, fuzzy
+#~| msgid "Group"
+#~ msgid "Group by class name"
+#~ msgstr "组"
 
 #, fuzzy
 #~| msgid "Modules"

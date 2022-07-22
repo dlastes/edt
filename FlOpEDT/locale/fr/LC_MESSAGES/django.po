@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-07-22 07:11+0000\n"
+"POT-Creation-Date: 2022-07-22 15:30+0000\n"
 "PO-Revision-Date: 2021-03-14 13:02+0000\n"
 "Last-Translator: b'prenom_de_QTF nom_de_QTF <QTF@mail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -180,7 +180,6 @@ msgid "No simultaneous courses for one group"
 msgstr "Pas de cours simultanés pour un groupe donné"
 
 #: TTapp/TTConstraints/core_constraints.py:224
-#| msgid "Schedule once every considered course"
 msgid "Schedule once all considered courses"
 msgstr "Planifie une fois chaque cours considéré"
 
@@ -199,7 +198,7 @@ msgstr "Chaque cours est affecté à un prof (max)"
 
 #: TTapp/TTConstraints/core_constraints.py:330
 msgid "Consider tutors' unvailabilities"
-msgstr "Considère les indisponibilités des profs"
+msgstr "Prendre en compte les indisponibilités des profs"
 
 #: TTapp/TTConstraints/core_constraints.py:373
 #, python-brace-format
@@ -261,7 +260,7 @@ msgstr "et {len(course_lits)} cours à donner."
 
 #: TTapp/TTConstraints/core_constraints.py:499
 msgid "Consider tutors unavailability"
-msgstr "Considère les indisponibilités des enseignant⋅e⋅s"
+msgstr "Prendre en compte les indisponibilités des enseignant⋅e⋅s"
 
 #: TTapp/TTConstraints/cosmo_style_constraints.py:65
 msgid "Limit holes"
@@ -1036,7 +1035,7 @@ msgstr "Modifier"
 
 #: configuration/templates/configuration/configuration.html:48
 #: configuration/templates/configuration/configuration.html:150
-#: templates/base.html:115
+#: templates/base.html:116
 msgid "Import"
 msgstr "Importer"
 
@@ -1140,80 +1139,91 @@ msgstr "Recharger"
 msgid "Clear Filters"
 msgstr "Filtres à zéro"
 
-#: cstmanager/templates/cstmanager/index.html:65
-msgid "Group by class name"
-msgstr "Classer par types"
+#: cstmanager/templates/cstmanager/index.html:64
+msgid "Gathering :"
+msgstr "Regroupement :"
 
-#: cstmanager/templates/cstmanager/index.html:76
+#: cstmanager/templates/cstmanager/index.html:66
+msgid "None"
+msgstr "Aucun"
+
+#: cstmanager/templates/cstmanager/index.html:67
+msgid "by class"
+msgstr "par classe"
+
+#: cstmanager/templates/cstmanager/index.html:68
+msgid "by status"
+msgstr "par statut"
+
+#: cstmanager/templates/cstmanager/index.html:80
 msgid "Edit constraint"
 msgstr "Modifier"
 
-#: cstmanager/templates/cstmanager/index.html:84
+#: cstmanager/templates/cstmanager/index.html:88
 msgid "Select type..."
 msgstr "Choisir le type..."
 
-#: cstmanager/templates/cstmanager/index.html:90
-#: cstmanager/templates/cstmanager/index.html:142
+#: cstmanager/templates/cstmanager/index.html:94
+#: cstmanager/templates/cstmanager/index.html:146
 msgid "Title"
 msgstr "Titre"
 
-#: cstmanager/templates/cstmanager/index.html:95
+#: cstmanager/templates/cstmanager/index.html:99
 msgid "Comment"
 msgstr "Commentaire"
 
-#: cstmanager/templates/cstmanager/index.html:106
+#: cstmanager/templates/cstmanager/index.html:110
 msgid "Activated?"
 msgstr "Activée ?"
 
-#: cstmanager/templates/cstmanager/index.html:112
-#: cstmanager/templates/cstmanager/index.html:215
+#: cstmanager/templates/cstmanager/index.html:116
+#: cstmanager/templates/cstmanager/index.html:209
 msgid "Weight :"
 msgstr "Poids :"
 
-#: cstmanager/templates/cstmanager/index.html:122
+#: cstmanager/templates/cstmanager/index.html:126
 msgid "Cancel"
 msgstr "Annuler"
 
-#: cstmanager/templates/cstmanager/index.html:125
+#: cstmanager/templates/cstmanager/index.html:129
 msgid "Save changes"
 msgstr "Enregistrer"
 
-#: cstmanager/templates/cstmanager/index.html:133
+#: cstmanager/templates/cstmanager/index.html:137
 msgid "Show Disabled"
-msgstr ""
+msgstr "Montrer les contraintes inactives"
 
-#: cstmanager/templates/cstmanager/index.html:134
+#: cstmanager/templates/cstmanager/index.html:138
 msgid "Preanalyse"
-msgstr ""
+msgstr "Pré-analyse"
 
-#: cstmanager/templates/cstmanager/index.html:148
+#: cstmanager/templates/cstmanager/index.html:152
 msgid "Comments"
 msgstr "Commentaires"
 
-#: cstmanager/templates/cstmanager/index.html:154
+#: cstmanager/templates/cstmanager/index.html:158
 msgid "Parameters"
 msgstr "Paramètres"
 
-#: cstmanager/templates/cstmanager/index.html:168
+#: cstmanager/templates/cstmanager/index.html:172
 msgid "Weight"
-msgstr ""
+msgstr "Poids"
 
-#: cstmanager/templates/cstmanager/index.html:180
-#: cstmanager/templates/cstmanager/index.html:236
-msgid "Delete"
-msgstr "Supprimer"
-
-#: cstmanager/templates/cstmanager/index.html:202
+#: cstmanager/templates/cstmanager/index.html:196
 msgid "Select all"
 msgstr "Sélectionner tout"
 
-#: cstmanager/templates/cstmanager/index.html:207
+#: cstmanager/templates/cstmanager/index.html:201
 msgid "Selected constraints :"
 msgstr "Contraintes sélectionnées :"
 
-#: cstmanager/templates/cstmanager/index.html:233
+#: cstmanager/templates/cstmanager/index.html:227
 msgid "Set weight"
 msgstr "Affecter le poids"
+
+#: cstmanager/templates/cstmanager/index.html:230
+msgid "Delete"
+msgstr "Supprimer"
 
 #: ics/templates/ics/index.html:35
 msgid "iCal Subscription"
@@ -1457,7 +1467,7 @@ msgstr "Catégorie "
 msgid "Schedule Generation"
 msgstr "Génération d'EDT"
 
-#: solve_board/templates/solve_board/main-board.html:66
+#: solve_board/templates/solve_board/main-board.html:66 templates/base.html:112
 msgid "Constraints"
 msgstr "Contraintes"
 
@@ -1542,21 +1552,17 @@ msgstr "Contact"
 msgid "Modules"
 msgstr "Modules"
 
-#: templates/base.html:112
+#: templates/base.html:113
 msgid "Generate"
 msgstr "Générer"
 
-#: templates/base.html:113
+#: templates/base.html:114
 msgid "flop!EDITOR"
 msgstr "flop!EDITOR"
 
-#: templates/base.html:116
+#: templates/base.html:117
 msgid "Admin"
 msgstr "Admin"
-
-#: templates/base.html:118
-msgid "MyApp"
-msgstr ""
 
 #: templates/base.html:123 templates/base.html:125 templates/base.html:127
 msgid "Sign out"
@@ -1565,6 +1571,9 @@ msgstr "Déconnexion"
 #: templates/base.html:134
 msgid "Signed in as "
 msgstr "Connecté·e sous "
+
+#~ msgid "Group by class name"
+#~ msgstr "Classer par types"
 
 #~ msgid "mode"
 #~ msgstr "mode"
