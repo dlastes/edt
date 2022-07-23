@@ -898,6 +898,7 @@ let createSelectedParameterPopup = (constraint, parameter) => {
             'id': temp_id,
             'element-id': 0,
             'name': 'elementsParameter',
+            'value': param_obj.id_list[0]===undefined ? '' : param_obj.id_list[0]
         });
 
         let label = elementBuilder('label', {
