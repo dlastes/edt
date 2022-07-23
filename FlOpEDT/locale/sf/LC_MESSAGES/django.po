@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-07-22 15:30+0000\n"
+"POT-Creation-Date: 2022-07-23 10:33+0000\n"
 "PO-Revision-Date: 2021-03-14 13:02+0000\n"
 "Last-Translator: b'prenom_de_QTF nom_de_QTF <QTF@mail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -450,8 +450,10 @@ msgid "Stabilization through weeks"
 msgstr "Stabilisation ?"
 
 #: TTapp/TTConstraints/tutors_constraints.py:56
-msgid "Minimize busy days for tutors"
-msgstr ""
+#, fuzzy
+#| msgid "Minimize groups half-days"
+msgid "Minimize busy half days for tutors"
+msgstr "Minimise les demis-schtroumpfs pour les groupes"
 
 #: TTapp/TTConstraints/tutors_constraints.py:96
 #, fuzzy
@@ -1172,121 +1174,114 @@ msgstr "Stabilisation ?"
 msgid "Constraints manager"
 msgstr "Contraintes"
 
-#: cstmanager/templates/cstmanager/index.html:30
+#: cstmanager/templates/cstmanager/index.html:33
 #, fuzzy
 #| msgid "Constraints"
 msgid "New Constraint"
 msgstr "Contraintes"
 
-#: cstmanager/templates/cstmanager/index.html:35
+#: cstmanager/templates/cstmanager/index.html:38
 msgid "Discard Changes"
 msgstr ""
 
-#: cstmanager/templates/cstmanager/index.html:40
+#: cstmanager/templates/cstmanager/index.html:43
 msgid "Commit Changes"
 msgstr ""
 
-#: cstmanager/templates/cstmanager/index.html:45
+#: cstmanager/templates/cstmanager/index.html:48
 #, fuzzy
 #| msgid "Constraints"
 msgid "Reload Constraints"
 msgstr "Contraintes"
 
-#: cstmanager/templates/cstmanager/index.html:59
+#: cstmanager/templates/cstmanager/index.html:61
+#, fuzzy
+#| msgid "Set default week"
+msgid "See all weeks"
+msgstr "Appliquer la configuration ci-contre"
+
+#: cstmanager/templates/cstmanager/index.html:66
 msgid "Clear Filters"
 msgstr ""
 
-#: cstmanager/templates/cstmanager/index.html:64
+#: cstmanager/templates/cstmanager/index.html:71
 msgid "Gathering :"
 msgstr ""
 
-#: cstmanager/templates/cstmanager/index.html:66
-msgid "None"
-msgstr ""
-
-#: cstmanager/templates/cstmanager/index.html:67
-msgid "by class"
-msgstr ""
-
-#: cstmanager/templates/cstmanager/index.html:68
+#: cstmanager/templates/cstmanager/index.html:73
 msgid "by status"
 msgstr ""
 
-#: cstmanager/templates/cstmanager/index.html:80
+#: cstmanager/templates/cstmanager/index.html:74
+msgid "by class"
+msgstr ""
+
+#: cstmanager/templates/cstmanager/index.html:75
+msgid "None"
+msgstr ""
+
+#: cstmanager/templates/cstmanager/index.html:87
 #, fuzzy
 #| msgid "Constraints"
 msgid "Edit constraint"
 msgstr "Contraintes"
 
-#: cstmanager/templates/cstmanager/index.html:88
+#: cstmanager/templates/cstmanager/index.html:95
 msgid "Select type..."
 msgstr ""
 
-#: cstmanager/templates/cstmanager/index.html:94
-#: cstmanager/templates/cstmanager/index.html:146
+#: cstmanager/templates/cstmanager/index.html:101
 msgid "Title"
 msgstr ""
 
-#: cstmanager/templates/cstmanager/index.html:99
+#: cstmanager/templates/cstmanager/index.html:106
 msgid "Comment"
 msgstr ""
 
-#: cstmanager/templates/cstmanager/index.html:110
+#: cstmanager/templates/cstmanager/index.html:117
 #, fuzzy
 #| msgid "Is active?"
 msgid "Activated?"
 msgstr "Est active?"
 
-#: cstmanager/templates/cstmanager/index.html:116
-#: cstmanager/templates/cstmanager/index.html:209
+#: cstmanager/templates/cstmanager/index.html:123
+#: cstmanager/templates/cstmanager/index.html:176
 msgid "Weight :"
 msgstr ""
 
-#: cstmanager/templates/cstmanager/index.html:126
+#: cstmanager/templates/cstmanager/index.html:133
 #, fuzzy
 #| msgid "Move/Cancel"
 msgid "Cancel"
 msgstr "Schtroumpfer/Annuler"
 
-#: cstmanager/templates/cstmanager/index.html:129
+#: cstmanager/templates/cstmanager/index.html:136
 msgid "Save changes"
 msgstr ""
 
-#: cstmanager/templates/cstmanager/index.html:137
+#: cstmanager/templates/cstmanager/index.html:144
 msgid "Show Disabled"
 msgstr ""
 
-#: cstmanager/templates/cstmanager/index.html:138
+#: cstmanager/templates/cstmanager/index.html:145
 msgid "Preanalyse"
 msgstr ""
 
-#: cstmanager/templates/cstmanager/index.html:152
-msgid "Comments"
-msgstr ""
-
-#: cstmanager/templates/cstmanager/index.html:158
-msgid "Parameters"
-msgstr ""
-
-#: cstmanager/templates/cstmanager/index.html:172
-msgid "Weight"
-msgstr ""
-
-#: cstmanager/templates/cstmanager/index.html:196
+#: cstmanager/templates/cstmanager/index.html:163
 msgid "Select all"
 msgstr ""
 
-#: cstmanager/templates/cstmanager/index.html:201
+#: cstmanager/templates/cstmanager/index.html:168
 #, fuzzy
 #| msgid "Constraints"
 msgid "Selected constraints :"
 msgstr "Contraintes"
 
-#: cstmanager/templates/cstmanager/index.html:227
+#: cstmanager/templates/cstmanager/index.html:194
 msgid "Set weight"
 msgstr ""
 
-#: cstmanager/templates/cstmanager/index.html:230
+#: cstmanager/templates/cstmanager/index.html:197
 msgid "Delete"
 msgstr ""
 

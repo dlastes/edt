@@ -53,7 +53,7 @@ class MinTutorsHalfDays(TTConstraint):
         default=False)
 
     class Meta:
-        verbose_name = _('Minimize busy days for tutors')
+        verbose_name = _('Minimize busy half days for tutors')
         verbose_name_plural = verbose_name
 
     def enrich_ttmodel(self, ttmodel, week, ponderation=1):
