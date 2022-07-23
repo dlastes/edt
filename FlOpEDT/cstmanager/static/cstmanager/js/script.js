@@ -571,8 +571,8 @@ let fillEditConstraintPopup = constraint => {
         title.value = constraint.title ?? "";
         comment.value = constraint.comment ?? "";
         activation.checked = constraint.is_active;
-        weightSlider.value = constraint.weight;
-        weightValue.innerText = constraint.weight;
+        weightSlider.value = constraint.weight ?? 9;
+        weightValue.innerText = constraint.weight ?? gettext("Strong constraint");
         updateParamsListExistingConstraint(constraint);
     }
 };
@@ -645,11 +645,10 @@ let extractConstraintFromPopup = (constraint) => {
 };
 
 let updateEditConstraintWeightDisplay = (labelID, value) => {
-    let weightText = "Unwanted";
+    let weightText = gettext("Strong constraint");
     if (value <= 8) {
         weightText = value.toString();
     }
-
     document.getElementById(labelID).innerText = weightText;
 }
 
