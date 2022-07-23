@@ -605,7 +605,7 @@ let extractConstraintFromPopup = (constraint) => {
 
     constraint.comment = htmlElements.constraintEditComment.value;
     constraint.is_active = htmlElements.constraintEditActivation.checked;
-    constraint.weight = parseInt(htmlElements.constraintEditWeightSlider.value);
+    constraint.weight = parseInt(htmlElements.constraintEditWeightSlider.value)===9 ? null : parseInt(htmlElements.constraintEditWeightSlider.value)
 
     let isValid = true;
 
