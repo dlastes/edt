@@ -128,7 +128,6 @@ let changeEvents = {
 
         constraint_list = Object.keys(constraints);
         selected_constraints = selected_constraints.filter(id => id !== pageid);
-        filter.reset();
         refreshConstraints();
     },
     editConstraint: (constraint) => {
@@ -764,7 +763,7 @@ let elementBuilder = (tag, args = {}) => {
 }
 
 // returns the corresponding database table based on the parameter given
-let getCorrespondantDatabase = (param) => {
+let getCorrespondingDatabase = (param) => {
     switch (param) {
         case 'group':
         case 'groups':
@@ -789,8 +788,8 @@ let getCorrespondantDatabase = (param) => {
 }
 
 // returns the information needed from a parameter and a constraint id given
-let getCorrespondantInfo = (id, param) => {
-    let db = getCorrespondantDatabase(param);
+let getCorrespondingInfo = (id, param) => {
+    let db = getCorrespondingDatabase(param);
     switch (param) {
         case 'group':
         case 'groups':
@@ -855,7 +854,7 @@ let createSelectedParameterPopup = (constraint, parameter) => {
 
     let createCheckboxAndLabel = (ele, inputType) => {
         let temp_id = 'acceptable' + ele.toString();
-        let str = getCorrespondantInfo(ele, parameter);
+        let str = getCorrespondingInfo(ele, parameter);
 
         let checked = isParameterValueSelectedInConstraint(constraint, parameter, ele);
 
@@ -1301,7 +1300,7 @@ let constraintCardBuilder = (constraint) => {
         if (param.id_list.length >0){
             popover_content += gettext(param.name) + ' : '
             param.id_list.forEach((id) =>
-                popover_content += getCorrespondantInfo(id, param.name) + ', '
+                popover_content += getCorrespondingInfo(id, param.name) + ', '
             )
             popover_content += '</br>'
         }
