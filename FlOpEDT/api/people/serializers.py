@@ -88,7 +88,7 @@ class StudentInfoSerializer(serializers.Serializer):
 
     def get_department(self, obj):
         if obj.generic_groups.exists():
-            return obj.generic_groups.first().department.abbrev
+            return obj.generic_groups.first().train_prog.department.abbrev
         else:
             return
 
