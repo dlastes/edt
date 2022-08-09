@@ -1043,23 +1043,6 @@ def edt_changes(req, **kwargs):
             cache.delete(get_key_course_pl(department.abbrev, week, work_copy))
             cache.delete(get_key_course_pp(department.abbrev, week, work_copy))
 
-        if work_copy == 0:
-            subject = '[Modif sur tierce] ' + \
-                initiator.username + ' a déplacé '
-            for inst in impacted_inst:
-                subject += inst.username + ' '
-
-            if initiator in impacted_inst:
-                impacted_inst.remove(initiator)
-            if len(impacted_inst) > 0:
-                email = EmailMessage(
-                    subject,
-                    msg,
-                    to=['edt.info.iut.blagnac@gmail.com']
-                )
-                # email.send()
-                logger.info(email)
-
         return JsonResponse(good_response)
     else:
         bad_response['more'] = f"Version: {version} VS {old_version}"
