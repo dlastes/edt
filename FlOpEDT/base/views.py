@@ -223,14 +223,23 @@ def stype(req, *args, **kwargs):
     for a in Theme:
         themes.append(a.value)
     if req.method == 'GET':
+        t = req.user.tutor
+        if TutorPreference.objects.filter(tutor=t).exists():
+            usr_pref_hours = req.user.tutor.preferences.pref_hours_per_day
+            usr_max_hours = req.user.tutor.preferences.max_hours_per_day
+            usr_min_hours = req.user.tutor.preferences.min_hours_per_day
+        else:
+            usr_pref_hours = 6
+            usr_max_hours = 9
+            usr_min_hours = 0
         return TemplateResponse(req,
                                 'base/show-stype.html',
                                 {'date_deb': current_week(),
                                  'date_fin': current_week(),
                                  'name_usr': req.user.username,
-                                 'usr_pref_hours': req.user.tutor.preferences.pref_hours_per_day,
-                                 'usr_max_hours': req.user.tutor.preferences.max_hours_per_day,
-                                 'usr_min_hours': req.user.tutor.preferences.min_hours_per_day,
+                                 'usr_pref_hours': usr_pref_hours,
+                                 'usr_max_hours': usr_max_hours,
+                                 'usr_min_hours': usr_min_hours,
                                  'user_notifications_pref': user_notifications_pref,
                                  'themes': themes,
                                  'theme': queries.get_theme_preference(req.user),
