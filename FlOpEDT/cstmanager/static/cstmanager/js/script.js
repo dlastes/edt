@@ -128,7 +128,6 @@ let changeEvents = {
 
         constraint_list = Object.keys(constraints);
         selected_constraints = selected_constraints.filter(id => id !== pageid);
-        filter.reset();
         refreshConstraints();
     },
     editConstraint: (constraint) => {
@@ -355,7 +354,18 @@ let fetchers = {
             });
     },
     fetchRooms: (e) => {
-        // TODO
+        fetch(build_url(urlRooms, {"dept": department}))
+            .then(resp => resp.json())
+            .then(jsonObj => {
+                database['rooms'] = {};
+                Object.values(jsonObj).forEach(obj => {
+                    database['rooms'][obj['id']] = obj;
+                });
+            })
+            .catch(err => {
+                console.error("something went wrong while fetching courses");
+                console.error(err);
+            });
     },
     fetchTutorsIDs: (e) => {
         fetch(build_url(urlTutorsID, {"dept": department}))
@@ -553,9 +563,9 @@ let fillEditConstraintPopup = constraint => {
         type.disabled = false;
         title.value = "";
         comment.value = "";
-        activation.checked = false;
-        weightSlider.value = 1;
-        weightValue.innerText = weightSlider.value;
+        activation.checked = true;
+        weightSlider.value = 9;
+        weightValue.innerText = gettext("Strong constraint");
         params.innerHTML = '';
     } else {
         let localName = findConstraintLocalNameFromClass(constraint.name);
@@ -572,7 +582,7 @@ let fillEditConstraintPopup = constraint => {
         comment.value = constraint.comment ?? "";
         activation.checked = constraint.is_active;
         weightSlider.value = constraint.weight ?? 9;
-        weightValue.innerText = constraint.weight ?? gettext("Strong constraint");
+        weightValue.innerText = constraint.weight ? gettext('Weight : ') + constraint.weight : gettext("Strong constraint");
         updateParamsListExistingConstraint(constraint);
     }
 };
@@ -624,15 +634,27 @@ let extractConstraintFromPopup = (constraint) => {
         } else {
             // Store the selected values
             let tag = document.getElementById('collapse-parameter-' + param.name);
-            tag.querySelectorAll('input').forEach((value, key, parent) => {
-                if (value.type === 'text') {
-                    param.id_list.push(value.value);
-                } else {
-                    if (value.checked) {
-                        param.id_list.push(value.getAttribute('element-id'));
-                    }
+            let select = tag.querySelector('select')
+            if (select!==null){
+                let selected_value = select.options[select.selectedIndex].value
+                if (selected_value!==''){
+                    param.id_list.push(selected_value)
                 }
-            });
+            }
+            else{
+                tag.querySelectorAll('input').forEach((value, key, parent) => {
+                    if (value.type === 'text' && value.value!=='') {
+                        param.id_list.push(value.value);
+                    } else {
+                        if (value.checked) {
+                            param.id_list.push(value.getAttribute('element-id'));
+                        }
+                    }
+                });
+            }
+
+
+
         }
 
         if (param.required && param.id_list.length === 0) {
@@ -647,7 +669,7 @@ let extractConstraintFromPopup = (constraint) => {
 let updateEditConstraintWeightDisplay = (labelID, value) => {
     let weightText = gettext("Strong constraint");
     if (value <= 8) {
-        weightText = value.toString();
+        weightText = gettext("Weight : ") + value.toString();
     }
     document.getElementById(labelID).innerText = weightText;
 }
@@ -763,8 +785,27 @@ let elementBuilder = (tag, args = {}) => {
     return ele;
 }
 
+let selectBuilder = (param_name, args = {}, id_to_select) => {
+    let ele = elementBuilder('select', args);
+    let options = database.acceptable_values[param_name].acceptable
+    let opt = document.createElement('option')
+    opt.value = ''
+    opt.innerHTML = ''
+    ele.appendChild(opt)
+    for (let i=0; i<options.length; i++){
+        let opt = document.createElement('option')
+        let option_id = options[i]
+        opt.value = option_id
+        opt.innerHTML = getCorrespondingInfo(option_id, param_name)
+        ele.appendChild(opt)
+    }
+    let optionToSelect = Array.from(ele.options).find(item => item.value === id_to_select);
+    optionToSelect.selected = true;
+    return ele;
+}
+
 // returns the corresponding database table based on the parameter given
-let getCorrespondantDatabase = (param) => {
+let getCorrespondingDatabase = (param) => {
     switch (param) {
         case 'group':
         case 'groups':
@@ -781,6 +822,10 @@ let getCorrespondantDatabase = (param) => {
         case 'tutor':
         case 'tutors':
             return database['tutors_ids'];
+        case "rooms":
+        case "possible_rooms":
+        case "room":
+            return database['rooms']
         case 'weeks':
             return database['weeks'];
         default:
@@ -789,7 +834,8 @@ let getCorrespondantDatabase = (param) => {
 }
 
 // returns the information needed from a parameter and a constraint id given
-let getCorrespondantInfo = (id, param, db) => {
+let getCorrespondingInfo = (id, param) => {
+    let db = getCorrespondingDatabase(param);
     switch (param) {
         case 'group':
         case 'groups':
@@ -801,6 +847,9 @@ let getCorrespondantInfo = (id, param, db) => {
             return db[id]['abbrev'];
         case 'tutors':
         case 'tutor':
+        case "rooms":
+        case "possible_rooms":
+        case "room":
             return db[id]['name'];
         case 'course_type':
         case 'course_types':
@@ -854,8 +903,7 @@ let createSelectedParameterPopup = (constraint, parameter) => {
 
     let createCheckboxAndLabel = (ele, inputType) => {
         let temp_id = 'acceptable' + ele.toString();
-        let db = getCorrespondantDatabase(parameter);
-        let str = getCorrespondantInfo(ele, parameter, db);
+        let str = getCorrespondingInfo(ele, parameter);
 
         let checked = isParameterValueSelectedInConstraint(constraint, parameter, ele);
 
@@ -885,7 +933,22 @@ let createSelectedParameterPopup = (constraint, parameter) => {
         acceptableValues.forEach(ele => {
             createCheckboxAndLabel(ele, 'checkbox');
         });
-    } else {
+    } else if(param_obj.type.includes('.')){
+        let temp_id = parameter + '-value';
+
+        let form = divBuilder({
+            'class': 'form-floating',
+        })
+        let select = selectBuilder(parameter, {
+            'id': temp_id,
+            'element-id': 0,
+            'name': 'elementsParameter',
+        }, param_obj.id_list[0]===undefined ? '' : param_obj.id_list[0]);
+
+        form.append(select);
+        divs.append(form);
+    }
+    else {
         let temp_id = parameter + '-value';
 
         let form = divBuilder({
@@ -1281,7 +1344,6 @@ let duplicateSelectedConstraint = (pageid) => {
     let newConstraint = copyObj(constraint);
     newConstraint.id = getNewConstraintID(newConstraint.name);
     newConstraint.pageid = newConstraint.name + newConstraint.id;
-    console.log(newConstraint);
     openNewConstraintPopup(newConstraint);
 }
 
@@ -1293,7 +1355,20 @@ let constraintCardBuilder = (constraint) => {
     let editButton = `<button type="button" class="btn btn-primary" onclick="editSelectedConstraint('${constraint.pageid}')">${gettext('Edit')}</button>`;
     let deleteButton = `<button type="button" class="btn btn-danger" onclick="deleteSelectedConstraint('${constraint.pageid}')">${gettext('Delete')}</button>`;
     let duplicateButton = `<button type="button" class="btn btn-info" onclick="duplicateSelectedConstraint('${constraint.pageid}')">${gettext('Duplicate')}</button>`;
-    let popover_content = `<div class="btn-group" role="group" aria-label="Constraint edit">${duplicateButton}${editButton}${deleteButton}`;
+    let popover_content = ''
+    constraint.parameters.forEach((param) => {
+        if (param.name==='department'){
+            return
+        }
+        if (param.id_list.length >0){
+            popover_content += gettext(param.name) + ' : '
+            param.id_list.forEach((id) =>
+                popover_content += getCorrespondingInfo(id, param.name) + ', '
+            )
+            popover_content += '</br>'
+        }
+        })
+    popover_content += `<div class="btn-group" role="group" aria-label="Constraint edit">${duplicateButton}${editButton}${deleteButton}</div>`;
 
     const wrapper = divBuilder({
         'class': 'card border border-3 border-primary me-1 mb-1 constraint-card h-25',
@@ -1387,6 +1462,7 @@ fetchers.fetchTrainingPrograms(null);
 fetchers.fetchStructuralGroups(null);
 fetchers.fetchTutors(null);
 fetchers.fetchModules(null);
+fetchers.fetchRooms(null);
 fetchers.fetchCourseTypes(null);
 fetchers.fetchTutorsIDs(null);
 //fetchers.fetchCourses(null);
