@@ -32,7 +32,7 @@ let htmlElements = {
     filterSearch: document.getElementById('input-search'),
     filterTutor: document.getElementById('filter-tutor'),
     filterTutorList: document.getElementById('filter-tutor-list'),
-    filterGroup: document.getElementById('input-group'),
+    filterGroup: document.getElementById('filter-group'),
     filterAllWeeks: document.getElementById('filter-all-weeks'),
     numberSelectedConstraints: document.getElementById('num-selected-constraints'),
     commitChangesButton: document.getElementById('apply-changes'),
@@ -185,21 +185,36 @@ let filter = {
             return (param.id_list.length === 0 || param.id_list.includes('' + week_id));
         });
     },
-    by_group: groupSearch => {
-        filter.current.group = groupSearch;
+    by_group: groupID => {
+        filter.current.group = groupID;
 
-        if (groupSearch.length === 0) {
+        if (groupID === null) {
             // No module provided so not filtered
             return;
         }
 
-        // TODO
+        groupID = '' + groupID;
+
+        // Filter the constraints with the search
+        filtered_constraint_list = filtered_constraint_list.filter(pageid => {
+            let constraint = constraints[pageid];
+
+            // Keep only constraints having a 'groups' parameter with at least one tutor
+            let paramGroup = constraint.parameters.find(parameter => parameter.name === 'groups');
+            if (!paramGroup || paramGroup.id_list.length === 0) {
+                return false;
+            }
+
+            // Keep the constraint if one of their groups matches the provided ID
+            return paramGroup.id_list.includes(groupID);
+        });
     },
     reapply: () => {
         filter.reset();
         filter.by_week(filter.current.week);
         filter.by_search(filter.current.search);
         filter.by_tutor(filter.current.tutor);
+        filter.by_group(filter.current.group);
         refreshConstraints();
     },
 };
@@ -398,8 +413,29 @@ let fetchers = {
             .then(resp => resp.json())
             .then(jsonObj => {
                 database['groups'] = {};
+
+                htmlElements.filterGroup.innerHTML = '';
+                let option = elementBuilder('option', {
+                    'value': -1,
+                });
+                option.text = gettext('All groups');
+                option.onclick = () => {
+                    filter.by_group(null);
+                    filter.reapply();
+                };
+                htmlElements.filterGroup.append(option);
                 Object.values(jsonObj).forEach(obj => {
-                    database['groups'][obj['id']] = obj;
+                    database['groups'][obj.id] = obj;
+
+                    option = elementBuilder('option', {
+                        'value': obj.id,
+                    });
+                    option.innerText = `${obj.train_prog}-${obj.name}`;
+                    option.onclick = () => {
+                        filter.by_group(obj.id);
+                        filter.reapply();
+                    };
+                    htmlElements.filterGroup.append(option);
                 });
             })
             .catch(err => {
