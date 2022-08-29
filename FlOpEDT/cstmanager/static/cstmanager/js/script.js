@@ -2,7 +2,6 @@ const popoverAllowList = bootstrap.Tooltip.Default.allowList;
 popoverAllowList.button = [];
 popoverAllowList['*'].push('onclick');
 
-
 // helper function to extract a parameter object from a given constraint
 let get_parameter_from_constraint = (cst, name) => {
     let ret = {};
@@ -30,6 +29,9 @@ let htmlElements = {
     enabledConstraintsList: document.getElementById('constraints-enabled'),
     disabledConstraintsList: document.getElementById('constraints-disabled'),
     filtersElement: document.getElementById('filters'),
+    filterSearch: document.getElementById('input-search'),
+    filterTutor: document.getElementById('input-tutor'),
+    filterModule: document.getElementById('input-module'),
     filterAllWeeks: document.getElementById('filter-all-weeks'),
     numberSelectedConstraints: document.getElementById('num-selected-constraints'),
     commitChangesButton: document.getElementById('apply-changes'),
@@ -40,6 +42,16 @@ let htmlElements = {
     selectedConstraintsEditWeightSlider: document.getElementById('selected-constraints-edit-weight-slider'),
     selectedConstraintsEditWeightButton: document.getElementById('selected-constraints-edit-weight'),
     selectedConstraintsDeleteButton: document.getElementById('selected-constraints-delete'),
+};
+
+htmlElements.filterSearch.oninput = () => {
+    filter.by_search(htmlElements.filterSearch.value);
+    filter.reapply();
+};
+
+htmlElements.filterTutor.oninput = () => {
+    filter.by_tutor(htmlElements.filterTutor.value);
+    filter.reapply();
 };
 
 const State = Object.freeze({
@@ -61,27 +73,98 @@ let currentPopover;
 
 // object containing functions that involve filtering
 let filter = {
-    current: null,
+    current: {
+        search: '',
+        tutor: '',
+        module: '',
+        course: '',
+        week: null,
+    },
     reset: () => {
         filtered_constraint_list = [...constraint_list];
-        filter.current = filter.reset;
+    },
+    by_search: search => {
+        filter.current.search = search;
+
+        if (search.length === 0) {
+            // No search text provided so not filtered
+            return;
+        }
+
+        filtered_constraint_list = filtered_constraint_list.filter(pageid => {
+            let constraint = constraints[pageid];
+            let name = (constraint.title ?? database.constraint_types[constraint.name].local_name).toLowerCase();
+            let comment = (constraint.comment ?? "").toLowerCase();
+            return (name.includes(search) || comment?.includes(search));
+        });
+    },
+    by_tutor: tutorSearch => {
+        filter.current.tutor = tutorSearch;
+
+        if (tutorSearch.length === 0) {
+            // No tutor provided so not filtered
+            return;
+        }
+
+        tutorSearch = tutorSearch.toLowerCase();
+
+        // Find all the tutors with matching search
+        let tutors = Object.values(database.tutors);
+        let tutors_match_search = tutors.filter(tutor =>
+            tutor.first_name.toLowerCase().includes(tutorSearch)
+            || tutor.last_name.toLowerCase().includes(tutorSearch)
+            || tutor.username.toLowerCase().includes(tutorSearch));
+
+        if (tutors_match_search.length === 0) {
+            // Search does not concern any tutor
+            filtered_constraint_list = [];
+            return;
+        }
+
+        // Get the matching tutors' id
+        let tutors_id = [];
+        tutors_match_search.forEach(tutor => {
+            let t = Object.values(database.tutors_ids).find(t => t.name === tutor.username);
+            if (t) {
+                tutors_id.push("" + t.id);
+            }
+        });
+
+        // Filter the constraints with the search
+        filtered_constraint_list = filtered_constraint_list.filter(pageid => {
+            let constraint = constraints[pageid];
+
+            // Keep only constraints having a 'tutors' parameter with at least one tutor
+            let paramTutor = constraint.parameters.find(parameter => parameter.name === 'tutors');
+            if (!paramTutor || paramTutor.id_list.length === 0) {
+                return false;
+            }
+
+            // Keep the constraint if one of their tutors matches those of the search
+            return paramTutor.id_list.some(id => tutors_id.includes(id));
+        });
     },
     by_week: week_id => {
-        if (htmlElements.filterAllWeeks.checked) {
-            filter.reset();
-        } else {
-            filtered_constraint_list = constraint_list.filter(pageid => {
-                let param = constraints[pageid].parameters.find(parameter => parameter.name === 'weeks');
-                return (param.id_list.length === 0 || param.id_list.includes('' + week_id));
-            });
-            filter.current = filter.by_week;
+        filter.current.week = week_id;
+
+        if (week_id === null) {
+            // No week provided so not filtered
+            return;
         }
+
+        filtered_constraint_list = filtered_constraint_list.filter(pageid => {
+            let param = constraints[pageid].parameters.find(parameter => parameter.name === 'weeks');
+            return (param.id_list.length === 0 || param.id_list.includes('' + week_id));
+        });
     },
     reapply: () => {
-        filter.current();
+        filter.reset();
+        filter.by_week(filter.current.week);
+        filter.by_search(filter.current.search);
+        filter.by_tutor(filter.current.tutor);
+        refreshConstraints();
     },
-}
-filter.current = filter.reset;
+};
 
 let visibility = {
     setElementVisible: (htmlElement, isVisible) => {
@@ -232,8 +315,9 @@ let fetchers = {
                 selected_constraints = [];
                 lastSelectedConstraint = null;
                 constraint_list = Object.keys(constraints);
-                filter.by_week(getWeek(year_init, week_init));
-                refreshConstraints();
+                selected_week = getWeek(year_init, week_init)
+                filter.by_week(selected_week);
+                filter.reapply();
             })
             .catch(err => {
                 console.error("something went wrong while fetching constraints");
@@ -595,8 +679,8 @@ let fillEditConstraintPopup = constraint => {
 };
 
 let onChangeAllWeeksFilter = () => {
-    filter.by_week(selected_week);
-    refreshConstraints();
+    filter.by_week(htmlElements.filterAllWeeks.checked ? null : selected_week);
+    filter.reapply();
 };
 
 // Replaces given constraint's values with entered from user
@@ -684,7 +768,7 @@ let discardChanges = (e) => {
     constraint_list = Object.keys(constraints);
     selected_constraints = [];
     lastSelectedConstraint = null;
-    refreshConstraints();
+    filter.reapply();
 }
 document.getElementById('discard-changes').addEventListener('click', discardChanges);
 
@@ -696,12 +780,11 @@ let applyChanges = (e) => {
 
 // clear input fields for filters
 let clearFilters = (e) => {
-    document.getElementById('input-search').value = '';
-    document.getElementById('input-tutor').value = '';
-    document.getElementById('input-module').value = '';
-    document.getElementById('input-date').value = '';
-    filtered_constraint_list = [...constraint_list]
-    refreshConstraints();
+    htmlElements.filterSearch.value = '';
+    htmlElements.filterTutor.value = '';
+    htmlElements.filterModule.value = '';
+    filter.by_week(selected_week);
+    filter.reapply();
 }
 
 let saveConstraintChanges = () => {
@@ -751,7 +834,7 @@ let saveConstraintChanges = () => {
     setState(State.Nothing);
 
     // Refresh
-    refreshConstraints();
+    filter.reapply();
 };
 
 htmlElements.confirmEditConstraintButton.addEventListener('click', saveConstraintChanges);
@@ -1113,7 +1196,7 @@ let buildConstraintsSections = () => {
     htmlElements.enabledConstraintsList.innerHTML = "";
 
     if (filtered_constraint_list == null) {
-        filter.reset();
+        filter.reapply()
     }
 
     let dict = {};
@@ -1455,7 +1538,7 @@ htmlElements.selectedConstraintsEditWeightButton.onclick = editSelectedConstrain
 htmlElements.selectedConstraintsDeleteButton.onclick = deleteSelectedConstraints;
 
 let constraint_list = null;
-let filtered_constraint_list = null;
+let filtered_constraint_list = [];
 let constraint_metadata = null;
 
 // fetch data from database
