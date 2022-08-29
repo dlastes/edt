@@ -72,7 +72,7 @@ htmlElements.filterTutor.oninput = () => {
         'href': "#",
         'class': 'list-group-item list-group-item-action fs-6 lh-1',
     });
-    let text = `${gettext('All tutors')}`;
+    let text = gettext('All tutors');
     option.text = text;
     option.onclick = () => {
         htmlElements.filterTutor.value = text;
@@ -451,6 +451,7 @@ let fetchers = {
                 Object.values(jsonObj).forEach(obj => {
                     database['tutors'][obj['username']] = obj;
                 });
+                htmlElements.filterTutor.value = gettext('All tutors');
             })
             .catch(err => {
                 console.error("something went wrong while fetching tutors");
@@ -855,8 +856,12 @@ let applyChanges = (e) => {
 // clear input fields for filters
 let clearFilters = (e) => {
     htmlElements.filterSearch.value = '';
-    htmlElements.filterTutor.value = '';
-    htmlElements.filterGroup.value = '';
+    htmlElements.filterTutor.value = gettext('All tutors');
+    htmlElements.filterGroup.value = '-1';
+    htmlElements.filterAllWeeks.checked = false;
+    filter.current.search = '';
+    filter.current.tutor = null;
+    filter.current.group = null;
     filter.by_week(selected_week);
     filter.reapply();
 }
