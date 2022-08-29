@@ -368,7 +368,7 @@ let fetchers = {
                 selected_constraints = [];
                 lastSelectedConstraint = null;
                 constraint_list = Object.keys(constraints);
-                selected_week = getWeek(year_init, week_init)
+                selected_week = getWeek(year_init, week_init).id;
                 filter.by_week(selected_week);
                 filter.reapply();
             })
