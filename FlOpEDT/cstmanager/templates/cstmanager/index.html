@@ -52,13 +52,21 @@
                 <div class="search-bar mb-3">
                     <input type="text" class="form-control" id="input-search" placeholder="Search">
                 </div>
-                <div id="filters" class="search-bar pad-children mb-3">
-                    <input type="text" class="form-control mb-3" id="input-tutor" placeholder="Tutor">
-                    <input type="text" class="form-control mb-3" id="input-module" placeholder="Module">
-                    <input type="text" class="form-control mb-3" id="input-course" placeholder="Course">
+                <div id="filters" class="pad-children mb-3">
+                    <!-- Tutor -->
+                    <div>
+                        <input type="text" class="form-control mt-3" id="filter-tutor" placeholder="Tutor..."
+                               aria-label="Tutor filter">
+                        <div id="filter-tutor-list" class="list-group w-auto" style="display: none">
+                        </div>
+                    </div>
+
+                    <!-- Group -->
+                    <input type="text" class="form-control mt-3" id="input-group" placeholder="Groups">
                     <!-- See all weeks -->
                     <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="filter-all-weeks" onchange="onChangeAllWeeksFilter()">
+                        <input class="form-check-input" type="checkbox" role="switch" id="filter-all-weeks"
+                               onchange="onChangeAllWeeksFilter()">
                         <label class="form-check-label" for="filter-all-weeks">{% trans "See all weeks" %}</label>
                     </div>
                 </div>

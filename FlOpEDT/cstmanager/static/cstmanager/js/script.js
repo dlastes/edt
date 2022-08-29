@@ -30,8 +30,9 @@ let htmlElements = {
     disabledConstraintsList: document.getElementById('constraints-disabled'),
     filtersElement: document.getElementById('filters'),
     filterSearch: document.getElementById('input-search'),
-    filterTutor: document.getElementById('input-tutor'),
-    filterModule: document.getElementById('input-module'),
+    filterTutor: document.getElementById('filter-tutor'),
+    filterTutorList: document.getElementById('filter-tutor-list'),
+    filterGroup: document.getElementById('input-group'),
     filterAllWeeks: document.getElementById('filter-all-weeks'),
     numberSelectedConstraints: document.getElementById('num-selected-constraints'),
     commitChangesButton: document.getElementById('apply-changes'),
@@ -49,9 +50,59 @@ htmlElements.filterSearch.oninput = () => {
     filter.reapply();
 };
 
+htmlElements.filterTutor.onclick = () => {
+    if (htmlElements.filterTutorList.style.display !== 'none') {
+        htmlElements.filterTutorList.style.display = 'none';
+    }
+};
+
 htmlElements.filterTutor.oninput = () => {
-    filter.by_tutor(htmlElements.filterTutor.value);
-    filter.reapply();
+    let tutorSearch = htmlElements.filterTutor.value.toLowerCase();
+
+    // Find all the tutors with matching search
+    let tutors = Object.values(database.tutors);
+    let tutors_match_search = tutors.filter(tutor =>
+        tutor.first_name.toLowerCase().includes(tutorSearch)
+        || tutor.last_name.toLowerCase().includes(tutorSearch)
+        || tutor.username.toLowerCase().includes(tutorSearch));
+
+    htmlElements.filterTutorList.innerHTML = '';
+
+    let option = elementBuilder('a', {
+        'href': "#",
+        'class': 'list-group-item list-group-item-action fs-6 lh-1',
+    });
+    let text = `${gettext('All tutors')}`;
+    option.text = text;
+    option.onclick = () => {
+        htmlElements.filterTutor.value = text;
+        htmlElements.filterTutorList.style.display = 'none';
+        filter.by_tutor(null);
+        filter.reapply();
+    };
+    htmlElements.filterTutorList.append(option);
+
+    // Get the matching tutors' id
+    tutors_match_search.forEach(tutor => {
+        let t = Object.values(database.tutors_ids).find(t => t.name === tutor.username);
+        if (t) {
+            option = elementBuilder('a', {
+                'href': "#",
+                'class': 'list-group-item list-group-item-action fs-6 lh-1',
+            });
+            let text = `${tutor.username} - ${tutor.first_name} ${tutor.last_name}`;
+            option.text = text;
+            option.onclick = () => {
+                htmlElements.filterTutor.value = text;
+                htmlElements.filterTutorList.style.display = 'none';
+                filter.by_tutor(t.id);
+                filter.reapply();
+            };
+            htmlElements.filterTutorList.append(option);
+        }
+    })
+
+    htmlElements.filterTutorList.style.display = 'block';
 };
 
 const State = Object.freeze({
@@ -75,9 +126,8 @@ let currentPopover;
 let filter = {
     current: {
         search: '',
-        tutor: '',
-        module: '',
-        course: '',
+        tutor: null,
+        group: null,
         week: null,
     },
     reset: () => {
@@ -98,37 +148,15 @@ let filter = {
             return (name.includes(search) || comment?.includes(search));
         });
     },
-    by_tutor: tutorSearch => {
-        filter.current.tutor = tutorSearch;
+    by_tutor: tutorID => {
+        filter.current.tutor = tutorID;
 
-        if (tutorSearch.length === 0) {
+        if (tutorID === null) {
             // No tutor provided so not filtered
             return;
         }
 
-        tutorSearch = tutorSearch.toLowerCase();
-
-        // Find all the tutors with matching search
-        let tutors = Object.values(database.tutors);
-        let tutors_match_search = tutors.filter(tutor =>
-            tutor.first_name.toLowerCase().includes(tutorSearch)
-            || tutor.last_name.toLowerCase().includes(tutorSearch)
-            || tutor.username.toLowerCase().includes(tutorSearch));
-
-        if (tutors_match_search.length === 0) {
-            // Search does not concern any tutor
-            filtered_constraint_list = [];
-            return;
-        }
-
-        // Get the matching tutors' id
-        let tutors_id = [];
-        tutors_match_search.forEach(tutor => {
-            let t = Object.values(database.tutors_ids).find(t => t.name === tutor.username);
-            if (t) {
-                tutors_id.push("" + t.id);
-            }
-        });
+        tutorID = '' + tutorID;
 
         // Filter the constraints with the search
         filtered_constraint_list = filtered_constraint_list.filter(pageid => {
@@ -140,8 +168,8 @@ let filter = {
                 return false;
             }
 
-            // Keep the constraint if one of their tutors matches those of the search
-            return paramTutor.id_list.some(id => tutors_id.includes(id));
+            // Keep the constraint if one of their tutors matches the provided ID
+            return paramTutor.id_list.includes(tutorID);
         });
     },
     by_week: week_id => {
@@ -156,6 +184,16 @@ let filter = {
             let param = constraints[pageid].parameters.find(parameter => parameter.name === 'weeks');
             return (param.id_list.length === 0 || param.id_list.includes('' + week_id));
         });
+    },
+    by_group: groupSearch => {
+        filter.current.group = groupSearch;
+
+        if (groupSearch.length === 0) {
+            // No module provided so not filtered
+            return;
+        }
+
+        // TODO
     },
     reapply: () => {
         filter.reset();
@@ -782,7 +820,7 @@ let applyChanges = (e) => {
 let clearFilters = (e) => {
     htmlElements.filterSearch.value = '';
     htmlElements.filterTutor.value = '';
-    htmlElements.filterModule.value = '';
+    htmlElements.filterGroup.value = '';
     filter.by_week(selected_week);
     filter.reapply();
 }

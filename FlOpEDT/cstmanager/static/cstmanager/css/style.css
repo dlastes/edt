@@ -1,6 +1,5 @@
 * {
     font-family: Arial, sans-serif;
-    user-select: none;
 }
 
 .transition {
@@ -332,6 +331,12 @@ input:hover {
 
 .accordion-button-no-icon:after {
     content: none;
+}
+
+#filter-tutor-list {
+    max-height: 300px;
+    overflow:scroll;
+    -webkit-overflow-scrolling: touch;
 }
 
 /* Weeks banner */
