@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-07-25 22:09+0000\n"
+"POT-Creation-Date: 2022-08-29 16:34+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -108,19 +108,19 @@ msgstr "pas placé"
 
 #: base/static/base/logo.js:84
 msgid ""
-"Schedule manager <span id=\"flopGreen\">fl</span>exible and <span id="
-"\"flopGreen\">op</span>enSource"
+"Schedule manager <span id=\"flopGreen\">fl</span>exible and <span "
+"id=\"flopGreen\">op</span>enSource"
 msgstr ""
 "Gestionnaire d'emplois du temps <span id=\"flopGreen\">fl</span>exible et "
 "<span id=\"flopGreen\">op</span>enSource"
 
 #: base/static/base/logo.js:85
 msgid ""
-"\"Who want to manage schedules this year?\" ...  ... <span id=\"flopGreen"
-"\">flop</span>!"
+"\"Who want to manage schedules this year?\" ...  ... <span "
+"id=\"flopGreen\">flop</span>!"
 msgstr ""
-"Qui veut gérer les emplois du temps cette année ? ...  ... <span id="
-"\"flopGreen\">flop</span> !"
+"Qui veut gérer les emplois du temps cette année ? ...  ... <span "
+"id=\"flopGreen\">flop</span> !"
 
 #: base/static/base/logo.js:86
 msgid "And your schedules will <span id=\"flopRedDel\">flop</span> be a hit!"
@@ -354,6 +354,16 @@ msgstr "Semaines : "
 msgid "All"
 msgstr "Toutes"
 
+#: cstmanager/static/cstmanager/js/script.js:75
+msgid "All tutors"
+msgstr "Tous les profs"
+
+#: cstmanager/static/cstmanager/js/script.js:421
+msgid "All groups"
+msgstr "Tous les groupes"
+
+#: cstmanager/static/cstmanager/js/script.js:739
+#: cstmanager/static/cstmanager/js/script.js:813
 #: cstmanager/static/cstmanager/js/script.js:568
 #: cstmanager/static/cstmanager/js/script.js:585
 #: cstmanager/static/cstmanager/js/script.js:670
@@ -366,29 +376,34 @@ msgid "Weight : "
 msgstr "Poids : "
 
 #: cstmanager/static/cstmanager/js/script.js:1013
+#: cstmanager/static/cstmanager/js/script.js:1116
 msgid "Required"
 msgstr "Requis"
 
-#: cstmanager/static/cstmanager/js/script.js:1134
-#: cstmanager/static/cstmanager/js/script.js:1145
+#: cstmanager/static/cstmanager/js/script.js:1237
+#: cstmanager/static/cstmanager/js/script.js:1248
 msgid "Strong constraints"
 msgstr "Contraintes fortes"
 
-#: cstmanager/static/cstmanager/js/script.js:1138
-#: cstmanager/static/cstmanager/js/script.js:1147
+#: cstmanager/static/cstmanager/js/script.js:1241
+#: cstmanager/static/cstmanager/js/script.js:1250
 msgid "Preferences"
 msgstr "Préférences"
 
-#: cstmanager/static/cstmanager/js/script.js:1156
-#: cstmanager/static/cstmanager/js/script.js:1162
+#: cstmanager/static/cstmanager/js/script.js:1259
+#: cstmanager/static/cstmanager/js/script.js:1265
 msgid "All constraints"
 msgstr "Toutes les contraintes"
 
-#: cstmanager/static/cstmanager/js/script.js:1355
+#: cstmanager/static/cstmanager/js/script.js:1459
 msgid "Edit"
 msgstr "Modifier"
 
-#: cstmanager/static/cstmanager/js/script.js:1357
+#: cstmanager/static/cstmanager/js/script.js:1460
+msgid "Delete"
+msgstr "Supprimer"
+
+#: cstmanager/static/cstmanager/js/script.js:1461
 msgid "Duplicate"
 msgstr "Dupliquer"
 
@@ -446,9 +461,6 @@ msgstr "Manger tôt"
 #: people/static/people/student_preferences.js:66
 msgid "Eat late"
 msgstr "Manger tard"
-
-#~ msgid "Delete"
-#~ msgstr "Supprimer"
 
 #~ msgid "Cancel"
 #~ msgstr "Annuler"
