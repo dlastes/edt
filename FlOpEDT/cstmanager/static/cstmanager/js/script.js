@@ -34,6 +34,7 @@ let htmlElements = {
     filterTutorList: document.getElementById('filter-tutor-list'),
     filterGroup: document.getElementById('filter-group'),
     filterAllWeeks: document.getElementById('filter-all-weeks'),
+    showInactiveConstraints: document.getElementById('show-inactive-constraints'),
     numberSelectedConstraints: document.getElementById('num-selected-constraints'),
     commitChangesButton: document.getElementById('apply-changes'),
     fetchConstraintsButton: document.getElementById('fetch-constraints'),
@@ -593,10 +594,9 @@ let copyObj = (obj) => {
 }
 
 // toggle the tab for disabled constraints
-let toggleDisabledDiv = (e) => {
-    htmlElements.disabledConstraintsList.classList.toggle('display-none');
+let onChangeInactiveConstraintsFilter = (e) => {
+    htmlElements.disabledConstraintsList.style.display = htmlElements.showInactiveConstraints.checked ? 'block' : 'none';
 }
-document.getElementById('show-disabled').addEventListener('click', toggleDisabledDiv);
 
 // returns a copy of the original constraints
 let copyFromOriginalConstraints = () => {
