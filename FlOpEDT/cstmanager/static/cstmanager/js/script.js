@@ -61,8 +61,10 @@ let currentPopover;
 
 // object containing functions that involve filtering
 let filter = {
+    current: null,
     reset: () => {
         filtered_constraint_list = [...constraint_list];
+        filter.current = filter.reset;
     },
     by_week: week_id => {
         if (htmlElements.filterAllWeeks.checked) {
@@ -72,9 +74,14 @@ let filter = {
                 let param = constraints[pageid].parameters.find(parameter => parameter.name === 'weeks');
                 return (param.id_list.length === 0 || param.id_list.includes('' + week_id));
             });
+            filter.current = filter.by_week;
         }
     },
+    reapply: () => {
+        filter.current();
+    },
 }
+filter.current = filter.reset;
 
 let visibility = {
     setElementVisible: (htmlElement, isVisible) => {
@@ -105,7 +112,7 @@ let changeEvents = {
         constraints[constraint.pageid] = constraint;
         actionChanges.add[constraint.pageid] = constraint;
         constraint_list = Object.keys(constraints);
-        filter.reset();
+        filter.reapply();
     },
     deleteConstraint: (pageid) => {
         let constraint = constraints[pageid];
@@ -128,7 +135,7 @@ let changeEvents = {
 
         constraint_list = Object.keys(constraints);
         selected_constraints = selected_constraints.filter(id => id !== pageid);
-        refreshConstraints();
+        filter.reapply();
     },
     editConstraint: (constraint) => {
         constraints[constraint.pageid] = constraint;
@@ -615,7 +622,7 @@ let extractConstraintFromPopup = (constraint) => {
 
     constraint.comment = htmlElements.constraintEditComment.value;
     constraint.is_active = htmlElements.constraintEditActivation.checked;
-    constraint.weight = parseInt(htmlElements.constraintEditWeightSlider.value)===9 ? null : parseInt(htmlElements.constraintEditWeightSlider.value)
+    constraint.weight = parseInt(htmlElements.constraintEditWeightSlider.value) === 9 ? null : parseInt(htmlElements.constraintEditWeightSlider.value)
 
     let isValid = true;
 
@@ -635,15 +642,14 @@ let extractConstraintFromPopup = (constraint) => {
             // Store the selected values
             let tag = document.getElementById('collapse-parameter-' + param.name);
             let select = tag.querySelector('select')
-            if (select!==null){
+            if (select !== null) {
                 let selected_value = select.options[select.selectedIndex].value
-                if (selected_value!==''){
+                if (selected_value !== '') {
                     param.id_list.push(selected_value)
                 }
-            }
-            else{
+            } else {
                 tag.querySelectorAll('input').forEach((value, key, parent) => {
-                    if (value.type === 'text' && value.value!=='') {
+                    if (value.type === 'text' && value.value !== '') {
                         param.id_list.push(value.value);
                     } else {
                         if (value.checked) {
@@ -652,9 +658,6 @@ let extractConstraintFromPopup = (constraint) => {
                     }
                 });
             }
-
-
-
         }
 
         if (param.required && param.id_list.length === 0) {
@@ -792,7 +795,7 @@ let selectBuilder = (param_name, args = {}, id_to_select) => {
     opt.value = ''
     opt.innerHTML = ''
     ele.appendChild(opt)
-    for (let i=0; i<options.length; i++){
+    for (let i = 0; i < options.length; i++) {
         let opt = document.createElement('option')
         let option_id = options[i]
         opt.value = option_id
@@ -933,7 +936,7 @@ let createSelectedParameterPopup = (constraint, parameter) => {
         acceptableValues.forEach(ele => {
             createCheckboxAndLabel(ele, 'checkbox');
         });
-    } else if(param_obj.type.includes('.')){
+    } else if (param_obj.type.includes('.')) {
         let temp_id = parameter + '-value';
 
         let form = divBuilder({
@@ -943,12 +946,11 @@ let createSelectedParameterPopup = (constraint, parameter) => {
             'id': temp_id,
             'element-id': 0,
             'name': 'elementsParameter',
-        }, param_obj.id_list[0]===undefined ? '' : param_obj.id_list[0]);
+        }, param_obj.id_list[0] === undefined ? '' : param_obj.id_list[0]);
 
         form.append(select);
         divs.append(form);
-    }
-    else {
+    } else {
         let temp_id = parameter + '-value';
 
         let form = divBuilder({
@@ -960,7 +962,7 @@ let createSelectedParameterPopup = (constraint, parameter) => {
             'id': temp_id,
             'element-id': 0,
             'name': 'elementsParameter',
-            'value': param_obj.id_list[0]===undefined ? '' : param_obj.id_list[0]
+            'value': param_obj.id_list[0] === undefined ? '' : param_obj.id_list[0]
         });
 
         let label = elementBuilder('label', {
@@ -1355,19 +1357,19 @@ let constraintCardBuilder = (constraint) => {
     let editButton = `<button type="button" class="btn btn-primary" onclick="editSelectedConstraint('${constraint.pageid}')">${gettext('Edit')}</button>`;
     let deleteButton = `<button type="button" class="btn btn-danger" onclick="deleteSelectedConstraint('${constraint.pageid}')">${gettext('Delete')}</button>`;
     let duplicateButton = `<button type="button" class="btn btn-info" onclick="duplicateSelectedConstraint('${constraint.pageid}')">${gettext('Duplicate')}</button>`;
-    let popover_content = ''
+    let popover_content = '';
     constraint.parameters.forEach((param) => {
-        if (param.name==='department'){
+        if (param.name === 'department') {
             return
         }
-        if (param.id_list.length >0){
+        if (param.id_list.length > 0) {
             popover_content += gettext(param.name) + ' : '
             param.id_list.forEach((id) =>
                 popover_content += getCorrespondingInfo(id, param.name) + ', '
             )
             popover_content += '</br>'
         }
-        })
+    })
     popover_content += `<div class="btn-group" role="group" aria-label="Constraint edit">${duplicateButton}${editButton}${deleteButton}</div>`;
 
     const wrapper = divBuilder({
