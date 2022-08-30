@@ -596,7 +596,7 @@ let database = {
 
 let findConstraintClassFromLocalName = (localName) => {
     return Object.values(database.constraint_types).find(obj => {
-        return obj.local_name === localName;
+        return obj.local_name.trim() === localName.trim();
     });
 };
 
