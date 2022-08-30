@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-29 16:34+0000\n"
+"POT-Creation-Date: 2022-08-30 12:12+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -340,47 +340,55 @@ msgstr ""
 msgid "All"
 msgstr ""
 
-#: cstmanager/static/cstmanager/js/script.js:75
-msgid "All tutors"
-msgstr ""
-
-#: cstmanager/static/cstmanager/js/script.js:421
+#: cstmanager/static/cstmanager/js/script.js:367
 msgid "All groups"
 msgstr ""
 
-#: cstmanager/static/cstmanager/js/script.js:739
-#: cstmanager/static/cstmanager/js/script.js:813
+#: cstmanager/static/cstmanager/js/script.js:400
+#: cstmanager/static/cstmanager/js/script.js:793
+#: cstmanager/static/cstmanager/js/script.js:1659
+#: cstmanager/static/cstmanager/js/script.js:1663
+msgid "All tutors"
+msgstr ""
+
+#: cstmanager/static/cstmanager/js/script.js:685
+#: cstmanager/static/cstmanager/js/script.js:766
 msgid "Strong constraint"
 msgstr ""
 
-#: cstmanager/static/cstmanager/js/script.js:1116
+#: cstmanager/static/cstmanager/js/script.js:1187
 msgid "Required"
 msgstr ""
 
-#: cstmanager/static/cstmanager/js/script.js:1237
-#: cstmanager/static/cstmanager/js/script.js:1248
+#: cstmanager/static/cstmanager/js/script.js:1244
+#: cstmanager/static/cstmanager/js/script.js:1658
+msgid "Tutor"
+msgstr ""
+
+#: cstmanager/static/cstmanager/js/script.js:1332
+#: cstmanager/static/cstmanager/js/script.js:1343
 msgid "Strong constraints"
 msgstr ""
 
-#: cstmanager/static/cstmanager/js/script.js:1241
-#: cstmanager/static/cstmanager/js/script.js:1250
+#: cstmanager/static/cstmanager/js/script.js:1336
+#: cstmanager/static/cstmanager/js/script.js:1345
 msgid "Preferences"
 msgstr ""
 
-#: cstmanager/static/cstmanager/js/script.js:1259
-#: cstmanager/static/cstmanager/js/script.js:1265
+#: cstmanager/static/cstmanager/js/script.js:1354
+#: cstmanager/static/cstmanager/js/script.js:1360
 msgid "All constraints"
 msgstr ""
 
-#: cstmanager/static/cstmanager/js/script.js:1459
+#: cstmanager/static/cstmanager/js/script.js:1554
 msgid "Edit"
 msgstr ""
 
-#: cstmanager/static/cstmanager/js/script.js:1460
+#: cstmanager/static/cstmanager/js/script.js:1555
 msgid "Delete"
 msgstr ""
 
-#: cstmanager/static/cstmanager/js/script.js:1461
+#: cstmanager/static/cstmanager/js/script.js:1556
 msgid "Duplicate"
 msgstr ""
 
