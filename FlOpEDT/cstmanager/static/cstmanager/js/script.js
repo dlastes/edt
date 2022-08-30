@@ -786,45 +786,52 @@ let extractConstraintFromPopup = (constraint) => {
     let isValid = true;
 
     Object.values(constraint.parameters).forEach(param => {
-        // Ignore immutable parameters
-        if (param.name === 'department') {
-            return;
-        }
+            // Ignore immutable parameters
+            if (param.name === 'department') {
+                return;
+            }
 
-        // Clear the previously selected values (only keep the latest save)
-        param.id_list = [];
+            // Clear the previously selected values (only keep the latest save)
+            param.id_list = [];
 
-        if (param.type.includes('Boolean')) {
-            let tag = document.getElementById('param-check-' + param.name);
-            param.id_list.push(tag.checked);
-        } else {
-            // Store the selected values
-            let tag = document.getElementById('collapse-parameter-' + param.name);
-            let select = tag.querySelector('select')
-            if (select !== null) {
-                let selected_value = select.options[select.selectedIndex].value
-                if (selected_value !== '') {
-                    param.id_list.push(selected_value)
-                }
+            if (param.type.includes('Boolean')) {
+                let tag = document.getElementById('param-check-' + param.name);
+                param.id_list.push(tag.checked);
             } else {
-                tag.querySelectorAll('input').forEach((value, key, parent) => {
-                    if (value.type === 'text' && value.value !== '') {
-                        param.id_list.push(value.value);
-                    } else {
-                        if (value.checked) {
-                            param.id_list.push(value.getAttribute('element-id'));
+                if (param.name === 'tutors') {
+                    let tag = document.getElementById('param-select-' + param.name);
+                    tag.querySelectorAll('li').forEach((value, key, parent) => {
+                        param.id_list.push(value.getAttribute('data-param-id'));
+                    });
+                } else {
+                    // Store the selected values
+                    let tag = document.getElementById('collapse-parameter-' + param.name);
+                    let select = tag.querySelector('select')
+                    if (select !== null) {
+                        let selected_value = select.options[select.selectedIndex].value
+                        if (selected_value !== '') {
+                            param.id_list.push(selected_value)
                         }
+                    } else {
+                        tag.querySelectorAll('input').forEach((value, key, parent) => {
+                            if (value.type === 'text' && value.value !== '') {
+                                param.id_list.push(value.value);
+                            } else {
+                                if (value.checked) {
+                                    param.id_list.push(value.getAttribute('element-id'));
+                                }
+                            }
+                        });
                     }
-                });
+                }
+
+                if (param.required && param.id_list.length === 0) {
+                    isValid = false;
+                    alert(`Parameter ${param.name} is required!`, 'danger');
+                }
             }
         }
-
-        if (param.required && param.id_list.length === 0) {
-            isValid = false;
-            alert(`Parameter ${param.name} is required!`, 'danger');
-        }
-    });
-
+    );
     return isValid;
 };
 
@@ -968,6 +975,122 @@ let selectBuilder = (param_name, args = {}, id_to_select) => {
     optionToSelect.selected = true;
     return ele;
 }
+
+/**
+ * Creates a custom select with an input and a list.
+ **/
+let createSelect = (placeholder, label, searchMethod, result_interpret, additional_onclick, first_option_text = '', first_option_on_click = null, should_close_on_input_click = true) => {
+    let container = divBuilder({});
+    let input = elementBuilder('input', {
+        'type': 'text',
+        'class': 'form-control mt-3',
+        'placeholder': placeholder,
+        'aria-label': label,
+    });
+    let list = divBuilder({
+        'class': 'list-group w-auto custom-v-select-list',
+        'style': 'display: none;',
+    });
+    if (should_close_on_input_click) {
+        input.onclick = () => {
+            if (list.style.display !== 'none') {
+                list.style.display = 'none';
+            }
+        };
+    }
+    input.oninput = () => {
+        let search_value = input.value;
+
+        list.innerHTML = '';
+
+        let search_results = searchMethod(search_value);
+
+        let create_option = () => {
+            return elementBuilder('a', {
+                'href': "#",
+                'class': 'list-group-item list-group-item-action fs-6 lh-1',
+            });
+        };
+
+        if (first_option_text.length > 0) {
+            let option = create_option();
+            option.text = first_option_text;
+            if (first_option_on_click) {
+                let element = {'id': null};
+                option.onclick = () => {
+                    additional_onclick(element, input, list);
+                };
+            }
+            list.append(option);
+        }
+
+        search_results.forEach(element => {
+            let option = create_option();
+            option.text = result_interpret(element);
+            option.onclick = () => {
+                additional_onclick(element, input, list);
+            };
+            list.append(option);
+        });
+        list.style.display = 'block';
+    }
+    container.append(input, list);
+    return container;
+};
+
+let createSelectSingle = (label_text, searchMethod, result_interpret, option_on_click, first_option_text = '') => {
+    let container = divBuilder();
+
+    let on_click = (element, input, list) => {
+        input.value = result_interpret(element);
+        list.style.display = 'none';
+        option_on_click(element, input, list);
+    };
+
+    container.append(createSelect(`${label_text}...`, label_text, searchMethod, result_interpret, on_click, first_option_text, true));
+    return container;
+};
+
+let createSelectMultiple = (label_text, searchMethod, result_interpret, result_simple_interpret, selected_elements_id = '', already_selected = []) => {
+    let container = divBuilder();
+
+    let selected_elements = elementBuilder('ul', {
+        'id': selected_elements_id,
+        'class': 'list-group list-group-horizontal custom-h-select-list border border-solid',
+    });
+
+    let createSelected = (element) => {
+        let selected_element = elementBuilder('li', {
+            'class': 'list-group-item fs-6',
+            'style': 'text-align: center',
+            'data-param-id': element.id,
+        });
+        let content = divBuilder();
+        content.innerHTML = result_simple_interpret(element);
+        let remove_badge = elementBuilder('span', {
+            'class': 'badge bg-danger rounded-pill',
+            'style': 'cursor: pointer',
+        });
+        remove_badge.innerHTML = 'X';
+        remove_badge.onclick = () => {
+            selected_elements.removeChild(selected_element);
+        };
+        selected_element.append(content, remove_badge);
+        return selected_element;
+    };
+
+    let on_click = (element, input, list) => {
+        let selected_element = createSelected(element);
+        selected_elements.append(selected_element);
+    };
+
+    already_selected.forEach(element => {
+        selected_elements.append(createSelected(element));
+    });
+
+    container.append(selected_elements, createSelect(`${label_text}...`, label_text, searchMethod, result_interpret, on_click, false));
+    return container;
+};
 
 // returns the corresponding database table based on the parameter given
 let getCorrespondingDatabase = (param) => {
@@ -1228,8 +1351,32 @@ let buttonWithDropBuilder = (constraint, parameter) => {
         button.innerText = parameter.name;
         button.append(badge);
 
-        let elements = createSelectedParameterPopup(constraint, parameter.name);
+        let elements;
 
+        if (parameter.name === 'tutors') {
+            let label_text = gettext('Tutor');
+
+            let searchMethod = searchTutors;
+            let result_interpret = element => {
+                return `${element.tutor.username} - ${element.tutor.first_name} ${element.tutor.last_name}`;
+            };
+            let result_simple_interpret = element => {
+                return element.tutor.username;
+            };
+
+            let param_obj = (constraint.parameters.filter(o => o.name === parameter.name))[0];
+
+            let selected = param_obj.id_list.map(id => {
+                let tutor = database.tutors[database.tutors_ids[id].name];
+                return {'tutor': tutor, 'id': id};
+            });
+
+            let id = `param-select-${parameter.name}`;
+
+            elements = createSelectMultiple(label_text, searchMethod, result_interpret, result_simple_interpret, id, selected);
+        } else {
+            elements = createSelectedParameterPopup(constraint, parameter.name);
+        }
         let body = divBuilder({
             'class': 'accordion-body',
         });
@@ -1612,6 +1759,23 @@ let editSelectedConstraintsWeight = () => {
     });
     refreshConstraints();
 }
+
+let searchTutors = tutorSearch => {
+    // Find all the tutors with matching search
+    let tutors = Object.values(database.tutors);
+    let tutors_match_search = tutors.filter(tutor =>
+        tutor.first_name.toLowerCase().includes(tutorSearch)
+        || tutor.last_name.toLowerCase().includes(tutorSearch)
+        || tutor.username.toLowerCase().includes(tutorSearch));
+
+    // Return the matching tutors' id
+    return tutors_match_search.map(tutor => {
+        let t = Object.values(database.tutors_ids).find(t => t.name === tutor.username);
+        if (t) {
+            return {'tutor': tutor, 'id': t.id};
+        }
+    })
+};
 
 htmlElements.selectedConstraintsEditWeightButton.onclick = editSelectedConstraintsWeight;
 htmlElements.selectedConstraintsDeleteButton.onclick = deleteSelectedConstraints;
