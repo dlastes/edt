@@ -335,7 +335,7 @@ input:hover {
 
 .custom-v-select-list {
     max-height: 300px;
-    overflow: scroll;
+    overflow-y: auto;
     -webkit-overflow-scrolling: touch;
 }
 
