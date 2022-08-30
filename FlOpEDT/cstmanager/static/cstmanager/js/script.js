@@ -51,61 +51,6 @@ htmlElements.filterSearch.oninput = () => {
     filter.reapply();
 };
 
-htmlElements.filterTutor.onclick = () => {
-    if (htmlElements.filterTutorList.style.display !== 'none') {
-        htmlElements.filterTutorList.style.display = 'none';
-    }
-};
-
-htmlElements.filterTutor.oninput = () => {
-    let tutorSearch = htmlElements.filterTutor.value.toLowerCase();
-
-    // Find all the tutors with matching search
-    let tutors = Object.values(database.tutors);
-    let tutors_match_search = tutors.filter(tutor =>
-        tutor.first_name.toLowerCase().includes(tutorSearch)
-        || tutor.last_name.toLowerCase().includes(tutorSearch)
-        || tutor.username.toLowerCase().includes(tutorSearch));
-
-    htmlElements.filterTutorList.innerHTML = '';
-
-    let option = elementBuilder('a', {
-        'href': "#",
-        'class': 'list-group-item list-group-item-action fs-6 lh-1',
-    });
-    let text = gettext('All tutors');
-    option.text = text;
-    option.onclick = () => {
-        htmlElements.filterTutor.value = text;
-        htmlElements.filterTutorList.style.display = 'none';
-        filter.by_tutor(null);
-        filter.reapply();
-    };
-    htmlElements.filterTutorList.append(option);
-
-    // Get the matching tutors' id
-    tutors_match_search.forEach(tutor => {
-        let t = Object.values(database.tutors_ids).find(t => t.name === tutor.username);
-        if (t) {
-            option = elementBuilder('a', {
-                'href': "#",
-                'class': 'list-group-item list-group-item-action fs-6 lh-1',
-            });
-            let text = `${tutor.username} - ${tutor.first_name} ${tutor.last_name}`;
-            option.text = text;
-            option.onclick = () => {
-                htmlElements.filterTutor.value = text;
-                htmlElements.filterTutorList.style.display = 'none';
-                filter.by_tutor(t.id);
-                filter.reapply();
-            };
-            htmlElements.filterTutorList.append(option);
-        }
-    })
-
-    htmlElements.filterTutorList.style.display = 'block';
-};
-
 const State = Object.freeze({
     Nothing: Symbol('nothing'),
     CreateNewConstraint: Symbol('create'),
@@ -1779,6 +1724,13 @@ let searchTutors = tutorSearch => {
 
 htmlElements.selectedConstraintsEditWeightButton.onclick = editSelectedConstraintsWeight;
 htmlElements.selectedConstraintsDeleteButton.onclick = deleteSelectedConstraints;
+
+htmlElements.filterTutor.append(createSelectSingle(gettext('Tutor'), searchTutors, element => {
+    return element.id === null ? gettext('All tutors') : `${element.tutor.username} - ${element.tutor.first_name} ${element.tutor.last_name}`
+}, (element, input, list) => {
+    filter.by_tutor(element.id);
+    filter.reapply();
+}, gettext('All tutors')));
 
 let constraint_list = null;
 let filtered_constraint_list = [];
