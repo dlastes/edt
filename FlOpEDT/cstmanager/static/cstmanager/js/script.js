@@ -1010,7 +1010,14 @@ let createSelectMultiple = (label_text, searchMethod, result_interpret, result_s
             'style': 'text-align: center',
             'data-param-id': element.id,
         });
-        let content = divBuilder();
+        let content = divBuilder({
+            'data-bs-toggle': 'tooltip',
+            'data-bs-title': result_interpret(element),
+            'data-bs-placement': 'top',
+        });
+        const tooltip = bootstrap.Tooltip.getOrCreateInstance(content);
+        tooltip.enable();
+
         content.innerHTML = result_simple_interpret(element);
         let remove_badge = elementBuilder('span', {
             'class': 'badge bg-danger rounded-pill',
