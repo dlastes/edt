@@ -650,10 +650,15 @@ let updateParamsListExistingConstraint = (constraint) => {
     }
 
     // Fill parameters
-    database.constraint_types[constraint.name].parameters.sort((a, b) => (a.required && !b.required) ? -1 : (!a.required && b.required) ? 1 : 0);
-    database.constraint_types[constraint.name].parameters.forEach(param => {
+    constraint.parameters.sort((a, b) => (a.required && !b.required) ? -1 : (!a.required && b.required) ? 1 : b.id_list?.length - a.id_list?.length);
+    constraint.parameters.forEach(param => {
+        if (param.name === 'department') {
+            return;
+        }
         // Add empty id_list as selected elements (none when constraint has just been created)
-        param.id_list = [];
+        if (!param.id_list) {
+            param.id_list = [];
+        }
 
         let button = buttonWithDropBuilder(constraint, param);
         div.append(button);
