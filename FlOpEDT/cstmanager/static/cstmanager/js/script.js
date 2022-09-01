@@ -1303,8 +1303,12 @@ let buttonWithDropBuilder = (constraint, parameter) => {
         label.innerText = parameter.name;
         button.append(check, label, badge);
     } else {
+        let color = '';
+        if (parameter.id_list.length > 0) {
+            color = 'text-success';
+        }
         button = elementBuilder('button', {
-            'class': 'accordion-button collapsed',
+            'class': `accordion-button collapsed ${color}`,
             'type': 'button',
             'data-bs-toggle': 'collapse',
             'data-bs-target': '#' + collapseID,
