@@ -1105,6 +1105,12 @@ let isParameterValueSelectedInConstraint = (constraint, parameter, value) => {
     return constraint.parameters.find(param => param.name === parameter).id_list.includes(value);
 };
 
+let getContraintFilledParametersCount = (constraint) => {
+    return constraint.parameters.filter(param => {
+        return !param.required && param.id_list.length > 0;
+    }).length;
+};
+
 // returns the parameter object from a constraint obejct
 let getParamObj = (constraint, param) => {
     for (p of constraint.parameters) {
@@ -1653,7 +1659,7 @@ let constraintCardBuilder = (constraint) => {
         `    <h7 class="card-subtitle mt-0 mb-1 text-muted">${constraint.comment ?? ''}</h7>`,
         `    <div class="container-fluid">`,
         '        <div class="row">',
-        `        <div class="col">${iconTextBuilder(htmlElements.iconGears.src, constraint.parameters.length, 'parameters').outerHTML}</div>`,
+        `        <div class="col">${iconTextBuilder(htmlElements.iconGears.src, getContraintFilledParametersCount(constraint), 'parameters').outerHTML}</div>`,
         `        <div class="col">${iconTextBuilder(htmlElements.iconWeight.src, constraint.weight, 'weight').outerHTML}</div>`,
         `        <div class="col text-end"><input type="checkbox" data-cst-id="${constraint.pageid}" ${checkText} onchange="toggleConstraint(this)"></div>`,
         '</div>',
