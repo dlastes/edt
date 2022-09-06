@@ -1001,6 +1001,33 @@ let createSelectSingle = (label_text, searchMethod, result_interpret, option_on_
     return container;
 };
 
+let createSelectedElement = (element, selected_elements, element_title, element_name) => {
+    let selected_element = elementBuilder('li', {
+        'class': 'list-group-item fs-6',
+        'style': 'text-align: center',
+        'data-param-id': element.id,
+    });
+    let content = divBuilder({
+        'data-bs-toggle': 'tooltip',
+        'data-bs-title': element_title,
+        'data-bs-placement': 'top',
+    });
+    const tooltip = bootstrap.Tooltip.getOrCreateInstance(content);
+    tooltip.enable();
+
+    content.innerHTML = element_name;
+    let remove_badge = elementBuilder('span', {
+        'class': 'badge bg-danger rounded-pill',
+        'style': 'cursor: pointer',
+    });
+    remove_badge.innerHTML = 'X';
+    remove_badge.onclick = () => {
+        selected_elements.removeChild(selected_element);
+    };
+    selected_element.append(content, remove_badge);
+    return selected_element;
+};
+
 let createSelectMultiple = (label_text, searchMethod, result_interpret, result_simple_interpret, selected_elements_id = '', already_selected = []) => {
     let container = divBuilder();
 
@@ -1009,40 +1036,13 @@ let createSelectMultiple = (label_text, searchMethod, result_interpret, result_s
         'class': 'list-group list-group-horizontal custom-h-select-list border border-solid',
     });
 
-    let createSelected = (element) => {
-        let selected_element = elementBuilder('li', {
-            'class': 'list-group-item fs-6',
-            'style': 'text-align: center',
-            'data-param-id': element.id,
-        });
-        let content = divBuilder({
-            'data-bs-toggle': 'tooltip',
-            'data-bs-title': result_interpret(element),
-            'data-bs-placement': 'top',
-        });
-        const tooltip = bootstrap.Tooltip.getOrCreateInstance(content);
-        tooltip.enable();
-
-        content.innerHTML = result_simple_interpret(element);
-        let remove_badge = elementBuilder('span', {
-            'class': 'badge bg-danger rounded-pill',
-            'style': 'cursor: pointer',
-        });
-        remove_badge.innerHTML = 'X';
-        remove_badge.onclick = () => {
-            selected_elements.removeChild(selected_element);
-        };
-        selected_element.append(content, remove_badge);
-        return selected_element;
-    };
-
     let on_click = (element, input, list) => {
-        let selected_element = createSelected(element);
+        let selected_element = createSelectedElement(element, selected_elements, result_interpret(element), result_simple_interpret(element));
         selected_elements.append(selected_element);
     };
 
     already_selected.forEach(element => {
-        selected_elements.append(createSelected(element));
+        selected_elements.append(createSelectedElement(element, selected_elements, result_interpret(element), result_simple_interpret(element)));
     });
 
     container.append(selected_elements, createSelect(`${label_text}...`, label_text, searchMethod, result_interpret, on_click, false));
@@ -1333,14 +1333,42 @@ let buttonWithDropBuilder = (constraint, parameter) => {
 
             let param_obj = (constraint.parameters.filter(o => o.name === parameter.name))[0];
 
+            let element_obj = (tutor_id) => {
+                let tutor = database.tutors[database.tutors_ids[tutor_id].name];
+                return {'tutor': tutor, 'id': tutor_id};
+            };
+
             let selected = param_obj.id_list.map(id => {
-                let tutor = database.tutors[database.tutors_ids[id].name];
-                return {'tutor': tutor, 'id': id};
+                return element_obj(id);
             });
 
             let id = `param-select-${parameter.name}`;
+            let select = createSelectMultiple(label_text, searchMethod, result_interpret, result_simple_interpret, id, selected);
 
-            elements = createSelectMultiple(label_text, searchMethod, result_interpret, result_simple_interpret, id, selected);
+            let select_all_button = elementBuilder('button', {
+                'type': 'button',
+                'class': 'btn btn-primary',
+            });
+            select_all_button.innerHTML = gettext('Select all');
+            select_all_button.onclick = () => {
+                let acceptable_values = database.acceptable_values.tutor.acceptable;
+                let selected_list = document.getElementById(id);
+                selected_list.innerHTML = '';
+                acceptable_values.forEach(tutor_id => {
+                    let element = element_obj(tutor_id);
+                    selected_list.append(createSelectedElement(element, selected_list, result_interpret(element), result_simple_interpret(element)));
+                });
+            };
+
+            elements = divBuilder();
+
+            let buttons = divBuilder({
+                'class': 'mt-3',
+            });
+
+            buttons.append(select_all_button);
+
+            elements.append(select, buttons);
         } else {
             elements = createSelectedParameterPopup(constraint, parameter.name);
         }
