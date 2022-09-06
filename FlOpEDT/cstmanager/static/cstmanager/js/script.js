@@ -1360,13 +1360,24 @@ let buttonWithDropBuilder = (constraint, parameter) => {
                 });
             };
 
+            let remove_all_button = elementBuilder('button', {
+                'type': 'button',
+                'class': 'btn btn-danger',
+            });
+            remove_all_button.innerHTML = gettext('Remove all');
+            remove_all_button.onclick = () => {
+                let selected_list = document.getElementById(id);
+                selected_list.innerHTML = '';
+            };
+
             elements = divBuilder();
 
             let buttons = divBuilder({
-                'class': 'mt-3',
+                'class': 'mt-3 btn-group w-100',
+                'role': 'group',
             });
 
-            buttons.append(select_all_button);
+            buttons.append(select_all_button, remove_all_button);
 
             elements.append(select, buttons);
         } else {
