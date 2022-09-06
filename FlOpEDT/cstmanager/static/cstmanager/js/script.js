@@ -1377,6 +1377,7 @@ let buttonWithDropBuilder = (constraint, parameter) => {
 
         if (parameter.name === 'tutors') {
             let label_text = gettext('Tutor');
+            let acceptable_values = database.acceptable_values.tutor.acceptable;
 
             let searchMethod = searchTutors;
             let result_interpret = element => {
@@ -1406,7 +1407,6 @@ let buttonWithDropBuilder = (constraint, parameter) => {
             });
             select_all_button.innerHTML = gettext('Select all');
             select_all_button.onclick = () => {
-                let acceptable_values = database.acceptable_values.tutor.acceptable;
                 let selected_list = document.getElementById(id);
                 selected_list.innerHTML = '';
                 acceptable_values.forEach(tutor_id => {
@@ -1425,6 +1425,19 @@ let buttonWithDropBuilder = (constraint, parameter) => {
                 selected_list.innerHTML = '';
             };
 
+            let cancel_button = elementBuilder('button', {
+                'type': 'button',
+                'class': 'btn btn-secondary',
+            });
+            cancel_button.innerHTML = gettext('Cancel');
+            cancel_button.onclick = () => {
+                let selected_list = document.getElementById(id);
+                selected_list.innerHTML = '';
+                selected.forEach(element => {
+                    selected_list.append(createSelectedElement(element, selected_list, result_interpret(element), result_simple_interpret(element)));
+                });
+            };
+
             elements = divBuilder();
 
             let buttons = divBuilder({
@@ -1432,7 +1445,7 @@ let buttonWithDropBuilder = (constraint, parameter) => {
                 'role': 'group',
             });
 
-            buttons.append(select_all_button, remove_all_button);
+            buttons.append(select_all_button, remove_all_button, cancel_button);
 
             elements.append(select, buttons);
         } else {
