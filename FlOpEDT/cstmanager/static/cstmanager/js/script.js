@@ -68,6 +68,57 @@ let setState = (newState) => {
 
 let currentPopover;
 
+let currentSelectList = {
+    list: null,
+    input: null,
+    index: -1,
+    _elements_list: [],
+    reset: (newList = null, newInput = null) => {
+        currentSelectList.list = newList;
+        currentSelectList.index = -1;
+        currentSelectList.input = newInput;
+        if (newList) {
+            let list_id = newList.id;
+            currentSelectList._elements_list = document.getElementById(list_id).children;
+        }
+    },
+    _entry_changed: (previous_index, next_index) => {
+        if (next_index >= currentSelectList._elements_list.length) {
+            return;
+        }
+
+        if (previous_index >= 0) {
+            currentSelectList._elements_list[previous_index].classList.remove('active');
+        }
+        let next = currentSelectList._elements_list[next_index];
+        next.classList.add('active');
+        document.getElementById(next.id).scrollIntoView({behavior: "auto", block: "nearest", inline: "nearest"});
+    },
+    previous_entry: () => {
+        if (currentSelectList.index > 0) {
+            currentSelectList._entry_changed(currentSelectList.index, --currentSelectList.index);
+        }
+    },
+    next_entry: () => {
+        if (currentSelectList.index < currentSelectList._elements_list.length - 1) {
+            currentSelectList._entry_changed(currentSelectList.index, ++currentSelectList.index);
+        }
+    },
+    press_entry: () => {
+        let index = currentSelectList.index;
+        if (index >= 0 && index <= currentSelectList._elements_list.length - 1) {
+            let entry = currentSelectList._elements_list[index];
+            entry.onclick();
+        }
+    },
+    close: () => {
+        if (!currentSelectList.input) {
+            return;
+        }
+        currentSelectList.input.onclick();
+    },
+};
+
 // object containing functions that involve filtering
 let filter = {
     current: {
@@ -929,7 +980,7 @@ let selectBuilder = (param_name, args = {}, id_to_select) => {
 /**
  * Creates a custom select with an input and a list.
  **/
-let createSelect = (placeholder, label, searchMethod, result_interpret, additional_onclick, first_option_text = '', first_option_on_click = null, should_close_on_input_click = true) => {
+let createSelect = (id, placeholder, label, searchMethod, result_interpret, additional_onclick, first_option_text = '', first_option_on_click = null, should_close_on_input_click = true) => {
     let container = divBuilder({});
     let input = elementBuilder('input', {
         'type': 'text',
@@ -938,6 +989,7 @@ let createSelect = (placeholder, label, searchMethod, result_interpret, addition
         'aria-label': label,
     });
     let list = divBuilder({
+        'id': `custom-list-${id}`,
         'class': 'list-group w-auto custom-v-select-list',
         'style': 'display: none;',
     });
@@ -945,6 +997,7 @@ let createSelect = (placeholder, label, searchMethod, result_interpret, addition
         input.onclick = () => {
             if (list.style.display !== 'none') {
                 list.style.display = 'none';
+                currentSelectList.reset();
             }
         };
     }
@@ -955,15 +1008,17 @@ let createSelect = (placeholder, label, searchMethod, result_interpret, addition
 
         let search_results = searchMethod(search_value);
 
-        let create_option = () => {
+        let create_option = (link) => {
+            let option_id = `${id}-${link.replace(' ', '-')}`;
             return elementBuilder('a', {
-                'href': "#",
+                'id': option_id,
+                'href': `#${option_id}`,
                 'class': 'list-group-item list-group-item-action fs-6 lh-1',
             });
         };
 
         if (first_option_text.length > 0) {
-            let option = create_option();
+            let option = create_option(first_option_text);
             option.text = first_option_text;
             if (first_option_on_click) {
                 let element = {'id': null};
@@ -975,14 +1030,16 @@ let createSelect = (placeholder, label, searchMethod, result_interpret, addition
         }
 
         search_results.forEach(element => {
-            let option = create_option();
-            option.text = result_interpret(element);
+            let title = result_interpret(element);
+            let option = create_option(title);
+            option.text = title;
             option.onclick = () => {
                 additional_onclick(element, input, list);
             };
             list.append(option);
         });
         list.style.display = 'block';
+        currentSelectList.reset(list, input);
     }
     container.append(input, list);
     return container;
@@ -997,7 +1054,7 @@ let createSelectSingle = (label_text, searchMethod, result_interpret, option_on_
         option_on_click(element, input, list);
     };
 
-    container.append(createSelect(`${label_text}...`, label_text, searchMethod, result_interpret, on_click, first_option_text, true));
+    container.append(createSelect(label_text, `${label_text}...`, label_text, searchMethod, result_interpret, on_click, first_option_text, true));
     return container;
 };
 
@@ -1045,7 +1102,7 @@ let createSelectMultiple = (label_text, searchMethod, result_interpret, result_s
         selected_elements.append(createSelectedElement(element, selected_elements, result_interpret(element), result_simple_interpret(element)));
     });
 
-    container.append(selected_elements, createSelect(`${label_text}...`, label_text, searchMethod, result_interpret, on_click, false));
+    container.append(selected_elements, createSelect(selected_elements_id, `${label_text}...`, label_text, searchMethod, result_interpret, on_click, false));
     return container;
 };
 
@@ -1889,5 +1946,29 @@ fetchers.fetchConstraints(null);
 document.addEventListener('click', (e) => {
     if (currentPopover && !currentPopover.tip.contains(e.target)) {
         visibility.hidePopover();
+    }
+});
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowUp' && currentSelectList.list) {
+        e.preventDefault();
+        currentSelectList.previous_entry();
+    }
+
+    if (e.key === 'ArrowDown' && currentSelectList.list) {
+        e.preventDefault();
+        currentSelectList.next_entry();
+    }
+});
+
+document.addEventListener('keyup', (e) => {
+    if (e.key === 'Enter' && currentSelectList.list) {
+        e.preventDefault();
+        currentSelectList.press_entry();
+    }
+
+    if (e.key === 'Escape' && currentSelectList.list) {
+        e.preventDefault();
+        currentSelectList.close();
     }
 });
