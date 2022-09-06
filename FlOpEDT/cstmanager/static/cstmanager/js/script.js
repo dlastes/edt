@@ -1662,6 +1662,8 @@ let constraintCardBuilder = (constraint) => {
 
     let checkText = constraint.is_active ? 'checked' : "";
 
+    let weight = (constraint.weight && constraint.weight < 9) ? `<div class="col">${iconTextBuilder(htmlElements.iconWeight.src, constraint.weight, 'weight').outerHTML}</div>` : '';
+
     wrapper.innerHTML = [
         `<h6 class="card-header py-1">${constraint.title || localName}</h6>`,
         '<div class="card-body py-0">',
@@ -1669,7 +1671,7 @@ let constraintCardBuilder = (constraint) => {
         `    <div class="container-fluid">`,
         '        <div class="row">',
         `        <div class="col">${iconTextBuilder(htmlElements.iconGears.src, getContraintFilledParametersCount(constraint), 'parameters').outerHTML}</div>`,
-        `        <div class="col">${iconTextBuilder(htmlElements.iconWeight.src, constraint.weight, 'weight').outerHTML}</div>`,
+        `        ${weight}`,
         `        <div class="col text-end"><input type="checkbox" data-cst-id="${constraint.pageid}" ${checkText} onchange="toggleConstraint(this)"></div>`,
         '</div>',
     ].join('');
