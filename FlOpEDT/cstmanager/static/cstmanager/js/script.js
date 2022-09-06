@@ -992,6 +992,7 @@ let createSelect = (id, placeholder, label, searchMethod, result_interpret, addi
         'id': `custom-list-${id}`,
         'class': 'list-group w-auto custom-v-select-list',
         'style': 'display: none;',
+        'tabindex': '0',
     });
     if (should_close_on_input_click) {
         input.onclick = () => {
@@ -1014,6 +1015,7 @@ let createSelect = (id, placeholder, label, searchMethod, result_interpret, addi
                 'id': option_id,
                 'href': `#${option_id}`,
                 'class': 'list-group-item list-group-item-action fs-6 lh-1',
+                'tabindex': '-1',
             });
         };
 
