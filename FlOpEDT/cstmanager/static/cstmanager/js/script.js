@@ -1180,10 +1180,40 @@ let createSelectedParameterPopup = (constraint, parameter) => {
     };
 
     if (param_obj.multiple) {
-        let acceptableValues = database.acceptable_values[parameter].acceptable;
-        acceptableValues.forEach(ele => {
+        let acceptable_values = database.acceptable_values[parameter].acceptable;
+        acceptable_values.forEach(ele => {
             createCheckboxAndLabel(ele, 'checkbox');
         });
+
+        let select_all_button = elementBuilder('button', {
+            'type': 'button',
+            'class': 'btn btn-primary',
+        });
+        select_all_button.innerHTML = gettext('Select all');
+        select_all_button.onclick = () => {
+            divs.querySelectorAll('input').forEach(element => {
+                element.checked = true;
+            })
+        };
+
+        let remove_all_button = elementBuilder('button', {
+            'type': 'button',
+            'class': 'btn btn-danger',
+        });
+        remove_all_button.innerHTML = gettext('Remove all');
+        remove_all_button.onclick = () => {
+            divs.querySelectorAll('input').forEach(element => {
+                element.checked = false;
+            })
+        };
+
+        let buttons = divBuilder({
+            'class': 'mt-3 btn-group w-100',
+            'role': 'group',
+        });
+
+        buttons.append(select_all_button, remove_all_button);
+        divs.append(buttons);
     } else if (param_obj.type.includes('.')) {
         let temp_id = parameter + '-value';
 
