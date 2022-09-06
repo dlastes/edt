@@ -1152,6 +1152,8 @@ let createSelectedParameterPopup = (constraint, parameter) => {
     let param_obj = (constraint.parameters.filter(o => o.name === parameter))[0];
     let divs = divBuilder();
 
+    let values = divBuilder();
+
     let createCheckboxAndLabel = (ele, inputType) => {
         let temp_id = 'acceptable' + ele.toString();
         let str = getCorrespondingInfo(ele, parameter);
@@ -1176,14 +1178,31 @@ let createSelectedParameterPopup = (constraint, parameter) => {
         });
         label.innerHTML = str;
         form.append(input, label);
-        divs.append(form);
+        values.append(form);
     };
 
     if (param_obj.multiple) {
         let acceptable_values = database.acceptable_values[parameter].acceptable;
-        acceptable_values.forEach(ele => {
-            createCheckboxAndLabel(ele, 'checkbox');
-        });
+
+        let create_and_fill_selected = () => {
+            acceptable_values.forEach(ele => {
+                createCheckboxAndLabel(ele, 'checkbox');
+            });
+        };
+
+        let select_all = () => {
+            divs.querySelectorAll('input').forEach(element => {
+                element.checked = true;
+            });
+        };
+
+        let remove_all = () => {
+            divs.querySelectorAll('input').forEach(element => {
+                element.checked = false;
+            });
+        };
+
+        create_and_fill_selected();
 
         let select_all_button = elementBuilder('button', {
             'type': 'button',
@@ -1191,9 +1210,7 @@ let createSelectedParameterPopup = (constraint, parameter) => {
         });
         select_all_button.innerHTML = gettext('Select all');
         select_all_button.onclick = () => {
-            divs.querySelectorAll('input').forEach(element => {
-                element.checked = true;
-            })
+            select_all();
         };
 
         let remove_all_button = elementBuilder('button', {
@@ -1202,9 +1219,17 @@ let createSelectedParameterPopup = (constraint, parameter) => {
         });
         remove_all_button.innerHTML = gettext('Remove all');
         remove_all_button.onclick = () => {
-            divs.querySelectorAll('input').forEach(element => {
-                element.checked = false;
-            })
+            remove_all();
+        };
+
+        let cancel_button = elementBuilder('button', {
+            'type': 'button',
+            'class': 'btn btn-secondary',
+        });
+        cancel_button.innerHTML = gettext('Cancel');
+        cancel_button.onclick = () => {
+            values.innerHTML = '';
+            create_and_fill_selected();
         };
 
         let buttons = divBuilder({
@@ -1212,8 +1237,8 @@ let createSelectedParameterPopup = (constraint, parameter) => {
             'role': 'group',
         });
 
-        buttons.append(select_all_button, remove_all_button);
-        divs.append(buttons);
+        buttons.append(select_all_button, remove_all_button, cancel_button);
+        divs.append(values, buttons);
     } else if (param_obj.type.includes('.')) {
         let temp_id = parameter + '-value';
 
