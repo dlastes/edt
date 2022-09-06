@@ -1672,7 +1672,10 @@ let constraintCardBuilder = (constraint) => {
         '        <div class="row">',
         `        <div class="col">${iconTextBuilder(htmlElements.iconGears.src, getContraintFilledParametersCount(constraint), 'parameters').outerHTML}</div>`,
         `        ${weight}`,
-        `        <div class="col text-end"><input type="checkbox" data-cst-id="${constraint.pageid}" ${checkText} onchange="toggleConstraint(this)"></div>`,
+        `        <div class="col-auto text-end">`,
+        `            <input type="checkbox" id="cst-check-${constraint.pageid}" data-cst-id="${constraint.pageid}" ${checkText} onchange="toggleConstraint(this)">`,
+        `            <label class="form-check-label" for="cst-check-${constraint.pageid}">${constraint.is_active ? gettext('Active') : gettext('Inactive')}</label>`,
+        '        </div>',
         '</div>',
     ].join('');
 
