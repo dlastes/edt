@@ -1733,6 +1733,8 @@ let editSelectedConstraintsWeight = () => {
 }
 
 let searchTutors = tutorSearch => {
+    tutorSearch = tutorSearch.toLowerCase();
+
     // Find all the tutors with matching search
     let tutors = Object.values(database.tutors);
     let tutors_match_search = tutors.filter(tutor =>
