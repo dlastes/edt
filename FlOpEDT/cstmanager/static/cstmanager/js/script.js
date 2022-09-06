@@ -2,6 +2,8 @@ const popoverAllowList = bootstrap.Tooltip.Default.allowList;
 popoverAllowList.button = [];
 popoverAllowList['*'].push('onclick');
 
+const list_close = new Event('list-close');
+
 // helper function to extract a parameter object from a given constraint
 let get_parameter_from_constraint = (cst, name) => {
     let ret = {};
@@ -112,10 +114,10 @@ let currentSelectList = {
         }
     },
     close: () => {
-        if (!currentSelectList.input) {
+        if (!currentSelectList.list) {
             return;
         }
-        currentSelectList.input.onclick();
+        currentSelectList.list.dispatchEvent(list_close);
     },
 };
 
@@ -983,11 +985,11 @@ let selectBuilder = (param_name, args = {}, id_to_select) => {
 let createSelect = (id, placeholder, label, searchMethod, result_interpret, additional_onclick, {
         first_option_text = '',
         first_option_on_click = null,
-        should_close_on_input_click = true,
         select_once: select_once = false
     }) => {
         let container = divBuilder({});
         let input = elementBuilder('input', {
+            'id': `custom-list-input-${id}`,
             'type': 'text',
             'class': 'form-control mt-3',
             'placeholder': placeholder,
@@ -999,14 +1001,6 @@ let createSelect = (id, placeholder, label, searchMethod, result_interpret, addi
             'style': 'display: none;',
             'tabindex': '0',
         });
-        if (should_close_on_input_click) {
-            input.onclick = () => {
-                if (list.style.display !== 'none') {
-                    list.style.display = 'none';
-                    currentSelectList.reset();
-                }
-            };
-        }
 
         let create_option = (link) => {
             let option_id = `${id}-${link.replace(' ', '-')}`;
@@ -1018,7 +1012,17 @@ let createSelect = (id, placeholder, label, searchMethod, result_interpret, addi
             });
         };
 
-        let refreshList = (search_value) => {
+        let show_list = () => {
+            list.style.display = 'block';
+            currentSelectList.reset(list, input);
+        };
+
+        let hide_list = () => {
+            list.style.display = 'none';
+            currentSelectList.reset();
+        };
+
+        let refresh_list = (search_value) => {
             list.innerHTML = '';
 
             if (first_option_text.length > 0) {
@@ -1026,10 +1030,11 @@ let createSelect = (id, placeholder, label, searchMethod, result_interpret, addi
                 option.text = first_option_text;
                 if (first_option_on_click) {
                     let element = {'id': null};
-                    option.onclick = () => {
+                    option.onclick = (e) => {
+                        e?.stopPropagation();
                         additional_onclick(element, input, list);
                         if (select_once) {
-                            refreshList(input.value);
+                            refresh_list(input.value);
                         }
                     };
                 }
@@ -1042,21 +1047,36 @@ let createSelect = (id, placeholder, label, searchMethod, result_interpret, addi
                 let title = result_interpret(element);
                 let option = create_option(title);
                 option.text = title;
-                option.onclick = () => {
+                option.onclick = (e) => {
+                    e?.stopPropagation();
                     additional_onclick(element, input, list);
                     if (select_once) {
-                        refreshList(input.value);
+                        refresh_list(input.value);
                     }
                 };
                 list.append(option);
             });
-            list.style.display = 'block';
-            currentSelectList.reset(list, input);
+            show_list();
+        };
+
+        let close_listener = (e) => {
+            if (list.style.display !== 'none') {
+                hide_list();
+            }
+        };
+
+        list.addEventListener('list-close', close_listener);
+
+        input.onclick = () => {
+            if (list.style.display === 'none') {
+                refresh_list(input.value);
+            }
         };
 
         input.oninput = () => {
-            refreshList(input.value);
-        }
+            refresh_list(input.value);
+        };
+
         container.append(input, list);
         return container;
     }
@@ -1067,7 +1087,7 @@ let createSelectSingle = (label_text, searchMethod, result_interpret, option_on_
 
     let on_click = (element, input, list) => {
         input.value = result_interpret(element);
-        list.style.display = 'none';
+        list.dispatchEvent(list_close);
         option_on_click(element, input, list);
     };
 
@@ -1979,10 +1999,39 @@ fetchers.fetchWeeks();
 fetchers.fetchConstraintTypes();
 fetchers.fetchConstraints(null);
 
+let check_list_event = (e) => {
+    let node_contains = (node, content) => {
+        return node === content || node.contains(content)
+    };
+
+    let list = currentSelectList.list;
+    if (!list) {
+        return;
+    }
+    let list_node = document.getElementById(list.id);
+    if (!list_node) {
+        return;
+    }
+    let input = currentSelectList.input;
+
+    if (!input) {
+        return;
+    }
+    let input_node = document.getElementById(input.id);
+    if (!input_node) {
+        return;
+    }
+    if (!(node_contains(list_node, e.target) || node_contains(input_node, e.target))) {
+        list.dispatchEvent(list_close);
+    }
+};
+
 document.addEventListener('click', (e) => {
     if (currentPopover && !currentPopover.tip.contains(e.target)) {
         visibility.hidePopover();
     }
+
+    check_list_event(e);
 });
 
 document.addEventListener('keydown', (e) => {
