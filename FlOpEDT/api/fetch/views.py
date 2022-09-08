@@ -522,7 +522,7 @@ class ConstraintsQueriesViewSet(viewsets.ViewSet):
                       manual_parameters=[
                           week_param(required=True),
                           year_param(required=True),
-                          dept_param(required=True)
+                          dept_param()
                       ]
                   ),
                   )
@@ -532,13 +532,12 @@ class WeekDaysViewSet(viewsets.ViewSet):
     def list(self, req):
         week = int(req.query_params.get('week'))
         year = int(req.query_params.get('year'))
-        try:
-            department = bm.Department.objects.get(
-                abbrev=req.query_params.get('dept', None)
-            )
-        except bm.Department.DoesNotExist:
-            raise exceptions.NotFound(detail='Department not found')
-
+        department = req.query_params.get('dept', None)
+        if department is not None:
+            try:
+                department = bm.Department.objects.get(abbrev=department)
+            except bm.Department.DoesNotExist:
+                raise exceptions.NotFound(detail='Department not found')
         data = weeks.num_all_days(year, week, department)
         return JsonResponse(data, safe=False)
 
