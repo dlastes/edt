@@ -1,20 +1,28 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+
+export const routeNames = {
+  departmentSelection: Symbol('department-selection'),
+  home: Symbol('home'),
+  roomReservation: Symbol('room-reservation'),
+}
+
+const routes = [
+  {
+    path: '/', name: routeNames.departmentSelection, component: () => import('@/views/DepartmentSelectionView.vue')
+  },
+  {
+    path: '/edt/:dept', name: routeNames.home, component: () => import('@/views/HomeView.vue')
+  },
+  {
+    path: '/roomreservation/:dept',
+    name: routeNames.roomReservation,
+    component: () => import('@/views/RoomReservationView.vue')
+  },
+]
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes: [
-    {
-      path: '/',
-      name: 'home',
-      component: HomeView,
-    },
-    {
-      path: '/roomreservation',
-      name: 'room-reservation',
-      component: () => import('../views/RoomReservationView.vue'),
-    },
-  ],
+  routes: routes,
 })
 
 export default router

@@ -1,26 +1,26 @@
 <template>
-  <header>
-    <h1 class="border-solid border-bottom">HEADER</h1>
+  <header class="border-solid border-bottom mb-5">
+    <h1>HEADER</h1>
     <ul>
       <li>
-        <router-link :to="{name:'home'}">Home</router-link>
+        <router-link :to="{name: routeNames.departmentSelection}">Home</router-link>
       </li>
-      <li>
-        <router-link :to="{name:'room-reservation'}">Room Reservation</router-link>
+      <li v-if="'dept' in useRoute().params">
+        <router-link :to="{name: routeNames.roomReservation, params: useRoute().params}">Room Reservation</router-link>
       </li>
     </ul>
   </header>
 
   <RouterView/>
 
-  <footer>
-    <h1 class="border-solid border-top">FOOTER</h1>
+  <footer class="border-solid border-top mt-5">
+    <h1>FOOTER</h1>
   </footer>
 </template>
 
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
-</script>
+import { routeNames } from '@/router'
+import { RouterLink, RouterView, useRoute } from 'vue-router'</script>
 
 <style scoped>
 

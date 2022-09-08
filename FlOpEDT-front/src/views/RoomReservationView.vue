@@ -1,40 +1,54 @@
 <template>
   <h1>RoomReservation App</h1>
   <CustomDatePicker v-model:week="selectedDate.week" v-model:year="selectedDate.year"></CustomDatePicker>
-  <h2>Selected week: {{ selectedDate.week }}/ {{ selectedDate.year }}</h2>
-  <p>Departments: {{ departments }}</p>
-  <p>WeekDays: {{ weekDays }}</p>
-  <p>Times: {{ dayStartTime }}-{{ lunchBreakStartTime }}|{{ lunchBreakFinishTime }}-{{ dayFinishTime }}</p>
-  <p>Rooms: {{ rooms }}</p>
-  <div v-if="rooms" class="container w-auto">
-    <div v-for="room in rooms" class="row">
-      <button type="button" class="btn btn-primary" @click="onRoomChanged(room)">
-        {{ room.name }}
-      </button>
+  <p>Times: {{ dayStartTime.text }}-{{ lunchBreakStartTime.text }}|{{ lunchBreakFinishTime.text }}-{{
+      dayFinishTime.text
+    }}
+  </p>
+
+  <div class="container">
+    <div class="row">
+      <select v-model="selectedRoom" class="form-select" aria-label="Select room">
+        <option :value="undefined">All rooms</option>
+        <option v-for="room in rooms" :value="room">{{ room.name }}</option>
+      </select>
+    </div>
+    <div class="row">
+      <Calendar v-bind="{days: weekDays}"></Calendar>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import type { FlopAPI } from '@/assets/js/api'
 import { apiKey, currentWeekKey, requireInjection } from '@/assets/js/keys'
-import type { FlopWeek, TimeSettings } from '@/assets/js/types'
+import type { Department, FlopWeek, Time, TimeSettings } from '@/assets/js/types'
+import Calendar from '@/components/calendar/Calendar.vue'
 import CustomDatePicker from '@/components/DatePicker.vue'
+import { getDepartment } from '@/main'
 import { onMounted, ref, watchEffect } from 'vue'
+import { useRoute } from 'vue-router'
 
-const api = ref(requireInjection(apiKey))
+interface Room {
+  id: number,
+  name: string
+}
+
+const api = ref<FlopAPI>(requireInjection(apiKey))
 const currentWeek = ref(requireInjection(currentWeekKey))
 
 // API data
-const departments = ref<Array<{ id: number, abbrev: string }>>()
+const departments = ref<Array<Department>>()
 const weekDays = ref([])
-const rooms = ref([])
+const rooms = ref<Array<Room>>([])
 
 // Time Settings
 const timeSettings = ref<Array<TimeSettings>>()
-const dayStartTime = ref()
-const dayFinishTime = ref()
-const lunchBreakStartTime = ref()
-const lunchBreakFinishTime = ref()
+const dayStartTime = ref<Time>({value: 0, text: ''})
+const dayFinishTime = ref<Time>({value: 0, text: ''})
+const lunchBreakStartTime = ref<Time>({value: 0, text: ''})
+const lunchBreakFinishTime = ref<Time>({value: 0, text: ''})
+const timeSlots = ref<Array<Time>>([])
 
 // Fill with current date, uses date picker afterwards
 const selectedDate = ref<FlopWeek>({
@@ -42,23 +56,40 @@ const selectedDate = ref<FlopWeek>({
   year: currentWeek.value.year,
 })
 
+const selectedRoom = ref<Room>()
+
+const reservations = ref()
+
+// Selected date watcher
 watchEffect(() => {
   onWeekChanged(selectedDate.value)
 })
 
+// Time settings watcher
 watchEffect(() => {
   onTimeSettingsChanged(timeSettings.value)
 })
 
+// Day start and lunch break start times watcher
+watchEffect(() => {
+  for (let time = dayStartTime.value.value; time < lunchBreakStartTime.value.value; time += 15) {
+    let timeSlot: Time = {text: '', value: 0}
+    storeTime(timeSlot, time)
+    timeSlots.value.push(timeSlot)
+  }
+})
+
+// Selected room watcher
+watchEffect(() => {
+  if (selectedRoom.value) {
+    fetchRoomReservations(rooms.value[0].id, selectedDate.value.week, selectedDate.value.year).then(value => console.log(value))
+  }
+})
+
 function onWeekChanged (newWeek: FlopWeek) {
-  console.log(`Selected week: ${newWeek.week}/${newWeek.year}`)
   fetchWeekDays(newWeek.week, newWeek.year).then(value => {
     weekDays.value = value
   })
-}
-
-function onRoomChanged (room: { id: number, name: string }) {
-  console.log(`Selected room: ${room.name}`)
 }
 
 function convertDecimalTimeToHuman (time: number): string {
@@ -82,10 +113,16 @@ function onTimeSettingsChanged (timeSettings?: Array<TimeSettings>) {
     minLunchBreakStartTime = Math.min(minLunchBreakStartTime, setting.lunch_break_start_time)
     maxLunchBreakFinishTime = Math.max(maxLunchBreakFinishTime, setting.lunch_break_finish_time)
   })
-  dayStartTime.value = convertDecimalTimeToHuman(minStartTime / 60)
-  dayFinishTime.value = convertDecimalTimeToHuman(maxFinishTime / 60)
-  lunchBreakStartTime.value = convertDecimalTimeToHuman(minLunchBreakStartTime / 60)
-  lunchBreakFinishTime.value = convertDecimalTimeToHuman(maxLunchBreakFinishTime / 60)
+
+  storeTime(dayStartTime.value, minStartTime)
+  storeTime(dayFinishTime.value, maxFinishTime)
+  storeTime(lunchBreakStartTime.value, minLunchBreakStartTime)
+  storeTime(lunchBreakFinishTime.value, maxLunchBreakFinishTime)
+}
+
+function storeTime (store: Time, time: number) {
+  store.text = convertDecimalTimeToHuman(time / 60)
+  store.value = time
 }
 
 onMounted(() => {
@@ -111,11 +148,20 @@ async function fetchWeekDays (week: number, year: number) {
 }
 
 async function fetchRooms () {
-  return await api.value.fetch.all.rooms()
+  let department = getDepartment()
+  if (!department) {
+    console.log('No department provided, cannot fetch rooms.')
+    return []
+  }
+  return await api.value.fetch.all.rooms(department)
 }
 
 async function fetchTimeSettings () {
-  return await api.value.fetch.all.timesettings()
+  return await api.value.fetch.all.timeSettings()
+}
+
+async function fetchRoomReservations (idRoom: number, week: number, year: number) {
+  return await api.value.fetch.target.roomReservations(idRoom, {week: week, year: year})
 }
 
 </script>
