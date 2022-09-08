@@ -1,0 +1,40 @@
+[
+  {
+    "model": "roomreservation.RoomReservationType",
+    "pk": 1,
+    "fields": {
+      "name": "Cours",
+      "bg_color": "#0000ff"
+    }
+  },
+  {
+    "model": "roomreservation.ReservationPeriodicity",
+    "pk": 1,
+    "fields": {
+      "periodicity_type": "BW",
+      "start": "2022-09-02",
+      "end": "2022-09-04",
+      "bw_weekdays": null,
+      "bw_weeks_interval": null,
+      "bm_x_choice": null,
+      "bm_day_choice": null
+    }
+  },
+  {
+    "model": "roomreservation.RoomReservation",
+    "pk": 1,
+    "fields": {
+      "title": "aaa",
+      "description": "bbb",
+      "with_key": true,
+      "email": false,
+      "date": "2022-09-02",
+      "start_time": "01:00:00",
+      "end_time": "02:00:00",
+      "periodicity_id": 1,
+      "reservation_type_id": 1,
+      "responsible_id": 1,
+      "room_id": 186
+    }
+  }
+]

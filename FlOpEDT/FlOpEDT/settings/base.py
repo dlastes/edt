@@ -70,7 +70,7 @@ INSTALLED_APPS = [
     'configuration',
     'easter_egg',
     'MyFlOp',
-#    'importation'
+    #    'importation'
     'api',
     'rest_framework.authtoken',
     'rest_auth',
@@ -79,7 +79,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'cstmanager',
     'notifications',
-    'django_crontab'
+    'django_crontab',
+    'roomreservation',
 ]
 
 MIDDLEWARE = [
