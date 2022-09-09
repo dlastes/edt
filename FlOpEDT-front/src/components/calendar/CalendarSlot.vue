@@ -1,13 +1,19 @@
 <template>
-
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">Card title</h5>
+      <p class="card-text">
+        <slot>CONTENT</slot>
+      </p>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
-import type { Time } from '@/assets/js/types'
 import { defineProps } from 'vue'
 
 interface Props {
-  time: Time,
+
 }
 
 const props = defineProps<Props>()

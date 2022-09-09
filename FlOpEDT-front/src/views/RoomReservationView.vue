@@ -14,7 +14,7 @@
       </select>
     </div>
     <div class="row">
-      <Calendar v-bind="{days: weekDays}"></Calendar>
+      <Calendar v-bind="{days: weekDays, slots: dateSlots}"></Calendar>
     </div>
   </div>
 </template>
@@ -27,7 +27,6 @@ import Calendar from '@/components/calendar/Calendar.vue'
 import CustomDatePicker from '@/components/DatePicker.vue'
 import { getDepartment } from '@/main'
 import { onMounted, ref, watchEffect } from 'vue'
-import { useRoute } from 'vue-router'
 
 interface Room {
   id: number,
@@ -48,7 +47,6 @@ const dayStartTime = ref<Time>({value: 0, text: ''})
 const dayFinishTime = ref<Time>({value: 0, text: ''})
 const lunchBreakStartTime = ref<Time>({value: 0, text: ''})
 const lunchBreakFinishTime = ref<Time>({value: 0, text: ''})
-const timeSlots = ref<Array<Time>>([])
 
 // Fill with current date, uses date picker afterwards
 const selectedDate = ref<FlopWeek>({
@@ -60,37 +58,44 @@ const selectedRoom = ref<Room>()
 
 const reservations = ref()
 
-// Selected date watcher
+const dateSlots = ref<{ [index: string]: Array<{ startTime: number, endTime: number, content: string }> }>({})
+
+// Update weekDays
 watchEffect(() => {
-  onWeekChanged(selectedDate.value)
+  fetchWeekDays(selectedDate.value.week, selectedDate.value.year).then(value => {
+    weekDays.value = value
+  })
+})
+
+// Update room reservations
+watchEffect(() => {
+  let params: { roomId?: number } = {}
+  if (selectedRoom.value) {
+    params.roomId = selectedRoom.value.id
+  }
+
+  fetchRoomReservations(selectedDate.value.week, selectedDate.value.year, params).then(value => {
+    dateSlots.value = {}
+    value.forEach(reservation => {
+      let date = reservation.date.split('-')
+      let day = `${date[2]}/${date[1]}`
+      let startTimeRaw = reservation.start_time.split(':')
+      let startTime = parseInt(startTimeRaw[0]) * 60 + parseInt(startTimeRaw[1])
+      let endTimeRaw = reservation.end_time.split(':')
+      let endTime = parseInt(endTimeRaw[0]) * 60 + parseInt(endTimeRaw[1])
+      let content = `${reservation.title}\n${reservation.description}\n${reservation.responsible}`
+      if (!dateSlots.value[day]) {
+        dateSlots.value[day] = []
+      }
+      dateSlots.value[day].push({startTime: startTime, endTime: endTime, content: content})
+    })
+  })
 })
 
 // Time settings watcher
 watchEffect(() => {
   onTimeSettingsChanged(timeSettings.value)
 })
-
-// Day start and lunch break start times watcher
-watchEffect(() => {
-  for (let time = dayStartTime.value.value; time < lunchBreakStartTime.value.value; time += 15) {
-    let timeSlot: Time = {text: '', value: 0}
-    storeTime(timeSlot, time)
-    timeSlots.value.push(timeSlot)
-  }
-})
-
-// Selected room watcher
-watchEffect(() => {
-  if (selectedRoom.value) {
-    fetchRoomReservations(rooms.value[0].id, selectedDate.value.week, selectedDate.value.year).then(value => console.log(value))
-  }
-})
-
-function onWeekChanged (newWeek: FlopWeek) {
-  fetchWeekDays(newWeek.week, newWeek.year).then(value => {
-    weekDays.value = value
-  })
-}
 
 function convertDecimalTimeToHuman (time: number): string {
   let hours = Math.trunc(time)
@@ -160,8 +165,8 @@ async function fetchTimeSettings () {
   return await api.value.fetch.all.timeSettings()
 }
 
-async function fetchRoomReservations (idRoom: number, week: number, year: number) {
-  return await api.value.fetch.target.roomReservations(idRoom, {week: week, year: year})
+async function fetchRoomReservations (week: number, year: number, params: { roomId?: number }) {
+  return await api.value.fetch.target.roomReservations(week, year, params)
 }
 
 </script>

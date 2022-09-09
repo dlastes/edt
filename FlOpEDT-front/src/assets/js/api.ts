@@ -81,7 +81,7 @@ export interface FlopAPI {
     target: {
       room: (id: number, additionalParams?: object) => Promise<Room>,
       weekdays: (week: number, year: number, additionalParams?: object) => Promise<any>,
-      roomReservations: (id: number, additionalParams?: object) => Promise<RoomReservation>,
+      roomReservations: (week: number, year: number, params: { roomId?: number }, additionalParams?: object) => Promise<Array<RoomReservation>>,
     },
   },
 }
@@ -99,7 +99,12 @@ const api: FlopAPI = {
         week: week,
         year: year
       }, additionalParams),
-      roomReservations: (idRoom: number, additionalParams?: object) => fetcher(urls.roomreservation, {room_id: idRoom}, additionalParams)
+      roomReservations: (week: number, year: number, params: { roomId?: number }, additionalParams?: object) => fetcher(urls.roomreservation, {
+        ...{
+          week: week,
+          year: year
+        }, ...{...(params.roomId && {room: params.roomId}), ...(!params.roomId && {})}
+      }, additionalParams)
     }
   },
 }
