@@ -1,13 +1,28 @@
 <template>
   <div class="container">
-    <div class="row"> <!-- Header -->
+    <div class="row">
+      <div class="col m-0 p-1 text-end">
+        <div class="row">
+          <div>H</div>
+        </div>
+        <div :style="{height: height}" style="position: relative" class="col">
+          <div v-for="hour in hourIndicators" :style="computeHourStyle(hour)">
+            <div class="translate-middle-y">{{ hour.text }}</div>
+            <hr class="border border-primary border-1 vw-100 position-absolute top-0">
+          </div>
+        </div>
+      </div>
       <div v-for="day in days" class="col text-center border-dark border-bottom border-end border-top"
            :class="{'border-start border-dark': day === days[0]}">
         <div class="row border-bottom border-dark">
           <div>{{ day.name }} {{ day.date }}</div>
         </div>
-        <div :style="{height: height}" class="col">
+        <div :style="{height: height}" style="position: relative" class="col">
           <CalendarSlot v-for="slot in displayableSlots[day.date]"
+                        class="noselect"
+                        @click.left="onSlotClicked(slot)"
+                        @click.right.prevent
+                        @contextmenu="onSlotRightClicked(slot)"
                         :style="computeStyle(slot)"
                         :title="slot.title">{{ slot.content }}
           </CalendarSlot>
@@ -18,6 +33,7 @@
 </template>
 
 <script setup lang="ts">
+import { convertDecimalTimeToHuman } from '@/assets/js/helpers'
 import type { Time } from '@/assets/js/types'
 import CalendarSlot from '@/components/calendar/CalendarSlot.vue'
 import { computed, defineProps } from 'vue'
@@ -53,27 +69,51 @@ const displayableSlots = computed(() => {
     }
     out[index] = props.slots[index].filter(tmpSlot => canBeDisplayed(tmpSlot))
   })
-  console.log(out)
   return out
 })
 
-const heightValue = 300
+const hourIndicators = computed(() => {
+  let start = Math.trunc(props.startTime / 60)
+  let end = Math.trunc(props.endTime / 60)
+  let hours = []
+  for (let hour = start; hour <= end; ++hour) {
+    let time: Time = {value: hour * 60, text: convertDecimalTimeToHuman(hour)}
+    hours.push(time)
+  }
+  return hours
+})
+
+function onSlotClicked (slot: Slot) {
+  console.log('Left click')
+  console.log(slot.title)
+}
+
+function onSlotRightClicked (slot: Slot) {
+  console.log('Right click')
+  console.log(slot.title)
+}
+
+// Positioning and sizing
+
+const heightValue = 500
 
 const height = computed(() => {
   return `${heightValue}px`
 })
 
-function computeSize (slot: Slot): string {
-  let out = heightValue * (slot.startTime.value - slot.endTime.value) / (props.startTime - props.endTime)
-  console.log(slot.title)
-  console.log(out)
-  return `${out}px`
+function positionRelativeToColumn (value: number): number {
+  return 100 * (value - props.startTime) / (props.endTime - props.startTime)
 }
 
-function computeYOffset (slot: Slot): string {
-  let out = (slot.startTime.value - props.startTime) * 100 / (props.endTime - props.startTime)
-  console.log(slot.title)
-  console.log(out)
+function computeSize (slot: Slot): string {
+  let startPos = positionRelativeToColumn(slot.startTime.value)
+  let endPos = positionRelativeToColumn(slot.endTime.value)
+  let out = endPos - startPos
+  return `${out}%`
+}
+
+function computeYOffset (time: number): string {
+  let out = positionRelativeToColumn(time)
   return `${out}%`
 }
 
@@ -86,14 +126,24 @@ function canBeDisplayed (slot: Slot): boolean {
 }
 
 function computeStyle (slot: Slot): object {
-  console.log('Top')
-  let top = computeYOffset(slot)
-  console.log('Height')
+  let top = computeYOffset(slot.startTime.value)
   let height = computeSize(slot)
   return {
     height: height,
     top: top,
-    position: 'relative',
+    position: 'absolute',
+    width: '100%',
+    'border-radius': '5px',
+  }
+}
+
+function computeHourStyle (hour: Time): object {
+  let top = computeYOffset(hour.value)
+  return {
+    height: height,
+    top: top,
+    position: 'absolute',
+    width: '100%',
   }
 }
 

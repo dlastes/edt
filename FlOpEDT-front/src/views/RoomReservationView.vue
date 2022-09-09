@@ -21,6 +21,7 @@
 
 <script setup lang="ts">
 import type { FlopAPI } from '@/assets/js/api'
+import { convertDecimalTimeToHuman } from '@/assets/js/helpers'
 import { apiKey, currentWeekKey, requireInjection } from '@/assets/js/keys'
 import type { Department, FlopWeek, Time, TimeSettings } from '@/assets/js/types'
 import Calendar from '@/components/calendar/Calendar.vue'
@@ -64,8 +65,8 @@ const calendarValues = computed(() => {
   return {
     days: weekDays.value,
     slots: dateSlots.value,
-    startTime: dayStartTime.value.value,
-    endTime: dayFinishTime.value.value
+    startTime: dayStartTime.value.value - 60,
+    endTime: dayFinishTime.value.value + 60,
   }
 })
 
@@ -113,12 +114,6 @@ watchEffect(() => {
 watchEffect(() => {
   onTimeSettingsChanged(timeSettings.value)
 })
-
-function convertDecimalTimeToHuman (time: number): string {
-  let hours = Math.trunc(time)
-  let minutes = Math.trunc((time - hours) * 60)
-  return `${hours}h${minutes > 0 ? minutes : '00'}`
-}
 
 function onTimeSettingsChanged (timeSettings?: Array<TimeSettings>) {
   if (!timeSettings) {

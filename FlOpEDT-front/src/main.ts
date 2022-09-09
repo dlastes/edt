@@ -1,4 +1,5 @@
 import '@/assets/css/bootstrap.min.css'
+import '@/assets/css/global.css'
 import { api } from '@/assets/js/api'
 import '@/assets/js/bootstrap.bundle.min'
 import { apiKey, currentWeekKey } from '@/assets/js/keys'
