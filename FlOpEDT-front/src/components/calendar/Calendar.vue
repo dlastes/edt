@@ -1,22 +1,23 @@
 <template>
-  <div class="container">
-    <div class="row">
-      <div class="col m-0 p-1 text-end">
-        <div class="row">
-          <div>H</div>
-        </div>
+  <div class="container ms-1">
+    <div class="row p-0">
+      <div class="col-1 p-0 me-3"></div>
+      <div v-for="day in days" class="col text-center border-dark border-bottom border-end border-top"
+           :class="{'border-start border-dark': day === days[0]}">
+        <div>{{ day.name }} {{ day.date }}</div>
+      </div>
+    </div>
+    <div class="row" :style="{height: height}">
+      <div class="col-1 p-0 me-3">
         <div :style="{height: height}" style="position: relative" class="col">
           <div v-for="hour in hourIndicators" :style="computeHourStyle(hour)">
-            <div class="translate-middle-y">{{ hour.text }}</div>
+            <h6 class="translate-middle-y">{{ hour.text }}</h6>
             <hr class="border border-primary border-1 vw-100 position-absolute top-0">
           </div>
         </div>
       </div>
-      <div v-for="day in days" class="col text-center border-dark border-bottom border-end border-top"
+      <div v-for="day in days" class="col text-center border-dark border-bottom border-end"
            :class="{'border-start border-dark': day === days[0]}">
-        <div class="row border-bottom border-dark">
-          <div>{{ day.name }} {{ day.date }}</div>
-        </div>
         <div :style="{height: height}" style="position: relative" class="col">
           <CalendarSlot v-for="slot in displayableSlots[day.date]"
                         class="noselect"
@@ -30,6 +31,33 @@
       </div>
     </div>
   </div>
+  <!--      <div class="col m-0 p-1 text-end">
+          <div class="row">
+            <div>H</div>
+          </div>
+          <div :style="{height: height}" style="position: relative" class="col">
+            <div v-for="hour in hourIndicators" :style="computeHourStyle(hour)">
+              <div class="translate-middle-y">{{ hour.text }}</div>
+              <hr class="border border-primary border-1 vw-100 position-absolute top-0">
+            </div>
+          </div>
+        </div>
+        <div v-for="day in days" class="col text-center border-dark border-bottom border-end border-top"
+             :class="{'border-start border-dark': day === days[0]}">
+          <div class="row border-bottom border-dark">
+            <div>{{ day.name }} {{ day.date }}</div>
+          </div>
+          <div :style="{height: height}" style="position: relative" class="col">
+            <CalendarSlot v-for="slot in displayableSlots[day.date]"
+                          class="noselect"
+                          @click.left="onSlotClicked(slot)"
+                          @click.right.prevent
+                          @contextmenu="onSlotRightClicked(slot)"
+                          :style="computeStyle(slot)"
+                          :title="slot.title">{{ slot.content }}
+            </CalendarSlot>
+          </div>
+        </div>-->
 </template>
 
 <script setup lang="ts">
