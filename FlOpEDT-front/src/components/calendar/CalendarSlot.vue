@@ -1,11 +1,9 @@
 <template>
-  <div class="card">
-    <div class="card-body">
-      <h5 class="card-title">Card title</h5>
-      <p class="card-text">
-        <slot>CONTENT</slot>
-      </p>
-    </div>
+  <div class="border border-dark">
+    <p class="m-0">{{ title }}</p>
+    <p class="m-0">
+      <slot>CONTENT</slot>
+    </p>
   </div>
 </template>
 
@@ -13,7 +11,7 @@
 import { defineProps } from 'vue'
 
 interface Props {
-
+  title: string,
 }
 
 const props = defineProps<Props>()

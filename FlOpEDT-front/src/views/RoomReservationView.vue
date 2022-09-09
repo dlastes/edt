@@ -14,7 +14,7 @@
       </select>
     </div>
     <div class="row">
-      <Calendar v-bind="{days: weekDays, slots: dateSlots}"></Calendar>
+      <Calendar v-bind="calendarValues"></Calendar>
     </div>
   </div>
 </template>
@@ -26,7 +26,7 @@ import type { Department, FlopWeek, Time, TimeSettings } from '@/assets/js/types
 import Calendar from '@/components/calendar/Calendar.vue'
 import CustomDatePicker from '@/components/DatePicker.vue'
 import { getDepartment } from '@/main'
-import { onMounted, ref, watchEffect } from 'vue'
+import { computed, onMounted, ref, watchEffect } from 'vue'
 
 interface Room {
   id: number,
@@ -58,7 +58,16 @@ const selectedRoom = ref<Room>()
 
 const reservations = ref()
 
-const dateSlots = ref<{ [index: string]: Array<{ startTime: number, endTime: number, content: string }> }>({})
+const dateSlots = ref<{ [index: string]: Array<{ startTime: Time, endTime: Time, title: string, content: string }> }>({})
+
+const calendarValues = computed(() => {
+  return {
+    days: weekDays.value,
+    slots: dateSlots.value,
+    startTime: dayStartTime.value.value,
+    endTime: dayFinishTime.value.value
+  }
+})
 
 // Update weekDays
 watchEffect(() => {
@@ -80,14 +89,22 @@ watchEffect(() => {
       let date = reservation.date.split('-')
       let day = `${date[2]}/${date[1]}`
       let startTimeRaw = reservation.start_time.split(':')
-      let startTime = parseInt(startTimeRaw[0]) * 60 + parseInt(startTimeRaw[1])
+      let startTimeValue = parseInt(startTimeRaw[0]) * 60 + parseInt(startTimeRaw[1])
+      let startTime: Time = {
+        value: startTimeValue,
+        text: convertDecimalTimeToHuman(startTimeValue)
+      }
       let endTimeRaw = reservation.end_time.split(':')
-      let endTime = parseInt(endTimeRaw[0]) * 60 + parseInt(endTimeRaw[1])
-      let content = `${reservation.title}\n${reservation.description}\n${reservation.responsible}`
+      let endTimeValue = parseInt(endTimeRaw[0]) * 60 + parseInt(endTimeRaw[1])
+      let endTime: Time = {
+        value: endTimeValue,
+        text: convertDecimalTimeToHuman(endTimeValue)
+      }
+      let content = `${reservation.description}\n${reservation.responsible}`
       if (!dateSlots.value[day]) {
         dateSlots.value[day] = []
       }
-      dateSlots.value[day].push({startTime: startTime, endTime: endTime, content: content})
+      dateSlots.value[day].push({startTime: startTime, endTime: endTime, title: reservation.title, content: content})
     })
   })
 })
