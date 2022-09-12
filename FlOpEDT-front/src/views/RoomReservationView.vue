@@ -1,10 +1,6 @@
 <template>
   <h1>RoomReservation App</h1>
   <CustomDatePicker v-model:week="selectedDate.week" v-model:year="selectedDate.year"></CustomDatePicker>
-  <p>Times: {{ dayStartTime.text }}-{{ lunchBreakStartTime.text }}|{{ lunchBreakFinishTime.text }}-{{
-      dayFinishTime.text
-    }}
-  </p>
 
   <div class="container">
     <div class="row">
@@ -24,10 +20,12 @@ import type { FlopAPI } from '@/assets/js/api'
 import { convertDecimalTimeToHuman } from '@/assets/js/helpers'
 import { apiKey, currentWeekKey, requireInjection } from '@/assets/js/keys'
 import type { Department, FlopWeek, Time, TimeSettings } from '@/assets/js/types'
+import { CalendarRoomReservationSlotElement } from '@/assets/js/types'
 import Calendar from '@/components/calendar/Calendar.vue'
+import CalendarRoomReservationSlot from '@/components/calendar/CalendarRoomReservationSlot.vue'
 import CustomDatePicker from '@/components/DatePicker.vue'
 import { getDepartment } from '@/main'
-import { computed, onMounted, ref, watchEffect } from 'vue'
+import { computed, onMounted, ref, shallowRef, watchEffect } from 'vue'
 
 interface Room {
   id: number,
@@ -59,7 +57,7 @@ const selectedRoom = ref<Room>()
 
 const reservations = ref()
 
-const dateSlots = ref<{ [index: string]: Array<{ startTime: Time, endTime: Time, title: string, content: string }> }>({})
+const dateSlots = ref<{ [index: string]: Array<{ props: CalendarRoomReservationSlotElement, component: any }> }>({})
 
 const calendarValues = computed(() => {
   return {
@@ -101,11 +99,17 @@ watchEffect(() => {
         value: endTimeValue,
         text: convertDecimalTimeToHuman(endTimeValue)
       }
-      let content = `${reservation.description}\n${reservation.responsible}`
       if (!dateSlots.value[day]) {
         dateSlots.value[day] = []
       }
-      dateSlots.value[day].push({startTime: startTime, endTime: endTime, title: reservation.title, content: content})
+
+      let slot = new CalendarRoomReservationSlotElement()
+      slot.reservation = reservation
+      slot.title = reservation.title
+      slot.startTime = startTime
+      slot.endTime = endTime
+
+      dateSlots.value[day].push({props: slot, component: shallowRef(CalendarRoomReservationSlot)})
     })
   })
 })
