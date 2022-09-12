@@ -1,9 +1,8 @@
-import '@/assets/css/bootstrap.min.css'
-import '@/assets/css/global.css'
 import { api } from '@/assets/js/api'
-import '@/assets/js/bootstrap.bundle.min'
 import { apiKey, currentWeekKey } from '@/assets/js/keys'
 import type { FlopWeek } from '@/assets/js/types'
+// Import Bootstrap CSS
+import '@/assets/scss/styles.scss'
 import CustomDatePicker from '@/components/DatePicker.vue'
 import WeekBanner from '@/components/WeekBanner.vue'
 import router from '@/router'

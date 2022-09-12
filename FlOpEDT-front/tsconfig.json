@@ -10,6 +10,9 @@
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "bootstrap": [
+        "./node_modules/types/bootstrap"
       ]
     },
     "isolatedModules": true,
