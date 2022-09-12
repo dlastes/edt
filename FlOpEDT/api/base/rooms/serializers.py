@@ -21,10 +21,9 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-import base.models as bm
-
 from rest_framework import serializers
 
+import base.models as bm
 from api.fetch.serializers import IDRoomSerializer
 
 
@@ -51,4 +50,35 @@ class RoomNameSerializer(serializers.ModelSerializer):
 class RoomSortsSerializer(serializers.ModelSerializer):
     class Meta:
         model = bm.RoomSort
+        fields = '__all__'
+
+
+class RoomAttributeSerializer(serializers.ModelSerializer):
+    class Meta:
+        abstract = True
+        model = bm.RoomAttribute
+        fields = '__all__'
+
+
+class BooleanRoomAttributeSerializer(RoomAttributeSerializer):
+    class Meta:
+        model = bm.BooleanRoomAttribute
+        fields = '__all__'
+
+
+class NumericRoomAttributeSerializer(RoomAttributeSerializer):
+    class Meta:
+        model = bm.NumericRoomAttribute
+        fields = '__all__'
+
+
+class BooleanRoomAttributeValuesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = bm.BooleanRoomAttributeValues
+        fields = '__all__'
+
+
+class NumericRoomAttributeValuesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = bm.NumericRoomAttributeValues
         fields = '__all__'

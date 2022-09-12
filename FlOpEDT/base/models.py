@@ -24,24 +24,21 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from django.core.checks.messages import Error
-from colorfield.fields import ColorField
+from enum import Enum
 
 from django.contrib.auth.models import AbstractUser
 from django.contrib.postgres.fields import ArrayField
 from django.core.validators import MinValueValidator, MaxValueValidator
-from django.db.models.signals import post_save
 from django.db import models
+from django.db.models.signals import post_save
 from django.dispatch import receiver
-
-from base.timing import hhmm, str_slot, Day, Time, days_list, days_index
-import base.weeks
-
 from django.utils.translation import gettext_lazy as _
 
-from enum import Enum
+import base.weeks
+from base.timing import hhmm, str_slot, Day, Time, days_list, days_index
 
 slot_pause = 30
+
 
 ###
 #
@@ -58,6 +55,7 @@ class Theme(Enum):
     BRUME = 'Brume'
     PRESTIGE = 'Prestige Edition'
     PINK = 'Pink'
+
 
 # <editor-fold desc="GROUPS">
 # ------------
@@ -362,6 +360,39 @@ class RoomType(models.Model):
     def basic_rooms(self):
         s = set(b for r in self.members.all() for b in r.and_subrooms() if b.is_basic)
         return s
+
+
+class RoomAttribute(models.Model):
+    name = models.CharField(max_length=20)
+    description = models.TextField(null=True)
+
+    class Meta:
+        abstract = True
+
+    def __str__(self):
+        return self.name
+
+
+class BooleanRoomAttribute(RoomAttribute):
+    def __str__(self):
+        return self.name + ' (boolean)'
+
+
+class NumericRoomAttribute(RoomAttribute):
+    def __str__(self):
+        return self.name + ' (numeric)'
+
+
+class BooleanRoomAttributeValues(models.Model):
+    room = models.ForeignKey('Room', on_delete=models.CASCADE)
+    attribute = models.ForeignKey('BooleanRoomAttribute', on_delete=models.CASCADE)
+    value = models.BooleanField()
+
+
+class NumericRoomAttributeValues(models.Model):
+    room = models.ForeignKey('Room', on_delete=models.CASCADE)
+    attribute = models.ForeignKey('NumericRoomAttribute', on_delete=models.CASCADE)
+    value = models.DecimalField(max_digits=7, decimal_places=2)
 
 
 class Room(models.Model):
