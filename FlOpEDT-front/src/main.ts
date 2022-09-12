@@ -11,6 +11,7 @@ import '@vuepic/vue-datepicker/dist/main.css'
 import type { Ref } from 'vue'
 import { createApp, readonly, ref } from 'vue'
 import { useRoute } from 'vue-router'
+import Popper from 'vue3-popper'
 import App from './App.vue'
 
 const app = createApp(App)
@@ -43,6 +44,6 @@ export function getDepartment (): string | null {
   return dept
 }
 
-app.component('WeekBanner', WeekBanner).component('Datepicker', Datepicker).component('CustomDatePicker', CustomDatePicker)
+app.component('WeekBanner', WeekBanner).component('Datepicker', Datepicker).component('CustomDatePicker', CustomDatePicker).component('Popper', Popper)
 
 app.mount('#app')
