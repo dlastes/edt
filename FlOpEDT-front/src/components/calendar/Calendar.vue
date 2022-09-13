@@ -11,7 +11,7 @@
       <div class="col-1 p-0 me-3">
         <div v-for="hour in hourIndicators" :style="computeHourStyle(hour)" class="translate-middle-y">
           <h6 class="text-wrap">{{ hour.text }}</h6>
-          <hr class="translate-middle-y border border-primary border-1 w-100 position-absolute top-0">
+          <hr class="border border-primary border-1 w-100 position-absolute top-0" style="transform: translateY(-3px);">
         </div>
       </div>
       <div v-for="day in days" class="col border-dark border-bottom border-end p-0 position-relative"
