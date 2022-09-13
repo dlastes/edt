@@ -2,9 +2,9 @@
   <h1>RoomReservation App</h1>
   <CustomDatePicker v-model:week="selectedDate.week" v-model:year="selectedDate.year"></CustomDatePicker>
 
-  <div class="container">
+  <div class="container" style="max-width: 960px;">
     <div class="row">
-      <select v-model="selectedRoom" class="form-select" aria-label="Select room">
+      <select v-model="selectedRoom" class="form-select w-auto" aria-label="Select room">
         <option :value="undefined">All rooms</option>
         <option v-for="room in rooms" :value="room">{{ room.name }}</option>
       </select>
