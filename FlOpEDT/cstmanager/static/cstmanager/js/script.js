@@ -181,6 +181,9 @@ let filter = {
         }
 
         filtered_constraint_list = filtered_constraint_list.filter(pageid => {
+            if (!(pageid in constraints)) {
+                return false;
+            }
             let param = constraints[pageid].parameters.find(parameter => parameter.name === 'weeks');
             return (param.id_list.length === 0 || param.id_list.includes('' + week_id));
         });
