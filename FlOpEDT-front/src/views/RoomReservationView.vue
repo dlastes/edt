@@ -19,10 +19,17 @@
 import type { FlopAPI } from '@/assets/js/api'
 import { convertDecimalTimeToHuman } from '@/assets/js/helpers'
 import { apiKey, currentWeekKey, requireInjection } from '@/assets/js/keys'
-import type { Department, FlopWeek, Time, TimeSettings } from '@/assets/js/types'
-import { CalendarRoomReservationSlotElement } from '@/assets/js/types'
+import type { CourseType, Department, FlopWeek, TimeSettings, WeekDay } from '@/assets/js/types'
+import {
+  CalendarRoomReservationSlotElement,
+  CalendarScheduledCourseSlotElement,
+  CalendarSlotElement,
+  ScheduledCourse,
+  Time
+} from '@/assets/js/types'
 import Calendar from '@/components/calendar/Calendar.vue'
 import CalendarRoomReservationSlot from '@/components/calendar/CalendarRoomReservationSlot.vue'
+import CalendarScheduledCourseSlot from '@/components/calendar/CalendarScheduledCourseSlot.vue'
 import CustomDatePicker from '@/components/DatePicker.vue'
 import { getDepartment } from '@/main'
 import { computed, onMounted, ref, shallowRef, watchEffect } from 'vue'
@@ -34,11 +41,14 @@ interface Room {
 
 const api = ref<FlopAPI>(requireInjection(apiKey))
 const currentWeek = ref(requireInjection(currentWeekKey))
+const currentDepartment = ref(getDepartment())
 
 // API data
 const departments = ref<Array<Department>>()
-const weekDays = ref([])
+const weekDays = ref<Array<WeekDay>>([])
 const rooms = ref<Array<Room>>([])
+const scheduledCourses = ref<Array<ScheduledCourse>>([])
+const courseTypes = ref<Array<CourseType>>([])
 
 // Time Settings
 const timeSettings = ref<Array<TimeSettings>>()
@@ -57,14 +67,14 @@ const selectedRoom = ref<Room>()
 
 const reservations = ref()
 
-const dateSlots = ref<{ [index: string]: Array<{ props: CalendarRoomReservationSlotElement, component: any }> }>({})
+const dateSlots = ref<{ [index: string]: Array<{ props: CalendarSlotElement, component: any }> }>({})
 
 const calendarValues = computed(() => {
   return {
     days: weekDays.value,
     slots: dateSlots.value,
-    startTime: dayStartTime.value.value - 60,
-    endTime: dayFinishTime.value.value + 60,
+    startTime: dayStartTime.value.value - (60 + (dayStartTime.value.value % 60)),
+    endTime: dayFinishTime.value.value + (60 - (dayFinishTime.value.value % 60)),
   }
 })
 
@@ -72,6 +82,16 @@ const calendarValues = computed(() => {
 watchEffect(() => {
   fetchWeekDays(selectedDate.value.week, selectedDate.value.year).then(value => {
     weekDays.value = value
+  })
+})
+
+watchEffect(() => {
+  let department = currentDepartment.value
+  if (!department) {
+    return
+  }
+  fetchCourseTypes(department).then(value => {
+    courseTypes.value = value
   })
 })
 
@@ -89,19 +109,10 @@ watchEffect(() => {
       let day = `${date[2]}/${date[1]}`
       let startTimeRaw = reservation.start_time.split(':')
       let startTimeValue = parseInt(startTimeRaw[0]) * 60 + parseInt(startTimeRaw[1])
-      let startTime: Time = {
-        value: startTimeValue,
-        text: convertDecimalTimeToHuman(startTimeValue)
-      }
+      let startTime = createTime(startTimeValue)
       let endTimeRaw = reservation.end_time.split(':')
       let endTimeValue = parseInt(endTimeRaw[0]) * 60 + parseInt(endTimeRaw[1])
-      let endTime: Time = {
-        value: endTimeValue,
-        text: convertDecimalTimeToHuman(endTimeValue)
-      }
-      if (!dateSlots.value[day]) {
-        dateSlots.value[day] = []
-      }
+      let endTime: Time = createTime(endTimeValue)
 
       let slot = new CalendarRoomReservationSlotElement()
       slot.reservation = reservation
@@ -109,7 +120,52 @@ watchEffect(() => {
       slot.startTime = startTime
       slot.endTime = endTime
 
-      dateSlots.value[day].push({props: slot, component: shallowRef(CalendarRoomReservationSlot)})
+      if (!dateSlots.value[day]) {
+        dateSlots.value[day] = []
+      }
+      addSlot(day, slot, shallowRef(CalendarRoomReservationSlot))
+    })
+  })
+})
+
+// Update scheduled courses
+watchEffect(() => {
+  let params: { department?: string } = {}
+  let department = currentDepartment.value
+  if (department) {
+    params.department = department
+  }
+
+  fetchScheduledCourses(selectedDate.value.week, selectedDate.value.year, params).then(value => {
+    value.forEach(course => {
+      let day = weekDays.value.find(weekDay => {
+        return weekDay.ref === course.day
+      })
+
+      if (!day) {
+        return
+      }
+
+      let courseType = courseTypes.value.find(courseType => {
+        return courseType.name === course.course.type
+      })
+      if (!courseType) {
+        return
+      }
+      let date = day.date
+      let startTime = createTime(course.start_time)
+      let endTime = createTime(course.start_time + courseType.duration)
+
+      let slot = new CalendarScheduledCourseSlotElement()
+      slot.course = course
+      slot.title = course.course.module.abbrev
+      slot.startTime = startTime
+      slot.endTime = endTime
+
+      if (!dateSlots.value[date]) {
+        dateSlots.value[date] = []
+      }
+      addSlot(date, slot, shallowRef(CalendarScheduledCourseSlot))
     })
   })
 })
@@ -135,15 +191,22 @@ function onTimeSettingsChanged (timeSettings?: Array<TimeSettings>) {
     maxLunchBreakFinishTime = Math.max(maxLunchBreakFinishTime, setting.lunch_break_finish_time)
   })
 
-  storeTime(dayStartTime.value, minStartTime)
-  storeTime(dayFinishTime.value, maxFinishTime)
-  storeTime(lunchBreakStartTime.value, minLunchBreakStartTime)
-  storeTime(lunchBreakFinishTime.value, maxLunchBreakFinishTime)
+  dayStartTime.value = createTime(minStartTime)
+  dayFinishTime.value = createTime(maxFinishTime)
+  lunchBreakStartTime.value = createTime(minLunchBreakStartTime)
+  lunchBreakFinishTime.value = createTime(maxLunchBreakFinishTime)
 }
 
-function storeTime (store: Time, time: number) {
-  store.text = convertDecimalTimeToHuman(time / 60)
-  store.value = time
+function createTime (time: number): Time {
+  let text = convertDecimalTimeToHuman(time / 60)
+  return new Time(time, text)
+}
+
+function addSlot (date: string, slot: CalendarSlotElement, component: any) {
+  if (!dateSlots.value[date]) {
+    dateSlots.value[date] = []
+  }
+  dateSlots.value[date].push({props: slot, component: component})
 }
 
 onMounted(() => {
@@ -160,6 +223,7 @@ onMounted(() => {
   })
 })
 
+// Fetch functions
 async function fetchDepartments () {
   return await api.value.fetch.all.departments()
 }
@@ -185,6 +249,13 @@ async function fetchRoomReservations (week: number, year: number, params: { room
   return await api.value.fetch.target.roomReservations(week, year, params)
 }
 
+async function fetchScheduledCourses (week: number, year: number, params: { department?: string }) {
+  return await api.value.fetch.target.scheduledCourses(week, year, params)
+}
+
+async function fetchCourseTypes (department: string) {
+  return await api.value.fetch.all.coursetypes(department)
+}
 </script>
 
 <script lang="ts">

@@ -1,4 +1,12 @@
-import type { Department, Room, RoomReservation, TimeSettings } from '@/assets/js/types'
+import type {
+  Course,
+  CourseType,
+  Department,
+  Room,
+  RoomReservation,
+  ScheduledCourse,
+  TimeSettings
+} from '@/assets/js/types'
 
 function getCookie (name: string) {
   if (!document.cookie) {
@@ -55,7 +63,10 @@ const urls = {
   rooms: 'rooms/room',
   weekdays: 'fetch/weekdays',
   timesettings: 'base/timesettings',
-  roomreservation: 'roomreservations/reservation'
+  roomreservation: 'roomreservations/reservation',
+  courses: 'courses/courses',
+  scheduledcourses: 'fetch/scheduledcourses',
+  coursetypes: 'courses/type',
 }
 
 /**
@@ -77,11 +88,14 @@ export interface FlopAPI {
       departments: () => Promise<Array<Department>>,
       rooms: (department: string) => Promise<Array<Room>>,
       timeSettings: () => Promise<Array<TimeSettings>>,
+      coursetypes: (department: string) => Promise<Array<CourseType>>,
     },
     target: {
       room: (id: number, additionalParams?: object) => Promise<Room>,
       weekdays: (week: number, year: number, additionalParams?: object) => Promise<any>,
       roomReservations: (week: number, year: number, params: { roomId?: number }, additionalParams?: object) => Promise<Array<RoomReservation>>,
+      courses: (week: number, year: number, params: { department?: string }, additionalParams?: object) => Promise<Array<Course>>,
+      scheduledCourses: (week: number, year: number, params: { department?: string }, additionalParams?: object) => Promise<Array<ScheduledCourse>>,
     },
   },
 }
@@ -92,6 +106,7 @@ const api: FlopAPI = {
       departments: () => fetcher(urls.departments),
       rooms: (department: string) => fetcher(urls.rooms, {dept: department}),
       timeSettings: () => fetcher(urls.timesettings),
+      coursetypes: (department: string) => fetcher(urls.coursetypes, {dept: department}),
     },
     target: {
       room: (id: number, additionalParams?: object) => fetcher(buildUrl(urls.rooms, id.toString()), additionalParams),
@@ -104,7 +119,19 @@ const api: FlopAPI = {
           week: week,
           year: year
         }, ...{...(params.roomId && {room: params.roomId}), ...(!params.roomId && {})}
-      }, additionalParams)
+      }, additionalParams),
+      courses: (week: number, year: number, params: { department?: string }, additionalParams?: object) => fetcher(urls.courses, {
+        ...{
+          week: week,
+          year: year,
+        }, ...{...(params.department && {dept: params.department}), ...(!params.department && {})}
+      }, additionalParams),
+      scheduledCourses: (week: number, year: number, params: { department?: string }, additionalParams?: object) => fetcher(urls.scheduledcourses, {
+        ...{
+          week: week,
+          year: year,
+        }, ...{...(params.department && {dept: params.department}), ...(!params.department && {})}
+      }, additionalParams),
     }
   },
 }
