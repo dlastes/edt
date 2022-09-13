@@ -868,6 +868,7 @@ let updateEditConstraintWeightDisplay = (labelID, value) => {
 // data to the original state
 let discardChanges = (e) => {
     constraints = copyFromOriginalConstraints();
+    resetActionChanges();
     constraint_list = Object.keys(constraints);
     selected_constraints = [];
     lastSelectedConstraint = null;
