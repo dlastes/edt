@@ -345,6 +345,7 @@ let changeEvents = {
             // Reload the constraints (new constraints can have different IDs when inserted)
             fetchers.fetchConstraints();
             alertMessage.clearAll();
+            alertMessage.success(gettext('All changes have been saved.'));
         }
     },
 }
