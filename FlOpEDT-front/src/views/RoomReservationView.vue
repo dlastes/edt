@@ -24,6 +24,7 @@ import {
   CalendarRoomReservationSlotElement,
   CalendarScheduledCourseSlotElement,
   CalendarSlotElement,
+  RoomReservation,
   ScheduledCourse,
   Time
 } from '@/assets/js/types'
@@ -49,6 +50,7 @@ const weekDays = ref<Array<WeekDay>>([])
 const rooms = ref<Array<Room>>([])
 const scheduledCourses = ref<Array<ScheduledCourse>>([])
 const courseTypes = ref<Array<CourseType>>([])
+const roomReservations = ref<Array<RoomReservation>>([])
 
 // Time Settings
 const timeSettings = ref<Array<TimeSettings>>()
@@ -97,34 +99,41 @@ watchEffect(() => {
 
 // Update room reservations
 watchEffect(() => {
+  fetchRoomReservations(selectedDate.value.week, selectedDate.value.year, {}).then(value => {
+    roomReservations.value = value
+  })
+})
+
+watchEffect(() => {
   let params: { roomId?: number } = {}
   if (selectedRoom.value) {
     params.roomId = selectedRoom.value.id
   }
 
-  fetchRoomReservations(selectedDate.value.week, selectedDate.value.year, params).then(value => {
-    dateSlots.value = {}
-    value.forEach(reservation => {
-      let date = reservation.date.split('-')
-      let day = `${date[2]}/${date[1]}`
-      let startTimeRaw = reservation.start_time.split(':')
-      let startTimeValue = parseInt(startTimeRaw[0]) * 60 + parseInt(startTimeRaw[1])
-      let startTime = createTime(startTimeValue)
-      let endTimeRaw = reservation.end_time.split(':')
-      let endTimeValue = parseInt(endTimeRaw[0]) * 60 + parseInt(endTimeRaw[1])
-      let endTime: Time = createTime(endTimeValue)
+  dateSlots.value = {}
+  roomReservations.value.forEach(reservation => {
+    if (params.roomId && reservation.room.id != params.roomId) {
+      return
+    }
+    let date = reservation.date.split('-')
+    let day = `${date[2]}/${date[1]}`
+    let startTimeRaw = reservation.start_time.split(':')
+    let startTimeValue = parseInt(startTimeRaw[0]) * 60 + parseInt(startTimeRaw[1])
+    let startTime = createTime(startTimeValue)
+    let endTimeRaw = reservation.end_time.split(':')
+    let endTimeValue = parseInt(endTimeRaw[0]) * 60 + parseInt(endTimeRaw[1])
+    let endTime: Time = createTime(endTimeValue)
 
-      let slot = new CalendarRoomReservationSlotElement()
-      slot.reservation = reservation
-      slot.title = reservation.title
-      slot.startTime = startTime
-      slot.endTime = endTime
+    let slot = new CalendarRoomReservationSlotElement()
+    slot.reservation = reservation
+    slot.title = reservation.title
+    slot.startTime = startTime
+    slot.endTime = endTime
 
-      if (!dateSlots.value[day]) {
-        dateSlots.value[day] = []
-      }
-      addSlot(day, slot, shallowRef(CalendarRoomReservationSlot))
-    })
+    if (!dateSlots.value[day]) {
+      dateSlots.value[day] = []
+    }
+    addSlot(day, slot, shallowRef(CalendarRoomReservationSlot))
   })
 })
 
