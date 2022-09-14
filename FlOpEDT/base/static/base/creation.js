@@ -2203,6 +2203,7 @@ function select_entry_cm() {
   room_tutor_change.cm_settings = entry_cm_settings;
   var fake_id = new Date();
   fake_id = fake_id.getMilliseconds() + "-" + pending.wanted_course.id_course;
+
   room_tutor_change.proposal = [
     {
       fid: fake_id,
@@ -2211,12 +2212,14 @@ function select_entry_cm() {
     {
       fid: fake_id,
       content: "Salle"
-    },
-    {
+    }] ;
+  if (department_settings.mode.visio) {
+    room_tutor_change.proposal.push({
       fid: fake_id,
       content: "Visio"
-    },
-  ];
+    }) ;
+  }
+  
   update_change_cm_nlin() ;
 }
 
