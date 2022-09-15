@@ -3,48 +3,48 @@
     "model": "roomreservation.RoomReservationType",
     "pk": 1,
     "fields": {
-      "name": "Cours",
-      "bg_color": "#112aed"
+      "name": "Course",
+      "bg_color": "#3399ff"
     }
   },
   {
     "model": "roomreservation.RoomReservationType",
     "pk": 2,
     "fields": {
-      "name": "Conférence",
-      "bg_color": "#f54114"
+      "name": "Conference",
+      "bg_color": "#66ff66"
     }
   },
   {
     "model": "roomreservation.RoomReservationType",
     "pk": 3,
     "fields": {
-      "name": "Activité des étudiant⋅e⋅s",
-      "bg_color": "#e6f514"
+      "name": "Student activity",
+      "bg_color": "#ff9933"
     }
   },
   {
     "model": "roomreservation.RoomReservationType",
     "pk": 4,
     "fields": {
-      "name": "Formation extérieure",
-      "bg_color": "#0000ff"
+      "name": "External training",
+      "bg_color": "#cc66ff"
     }
   },
   {
     "model": "roomreservation.RoomReservationType",
     "pk": 5,
     "fields": {
-      "name": "Réunion",
-      "bg_color": "#1bf25f"
+      "name": "Meeting",
+      "bg_color": "#ff0066"
     }
   },
   {
     "model": "roomreservation.RoomReservationType",
     "pk": 6,
     "fields": {
-      "name": "Autre",
-      "bg_color": "#c8c8c8"
+      "name": "Other",
+      "bg_color": "#669999"
     }
   },
   {
@@ -74,7 +74,7 @@
       "periodicity_id": 1,
       "reservation_type_id": 1,
       "responsible_id": 1,
-      "room_id": 186
+      "room_id": 1
     }
   },
   {
@@ -91,7 +91,7 @@
       "periodicity_id": 1,
       "reservation_type_id": 1,
       "responsible_id": 1,
-      "room_id": 187
+      "room_id": 2
     }
   },
   {
@@ -108,7 +108,7 @@
       "periodicity_id": 1,
       "reservation_type_id": 1,
       "responsible_id": 1,
-      "room_id": 188
+      "room_id": 3
     }
   },
   {
@@ -125,7 +125,7 @@
       "periodicity_id": 1,
       "reservation_type_id": 1,
       "responsible_id": 1,
-      "room_id": 189
+      "room_id": 4
     }
   }
 ]
