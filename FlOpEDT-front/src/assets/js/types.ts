@@ -183,37 +183,29 @@ export interface CourseType {
   duration: number
 }
 
-export class CalendarSlotElement {
+export interface CalendarSlot {
+  data: CalendarSlotData
+  component: any
+}
+
+export interface CalendarSlotData {
   startTime: Time
   endTime: Time
   title: string
-
-  constructor () {
-    this.startTime = {value: 0, text: ''}
-    this.endTime = {value: 0, text: ''}
-    this.title = ''
-  }
+  id: string
+  displayStyle: object
 }
 
-export class CalendarRoomReservationSlotElement extends CalendarSlotElement {
+export interface CalendarRoomReservationSlotData extends CalendarSlotData {
   reservation: RoomReservation
-
-  constructor () {
-    super()
-    this.reservation = new RoomReservation()
-  }
 }
 
-export class CalendarScheduledCourseSlotElement extends CalendarSlotElement {
+export interface CalendarScheduledCourseSlotData extends CalendarSlotData {
   course: ScheduledCourse
-
-  constructor () {
-    super()
-    this.course = new ScheduledCourse()
-  }
+  department: string
 }
 
 export interface CalendarSlotInterface {
   openContextMenu: () => boolean,
-  closeContextMenu: () => boolean,
+  closeContextMenu: () => void,
 }
