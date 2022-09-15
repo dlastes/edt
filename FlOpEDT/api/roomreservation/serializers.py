@@ -13,7 +13,8 @@ class RoomReservationSerializer(serializers.Serializer):
 
     id = serializers.IntegerField()
     responsible = serializers.CharField()
-    room = api.base.rooms.serializers.RoomSerializer()
+    room = serializers.IntegerField(source='room.id')
+    type = serializers.IntegerField(source='reservation_type.id')
     title = serializers.CharField()
     description = serializers.CharField()
     with_key = serializers.BooleanField()
@@ -21,6 +22,7 @@ class RoomReservationSerializer(serializers.Serializer):
     date = serializers.DateField()
     start_time = serializers.TimeField()
     end_time = serializers.TimeField()
+    periodicity = serializers.IntegerField(source='periodicity.id')
 
     class Meta:
         model = rm.RoomReservation
@@ -34,6 +36,7 @@ class RoomReservationTypeSerializer(serializers.Serializer):
     def create(self, validated_data):
         pass
 
+    id = serializers.IntegerField()
     name = serializers.CharField()
     bg_color = serializers.CharField()
 
