@@ -11,11 +11,11 @@
 </template>
 
 <script setup lang="ts">
-import { CalendarSlotElement } from '@/assets/js/types'
+import type { CalendarSlotData } from '@/assets/js/types'
 import { defineProps } from 'vue'
 
 interface Props {
-  slot: CalendarSlotElement
+  slot: CalendarSlotData
 }
 
 const props = defineProps<Props>()

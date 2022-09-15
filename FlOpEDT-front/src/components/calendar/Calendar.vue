@@ -1,45 +1,42 @@
 <template>
-  <div class="container ms-1" @click="clicked">
-    <div class="row p-0 flex-nowrap">
-      <div class="col-1 p-0 me-3"></div>
-      <div v-for="day in days" class="col text-center border-dark border-bottom border-end border-top"
-           :class="{'border-start border-dark': day === days[0]}">
+  <table class="w-100" @click="clicked">
+    <tr class="p-0 flex-nowrap">
+      <th class="p-0 me-3"></th>
+      <th v-for="day in days" class="col text-center border-dark border-bottom border-end border-top"
+          :class="{'border-start border-dark': day === days[0]}">
         <div>{{ day.name }} {{ day.date }}</div>
-      </div>
-    </div>
-    <div class="row flex-nowrap position-relative" :style="{height: height}">
-      <div class="col-1 p-0 me-3">
+      </th>
+    </tr>
+    <tr class="flex-nowrap position-relative" :style="{height: height}">
+      <td class="p-0 h-100" style="min-width: 50px; width: 50px;">
         <div v-for="hour in hourIndicators" :style="computeHourStyle(hour)" class="translate-middle-y">
           <h6 class="text-wrap">{{ hour.text }}</h6>
-          <hr class="border border-primary border-1 w-100 position-absolute top-0" style="transform: translateY(-3px);">
+          <hr class="border border-primary border-1 w-100 position-absolute top-0"
+              style="transform: translateY(-3px);">
         </div>
-      </div>
-      <div v-for="day in days" class="col border-dark border-bottom border-end p-0 position-relative"
-           :class="{'border-start border-dark': day === days[0]}" :style="{height: height}" style="min-width: 65px;">
-        <component :is="slot.component" v-for="slot in displayableSlots[day.date]"
-                   v-bind="{slot: slot.props, id: getSlotId(slot.props), style: computeStyle(slot.props)}"
-                   class="noselect"
-                   @click.right.prevent
-                   @contextmenu="openContextMenu(getSlotId(slot.props))"
-                   @interface="storeSlotInterface"
-        >
-        </component>
-      </div>
-    </div>
-  </div>
+      </td>
+      <td v-for="day in days" class="col border-dark border-bottom border-end p-0"
+          :class="{'border-start border-dark': day === days[0]}" :style="{height: height}" style="min-width: 65px;">
+        <div class="position-relative h-100">
+          <component :is="slot.component" v-for="slot in displayableSlots[day.date]"
+                     :data="slot.data"
+                     :style="computeStyle(slot.data)"
+                     class="noselect slot m-0 border border-dark"
+                     @click.right.prevent
+                     @contextmenu="openContextMenu(slot.data.id)"
+                     @interface="storeSlotInterface"
+          >
+          </component>
+        </div>
+      </td>
+    </tr>
+  </table>
 </template>
 
 <script setup lang="ts">
 import { convertDecimalTimeToHuman } from '@/assets/js/helpers'
-import type { CalendarSlotInterface, Time } from '@/assets/js/types'
-import { CalendarSlotElement } from '@/assets/js/types'
+import type { CalendarSlot, CalendarSlotData, CalendarSlotInterface, Time } from '@/assets/js/types'
 import { computed, defineProps, ref } from 'vue'
-
-interface Slot {
-  props: CalendarSlotElement,
-  component: any,
-  interface: object,
-}
 
 interface Props {
   days: {
@@ -49,7 +46,7 @@ interface Props {
     }
   },
   slots: {
-    [index: string]: Array<Slot>
+    [index: string]: Array<CalendarSlot>
   },
   startTime: number,
   endTime: number,
@@ -58,12 +55,12 @@ interface Props {
 const props = defineProps<Props>()
 
 const displayableSlots = computed(() => {
-  let out: { [index: string]: Array<Slot> } = {}
+  let out: { [index: string]: Array<CalendarSlot> } = {}
   Object.keys(props.slots).forEach(index => {
     if (!(index in out)) {
       out[index] = []
     }
-    out[index] = props.slots[index].filter(tmpSlot => canBeDisplayed(tmpSlot.props))
+    out[index] = props.slots[index].filter(tmpSlot => canBeDisplayed(tmpSlot.data))
   })
   return out
 })
@@ -85,10 +82,6 @@ const currentContextMenu = ref<string>('')
 
 function storeSlotInterface (id: string, slotInterface: CalendarSlotInterface) {
   slotInterfaces.value[id] = slotInterface
-}
-
-function getSlotId (slot: CalendarSlotElement) {
-  return slot.title.replace(' ', '-')
 }
 
 function openContextMenu (slotId: string) {
@@ -126,9 +119,10 @@ function positionRelativeToColumn (value: number): number {
   return 100 * (value - props.startTime) / (props.endTime - props.startTime)
 }
 
-function computeHeight (slot: CalendarSlotElement): string {
+function computeHeight (slot: CalendarSlotData): string {
   let startPos = positionRelativeToColumn(slot.startTime.value)
   let endPos = positionRelativeToColumn(slot.endTime.value)
+
   let out = endPos - startPos
   return `${out}%`
 }
@@ -138,7 +132,7 @@ function computeYOffset (time: number): string {
   return `${out}%`
 }
 
-function canBeDisplayed (slot: CalendarSlotElement): boolean {
+function canBeDisplayed (slot: CalendarSlotData): boolean {
   let out = slot.startTime.value >= props.startTime
   if (!out) {
     console.log(`Slot ${slot.title} cannot be displayed because it does not begin after day start time`)
@@ -146,7 +140,7 @@ function canBeDisplayed (slot: CalendarSlotElement): boolean {
   return out
 }
 
-function computeStyle (slot: CalendarSlotElement): object {
+function computeStyle (slot: CalendarSlotData): object {
   let top = computeYOffset(slot.startTime.value)
   let height = computeHeight(slot)
   return {
@@ -177,6 +171,8 @@ export default {
 
 </script>
 
-<style scoped>
-
+<style>
+.slot > div {
+  height: 100%;
+}
 </style>

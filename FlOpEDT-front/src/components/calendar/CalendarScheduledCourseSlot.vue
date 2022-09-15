@@ -1,28 +1,24 @@
 <template>
-  <Popper class="border border-dark frame m-0" :style="props.style" :show="isContextMenuOpened">
-    <div @click="onClick"
-         style="overflow: hidden;"
-         :id="props.id">
-      <p class="m-0">{{ props.slot.title }}</p>
-      <p class="m-0">{{ props.slot.course.course.type }}</p>
-      <p class="m-0">{{ props.slot.course.room }}</p>
-      <p class="m-0">{{ props.slot.course.tutor }}</p>
+  <Popper class="frame" :show="isContextMenuOpened" :style="props.data.displayStyle"
+          :id="props.data.id">
+    <div @click="onClick" class="course">
+      <p class="m-0">{{ props.data.course.course.module.abbrev }}</p>
+      <p class="m-0">{{ props.data.course.tutor }}</p>
+      <p class="m-0">{{ props.data.department }}</p>
     </div>
     <template #content>
-      <CalendarSlotContextMenu :slot="props.slot"></CalendarSlotContextMenu>
+      <CalendarSlotContextMenu :slot="props.data"></CalendarSlotContextMenu>
     </template>
   </Popper>
 </template>
 
 <script setup lang="ts">
-import type { CalendarScheduledCourseSlotElement, CalendarSlotInterface } from '@/assets/js/types'
+import type { CalendarScheduledCourseSlotData, CalendarSlotInterface } from '@/assets/js/types'
 import CalendarSlotContextMenu from '@/components/calendar/CalendarSlotContextMenu.vue'
 import { onMounted, ref } from 'vue'
 
 interface Props {
-  slot: CalendarScheduledCourseSlotElement,
-  id: string,
-  style: object,
+  data: CalendarScheduledCourseSlotData
 }
 
 const props = defineProps<Props>()
@@ -36,21 +32,20 @@ const emit = defineEmits<Emits>()
 const isContextMenuOpened = ref<boolean>(false)
 
 function onClick () {
-  console.log(props.slot.title)
+  console.log(props.data.title)
 }
 
 function openContextMenu (): boolean {
-  isContextMenuOpened.value = true
-  return isContextMenuOpened.value
+  // No interaction with courses
+  return false
 }
 
-function closeContextMenu (): boolean {
-  isContextMenuOpened.value = false
-  return isContextMenuOpened.value
+function closeContextMenu () {
+
 }
 
 function emitInterface () {
-  emit('interface', props.id, {
+  emit('interface', props.data.id, {
     openContextMenu: openContextMenu,
     closeContextMenu: closeContextMenu
   })
@@ -78,5 +73,15 @@ div {
 .frame {
   border-radius: 5px;
   width: 100%;
+}
+
+p {
+  font-size: 0.625em;
+  margin: 0;
+}
+
+.course {
+  overflow: hidden;
+  height: 100%;
 }
 </style>
