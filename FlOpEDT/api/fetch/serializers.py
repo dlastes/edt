@@ -113,7 +113,7 @@ class Course_SC_Serializer(serializers.Serializer):
 class ScheduledCoursesSerializer(serializers.Serializer):
     # Spécification des champs voulus
     id = serializers.IntegerField()
-    room = serializers.CharField(allow_null=True)
+    room = serializers.IntegerField(source='room.id', allow_null=True)
     start_time = serializers.IntegerField()
     day = serializers.CharField()
     course = Course_SC_Serializer()
