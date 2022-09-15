@@ -4,7 +4,47 @@
     "pk": 1,
     "fields": {
       "name": "Cours",
+      "bg_color": "#112aed"
+    }
+  },
+  {
+    "model": "roomreservation.RoomReservationType",
+    "pk": 2,
+    "fields": {
+      "name": "Conférence",
+      "bg_color": "#f54114"
+    }
+  },
+  {
+    "model": "roomreservation.RoomReservationType",
+    "pk": 3,
+    "fields": {
+      "name": "Activité des étudiant⋅e⋅s",
+      "bg_color": "#e6f514"
+    }
+  },
+  {
+    "model": "roomreservation.RoomReservationType",
+    "pk": 4,
+    "fields": {
+      "name": "Formation extérieure",
       "bg_color": "#0000ff"
+    }
+  },
+  {
+    "model": "roomreservation.RoomReservationType",
+    "pk": 5,
+    "fields": {
+      "name": "Réunion",
+      "bg_color": "#1bf25f"
+    }
+  },
+  {
+    "model": "roomreservation.RoomReservationType",
+    "pk": 6,
+    "fields": {
+      "name": "Autre",
+      "bg_color": "#c8c8c8"
     }
   },
   {
@@ -24,17 +64,68 @@
     "model": "roomreservation.RoomReservation",
     "pk": 1,
     "fields": {
-      "title": "aaa",
-      "description": "bbb",
+      "title": "AAA",
+      "description": "aaa",
       "with_key": true,
       "email": false,
-      "date": "2022-09-02",
-      "start_time": "01:00:00",
-      "end_time": "02:00:00",
+      "date": "2022-09-16",
+      "start_time": "08:00:00",
+      "end_time": "09:30:00",
       "periodicity_id": 1,
       "reservation_type_id": 1,
       "responsible_id": 1,
       "room_id": 186
+    }
+  },
+  {
+    "model": "roomreservation.RoomReservation",
+    "pk": 2,
+    "fields": {
+      "title": "BBB",
+      "description": "bbb",
+      "with_key": true,
+      "email": false,
+      "date": "2022-09-15",
+      "start_time": "09:30:00",
+      "end_time": "11:00:00",
+      "periodicity_id": 1,
+      "reservation_type_id": 1,
+      "responsible_id": 1,
+      "room_id": 187
+    }
+  },
+  {
+    "model": "roomreservation.RoomReservation",
+    "pk": 3,
+    "fields": {
+      "title": "CCC",
+      "description": "ccc",
+      "with_key": true,
+      "email": false,
+      "date": "2022-09-14",
+      "start_time": "12:15:00",
+      "end_time": "13:45:00",
+      "periodicity_id": 1,
+      "reservation_type_id": 1,
+      "responsible_id": 1,
+      "room_id": 188
+    }
+  },
+  {
+    "model": "roomreservation.RoomReservation",
+    "pk": 4,
+    "fields": {
+      "title": "DDD",
+      "description": "ddd",
+      "with_key": true,
+      "email": false,
+      "date": "2022-09-13",
+      "start_time": "08:00:00",
+      "end_time": "18:45:00",
+      "periodicity_id": 1,
+      "reservation_type_id": 1,
+      "responsible_id": 1,
+      "room_id": 189
     }
   }
 ]
