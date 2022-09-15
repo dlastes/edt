@@ -77,6 +77,7 @@ div {
 
 p {
   font-size: 0.625em;
+  font-weight: bold;
   margin: 0;
 }
 </style>
