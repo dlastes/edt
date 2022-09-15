@@ -1,7 +1,7 @@
 <template>
   <Popper class="frame" :show="isContextMenuOpened" :style="props.data.displayStyle"
           :id="props.data.id">
-    <div @click="onClick">
+    <div @click.left="onClick">
       <p class="m-0">{{ props.data.title }}</p>
       <p class="m-0">{{ props.data.reservation.description }}</p>
       <p class="m-0">{{ props.data.reservation.responsible }}</p>
@@ -30,9 +30,28 @@ interface Emits {
 const emit = defineEmits<Emits>()
 
 const isContextMenuOpened = ref<boolean>(false)
+const clickCount = ref(0)
+const timer = ref()
 
 function onClick () {
-  console.log(props.data.title)
+  if (++clickCount.value == 1) {
+    timer.value = setTimeout(() => {
+      clickCount.value = 0
+      onSingleClick()
+    }, 300)
+    return
+  }
+  clearTimeout(timer.value)
+  clickCount.value = 0
+  onDoubleClick()
+}
+
+function onSingleClick () {
+  console.log(`Click on ${props.data.title}`)
+}
+
+function onDoubleClick () {
+  console.log(`Double-click on: ${props.data.title}`)
 }
 
 function openContextMenu (): boolean {
