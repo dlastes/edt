@@ -95,7 +95,7 @@ export interface FlopAPI {
       weekdays: (week: number, year: number, additionalParams?: object) => Promise<any>,
       roomReservations: (week: number, year: number, params: { roomId?: number }, additionalParams?: object) => Promise<Array<RoomReservation>>,
       courses: (week: number, year: number, params: { department?: string }, additionalParams?: object) => Promise<Array<Course>>,
-      scheduledCourses: (week: number, year: number, params: { department?: string }, additionalParams?: object) => Promise<Array<ScheduledCourse>>,
+      scheduledCourses: (week: number, year: number, department: string, additionalParams?: object) => Promise<Array<ScheduledCourse>>,
     },
   },
 }
@@ -126,11 +126,10 @@ const api: FlopAPI = {
           year: year,
         }, ...{...(params.department && {dept: params.department}), ...(!params.department && {})}
       }, additionalParams),
-      scheduledCourses: (week: number, year: number, params: { department?: string }, additionalParams?: object) => fetcher(urls.scheduledcourses, {
-        ...{
-          week: week,
-          year: year,
-        }, ...{...(params.department && {dept: params.department}), ...(!params.department && {})}
+      scheduledCourses: (week: number, year: number, department: string, additionalParams?: object) => fetcher(urls.scheduledcourses, {
+        week: week,
+        year: year,
+        dept: department
       }, additionalParams),
     }
   },
