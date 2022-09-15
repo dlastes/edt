@@ -1,4 +1,5 @@
 <template>
+  <div class="loader" :style="{visibility: loaderVisibility}"></div>
   <div class="container-fluid">
     <div class="row">
       <div class="col-auto">
@@ -22,20 +23,6 @@
         </div>
       </div>
       <div class="col">
-        <div ref="modalLoading" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-             aria-labelledby="exampleModalLabel"
-             aria-hidden="true">
-          <div class="modal-dialog modal-sm modal-dialog-centered">
-            <div class="modal-content">
-              <div class="modal-body text-center">
-                Loading data, please wait...
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ignore</button>
-              </div>
-            </div>
-          </div>
-        </div>
         <Calendar v-bind="calendarValues"></Calendar>
       </div>
     </div>
@@ -64,8 +51,7 @@ import CalendarRoomReservationSlot from '@/components/calendar/CalendarRoomReser
 import CalendarScheduledCourseSlot from '@/components/calendar/CalendarScheduledCourseSlot.vue'
 import CustomDatePicker from '@/components/DatePicker.vue'
 import { getDepartment } from '@/main'
-import { Modal } from 'bootstrap'
-import { computed, onMounted, ref, shallowRef, watchEffect } from 'vue'
+import { computed, onMounted, ref, shallowRef, watchEffect, watchPostEffect } from 'vue'
 
 interface Room {
   id: number,
@@ -75,6 +61,7 @@ interface Room {
 const api = ref<FlopAPI>(requireInjection(apiKey))
 const currentWeek = ref(requireInjection(currentWeekKey))
 const currentDepartment = getDepartment()
+let loadingCounter = 0
 
 // API data
 const departments = ref<Array<Department>>()
@@ -98,8 +85,7 @@ const selectedDate = ref<FlopWeek>({
   year: currentWeek.value.year,
 })
 
-const modalLoading = ref()
-const mounted = ref(false)
+const loaderVisibility = ref('hidden')
 
 const selectedRoom = ref<Room>()
 const selectedDepartment = ref<Department>()
@@ -193,7 +179,7 @@ watchEffect(() => {
 })
 
 // Update the list of rooms and course types on departments fetched
-watchEffect(() => {
+watchPostEffect(() => {
   if (!departments.value) {
     return
   }
@@ -213,7 +199,7 @@ watchEffect(() => {
 })
 
 // Display reservations of the selected room
-watchEffect(() => {
+watchPostEffect(() => {
   let params: { roomId?: number } = {}
   if (selectedRoom.value) {
     params.roomId = selectedRoom.value.id
@@ -362,6 +348,7 @@ function updateRoomReservations (date: FlopWeek) {
   showLoading()
   fetchRoomReservations(week, year, {}).then(value => {
     roomReservations.value = value
+    hideLoading()
   })
 }
 
@@ -383,22 +370,18 @@ function updateScheduledCourses (date: FlopWeek, departments: Array<Department>)
 }
 
 function hideLoading (): void {
-  if (!mounted.value) {
-    return
+  if (--(loadingCounter) <= 0) {
+    loaderVisibility.value = 'hidden'
   }
-  const modal = Modal.getOrCreateInstance(modalLoading.value, {})
-  modal.hide()
 }
 
 function showLoading (): void {
-  if (!mounted.value) {
-    return
-  }
-  const modal = Modal.getOrCreateInstance(modalLoading.value, {})
-  modal.show()
+  ++loadingCounter
+  loaderVisibility.value = 'visible'
 }
 
 onMounted(() => {
+  showLoading()
   fetchDepartments().then(value => {
     departments.value = value
 
@@ -417,8 +400,7 @@ onMounted(() => {
       roomReservationTypes.value[reservationType.id] = reservationType
     })
   })
-
-  mounted.value = true
+  hideLoading()
 })
 
 // Fetch functions
@@ -464,5 +446,14 @@ export default {
 </script>
 
 <style scoped>
-
+.loader {
+  position: fixed;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.6) url('@/assets/images/logo-head-gribou-rc-hand.svg') no-repeat 50% 50%;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  cursor: wait;
+}
 </style>
