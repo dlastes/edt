@@ -53,10 +53,12 @@ import type {
   CourseType,
   Department,
   FlopWeek,
+  RoomReservation,
+  RoomReservationType,
   TimeSettings,
   WeekDay
 } from '@/assets/js/types'
-import { RoomReservation, ScheduledCourse, Time } from '@/assets/js/types'
+import { ScheduledCourse, Time } from '@/assets/js/types'
 import Calendar from '@/components/calendar/Calendar.vue'
 import CalendarRoomReservationSlot from '@/components/calendar/CalendarRoomReservationSlot.vue'
 import CalendarScheduledCourseSlot from '@/components/calendar/CalendarScheduledCourseSlot.vue'
@@ -81,6 +83,7 @@ const rooms = ref<{ [departmentId: number]: Array<Room> }>([])
 const scheduledCourses = ref<{ [departmentId: number]: Array<ScheduledCourse> }>([])
 const courseTypes = ref<{ [departmentId: number]: Array<CourseType> }>([])
 const roomReservations = ref<Array<RoomReservation>>([])
+const roomReservationTypes = ref<{ [id: number]: RoomReservationType }>([])
 
 // Time Settings
 const timeSettings = ref<Array<TimeSettings>>()
@@ -218,9 +221,10 @@ watchEffect(() => {
 
   dateSlots.value = {}
   roomReservations.value.forEach(reservation => {
-    if (params.roomId && reservation.room.id != params.roomId) {
+    if (params.roomId && reservation.room != params.roomId) {
       return
     }
+
     let date = reservation.date.split('-')
     let day = `${date[2]}/${date[1]}`
     let slot = createRoomReservationSlot(reservation)
@@ -292,13 +296,19 @@ function createRoomReservationSlot (reservation: RoomReservation): CalendarSlot 
   let endTimeValue = parseInt(endTimeRaw[0]) * 60 + parseInt(endTimeRaw[1])
   let endTime: Time = createTime(endTimeValue)
 
+  let backgroundColor = '#000000'
+  if (reservation.type in roomReservationTypes.value) {
+    let type = roomReservationTypes.value[reservation.type]
+    backgroundColor = type.bg_color
+  }
+
   let slotData: CalendarRoomReservationSlotData = {
     reservation: reservation,
     startTime: startTime,
     endTime: endTime,
     title: reservation.title,
-    id: `roomreservation-${reservation.room.name}-${reservation.date}-${reservation.start_time}`,
-    displayStyle: {background: '#00ff00'}
+    id: `roomreservation-${reservation.room}-${reservation.date}-${reservation.start_time}`,
+    displayStyle: {background: backgroundColor}
   }
   return {
     data: slotData,
@@ -317,6 +327,11 @@ function createScheduledCourseSlot (course: ScheduledCourse, courseType: CourseT
       departmentName = department.abbrev
     }
   }
+  let type = Object.values(roomReservationTypes.value).find(type => type.name === 'Course')
+  let backgroundColor = '#000000'
+  if (type) {
+    backgroundColor = type.bg_color
+  }
   let slotData: CalendarScheduledCourseSlotData = {
     course: course,
     department: departmentName,
@@ -324,7 +339,7 @@ function createScheduledCourseSlot (course: ScheduledCourse, courseType: CourseT
     endTime: endTime,
     title: course.course.module.abbrev,
     id: `scheduledcourse-${course.course.id}`,
-    displayStyle: {background: '#ff0000'}
+    displayStyle: {background: backgroundColor}
   }
   return {
     data: slotData,
@@ -396,6 +411,13 @@ onMounted(() => {
   fetchTimeSettings().then(value => {
     timeSettings.value = value
   })
+
+  fetchRoomReservationTypes().then(value => {
+    value.forEach(reservationType => {
+      roomReservationTypes.value[reservationType.id] = reservationType
+    })
+  })
+
   mounted.value = true
 })
 
@@ -418,6 +440,10 @@ async function fetchTimeSettings () {
 
 async function fetchRoomReservations (week: number, year: number, params: { roomId?: number }) {
   return await api.value.fetch.target.roomReservations(week, year, params)
+}
+
+async function fetchRoomReservationTypes () {
+  return await api.value.fetch.all.roomReservationTypes()
 }
 
 async function fetchScheduledCourses (week: number, year: number, department: string) {

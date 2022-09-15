@@ -52,30 +52,25 @@ export class Room {
   }
 }
 
-export class RoomReservation {
+export interface RoomReservation {
   date: string
   description: string
   email: boolean
   end_time: string
   id: number
   responsible: string
-  room: Room
+  room: number
+  type: number
   start_time: string
   title: string
   with_key: boolean
+  periodicity: number
+}
 
-  constructor () {
-    this.date = ''
-    this.description = ''
-    this.email = false
-    this.end_time = ''
-    this.id = 0
-    this.responsible = ''
-    this.room = new Room()
-    this.start_time = ''
-    this.title = ''
-    this.with_key = false
-  }
+export interface RoomReservationType {
+  id: number
+  name: string
+  bg_color: string
 }
 
 export class Course {

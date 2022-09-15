@@ -4,6 +4,7 @@ import type {
   Department,
   Room,
   RoomReservation,
+  RoomReservationType,
   ScheduledCourse,
   TimeSettings
 } from '@/assets/js/types'
@@ -64,6 +65,7 @@ const urls = {
   weekdays: 'fetch/weekdays',
   timesettings: 'base/timesettings',
   roomreservation: 'roomreservations/reservation',
+  roomreservationtype: 'roomreservations/reservationtype',
   courses: 'courses/courses',
   scheduledcourses: 'fetch/scheduledcourses',
   coursetypes: 'courses/type',
@@ -89,6 +91,7 @@ export interface FlopAPI {
       rooms: (department: string) => Promise<Array<Room>>,
       timeSettings: () => Promise<Array<TimeSettings>>,
       coursetypes: (department: string) => Promise<Array<CourseType>>,
+      roomReservationTypes: () => Promise<Array<RoomReservationType>>
     },
     target: {
       room: (id: number, additionalParams?: object) => Promise<Room>,
@@ -107,6 +110,7 @@ const api: FlopAPI = {
       rooms: (department: string) => fetcher(urls.rooms, {dept: department}),
       timeSettings: () => fetcher(urls.timesettings),
       coursetypes: (department: string) => fetcher(urls.coursetypes, {dept: department}),
+      roomReservationTypes: () => fetcher(urls.roomreservationtype),
     },
     target: {
       room: (id: number, additionalParams?: object) => fetcher(buildUrl(urls.rooms, id.toString()), additionalParams),
