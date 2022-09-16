@@ -593,6 +593,36 @@ function go_select_tutors() {
 }
 
 
+/*--------------------------
+  ------- COURSES ------
+  --------------------------*/
+function select_course_attributes () {
+  room_tutor_change.cm_settings = course_cm_settings;
+  room_tutor_change.proposal = [] ;
+
+  let fake_id = new Date();
+  fake_id = fake_id.getMilliseconds() + "-";
+
+  let c = pending.wanted_course ;
+  let grade_it = {fid: fake_id, content: "Noté"} ;
+  if (c.graded) {
+    grade_it.content = "Non noté" ;
+  }
+
+  room_tutor_change.proposal.push(grade_it) ;
+
+  /* TODO change type of course
+  room_tutor_change.proposal.push({
+    fid: fake_id,
+    content: "Type"
+  }) ;
+  */
+
+  update_change_cm_nlin() ;
+
+}
+
+
 /*----------------------
   ------- GROUPS -------
   ----------------------*/

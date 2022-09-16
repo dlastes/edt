@@ -2219,7 +2219,11 @@ function select_entry_cm() {
       content: "Visio"
     }) ;
   }
-  
+  room_tutor_change.proposal.push({
+    fid: fake_id,
+    content: "Autre"
+  }) ;
+
   update_change_cm_nlin() ;
 }
 
@@ -2240,9 +2244,13 @@ function def_cm_change() {
       // don't consider other constraints than tutor's
       pending.pass.room = true;
       select_tutor_module_change();
-    } else {
+    } else if (d.content == 'Visio') {
       pending.pass.tutor = true ;
       select_pref_links_change();
+    } else {
+      pending.pass.tutor = true ;
+      pending.pass.room = true ;
+      select_course_attributes() ;
     }
     go_cm_room_tutor_change();
   };
