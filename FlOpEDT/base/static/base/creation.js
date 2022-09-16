@@ -2313,6 +2313,24 @@ function def_cm_change() {
     go_cm_room_tutor_change();
   };
 
+  course_cm_settings.click = function (d) {
+    context_menu.room_tutor_hold = true;
+    let c = pending.wanted_course ;
+    if (d.content == "Non noté") {
+      c.graded = false ;
+      check_pending_course() ;
+    } else if (d.content == "Noté") {
+      c.graded = true ;
+      check_pending_course() ;
+    } else if (d.content == "Type") {
+      
+    }
+    room_tutor_change.proposal = [] ;
+    update_change_cm_nlin() ;
+
+    go_cm_room_tutor_change() ;
+    //go_courses();
+  }
 }
 
 
