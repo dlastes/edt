@@ -1,23 +1,45 @@
 <template>
-  <div class="loader" :style="{visibility: loaderVisibility}"></div>
+  <div class="loader" :style="{ visibility: loaderVisibility }"></div>
   <div class="container-fluid">
     <div class="row">
       <div class="col-auto">
-        <CustomDatePicker v-model:week="selectedDate.week" v-model:year="selectedDate.year"></CustomDatePicker>
+        <CustomDatePicker
+            v-model:week="selectedDate.week"
+            v-model:year="selectedDate.year"
+        ></CustomDatePicker>
         <div class="col-auto">
           <div class="mb-3">
             <label for="select-room" class="form-label">Room:</label>
-            <select v-model="selectedRoom" id="select-room" class="form-select w-auto" aria-label="Select room">
+            <select
+                id="select-room"
+                v-model="selectedRoom"
+                class="form-select w-auto"
+                aria-label="Select room"
+            >
               <option :value="undefined">All rooms</option>
-              <option v-for="room in selectedDepartmentsRooms" :value="room">{{ room.name }}</option>
+              <option
+                  v-for="room in selectedDepartmentsRooms"
+                  :key="room"
+                  :value="room"
+              >
+                {{ room.name }}
+              </option>
             </select>
           </div>
           <div class="mb-3">
-            <label for="select-department" class="form-label">Department:</label>
-            <select v-model="selectedDepartment" id="select-department" class="form-select w-auto ms-1"
-                    aria-label="Select department">
+            <label for="select-department" class="form-label"
+            >Department:</label
+            >
+            <select
+                id="select-department"
+                v-model="selectedDepartment"
+                class="form-select w-auto ms-1"
+                aria-label="Select department"
+            >
               <option :value="undefined">All departments</option>
-              <option v-for="dept in departments" :value="dept">{{ dept.abbrev }}</option>
+              <option v-for="dept in departments" :key="dept.id" :value="dept">
+                {{ dept.abbrev }}
+              </option>
             </select>
           </div>
         </div>
@@ -43,7 +65,7 @@ import type {
   RoomReservation,
   RoomReservationType,
   TimeSettings,
-  WeekDay
+  WeekDay,
 } from '@/assets/js/types'
 import { ScheduledCourse, Time } from '@/assets/js/types'
 import Calendar from '@/components/calendar/Calendar.vue'
@@ -51,11 +73,11 @@ import CalendarRoomReservationSlot from '@/components/calendar/CalendarRoomReser
 import CalendarScheduledCourseSlot from '@/components/calendar/CalendarScheduledCourseSlot.vue'
 import CustomDatePicker from '@/components/DatePicker.vue'
 import { getDepartment } from '@/main'
-import { computed, onMounted, ref, shallowRef, watchEffect, watchPostEffect } from 'vue'
+import { computed, onMounted, ref, shallowRef, watchEffect, } from 'vue'
 
 interface Room {
-  id: number,
-  name: string
+  id: number;
+  name: string;
 }
 
 const api = ref<FlopAPI>(requireInjection(apiKey))
@@ -64,13 +86,15 @@ const currentDepartment = getDepartment()
 let loadingCounter = 0
 
 // API data
-const departments = ref<Array<Department>>()
+const departments = ref<Array<Department>>([])
 const weekDays = ref<Array<WeekDay>>([])
 const rooms = ref<{ [departmentId: number]: Array<Room> }>([])
-const scheduledCourses = ref<{ [departmentId: number]: Array<ScheduledCourse> }>([])
+const scheduledCourses = ref<{
+  [departmentId: number]: Array<ScheduledCourse>;
+}>([])
 const courseTypes = ref<{ [departmentId: number]: Array<CourseType> }>([])
 const roomReservations = ref<Array<RoomReservation>>([])
-const roomReservationTypes = ref<{ [id: number]: RoomReservationType }>([])
+const roomReservationTypes = ref<{ [id: number]: RoomReservationType }>({})
 
 // Time Settings
 const timeSettings = ref<Array<TimeSettings>>()
@@ -110,23 +134,27 @@ const dateSlots = ref<{ [index: string]: Array<CalendarSlot> }>({})
 
 // Update rooms list on department selection
 const selectedDepartmentsRooms = computed(() => {
-  if (!selectedRoom) {
-    return Object.values(rooms.value)
+  let departmentsList = []
+  if (!selectedDepartments.value) {
+    departmentsList = departments.value
+  } else {
+    departmentsList = selectedDepartments.value
   }
+
   // Use a Set so that rooms accessible to multiple departments are displayed once
   let out: Set<Room> = new Set()
-  selectedDepartments.value.forEach(dept => {
+  departmentsList.forEach((dept) => {
     if (!(dept.id in rooms.value)) {
       return
     }
     out = new Set([...out, ...rooms.value[dept.id]])
   })
-  return [...out]
+  return [...out].flat()
 })
 
 const selectedDepartmentsCourses = computed(() => {
-  let courses: { [departmentId: number]: Array<ScheduledCourse> } = {}
-  selectedDepartments.value.forEach(dept => {
+  const courses: { [departmentId: number]: Array<ScheduledCourse> } = {}
+  selectedDepartments.value.forEach((dept) => {
     if (!(dept.id in scheduledCourses.value)) {
       return
     }
@@ -136,8 +164,8 @@ const selectedDepartmentsCourses = computed(() => {
 })
 
 const selectedDepartmentsCourseTypes = computed(() => {
-  let out: Array<CourseType> = []
-  selectedDepartments.value.forEach(dept => {
+  const out: Array<CourseType> = []
+  selectedDepartments.value.forEach((dept) => {
     if (!(dept.id in courseTypes.value)) {
       return
     }
@@ -150,27 +178,34 @@ const calendarValues = computed(() => {
   return {
     days: weekDays.value,
     slots: dateSlots.value,
-    startTime: dayStartTime.value.value - (60 + (dayStartTime.value.value % 60)),
-    endTime: dayFinishTime.value.value + (60 - (dayFinishTime.value.value % 60)),
+    startTime:
+        dayStartTime.value.value - (60 + (dayStartTime.value.value % 60)),
+    endTime:
+        dayFinishTime.value.value + (60 - (dayFinishTime.value.value % 60)),
   }
 })
 
 // Update weekDays
 watchEffect(() => {
-  fetchWeekDays(selectedDate.value.week, selectedDate.value.year).then(value => {
-    weekDays.value = value
-  })
+  console.log('Updating Week days')
+  fetchWeekDays(selectedDate.value.week, selectedDate.value.year).then(
+      (value) => {
+        weekDays.value = value
+      }
+  )
 })
 
 // Week selection watcher
 watchEffect(() => {
-  let date = selectedDate.value
+  console.log('Updating Rooms reservations')
+  const date = selectedDate.value
   updateRoomReservations(date)
 })
 
 // Week selection and departments watcher
 watchEffect(() => {
-  let date = selectedDate.value
+  console.log('Updating Scheduled courses')
+  const date = selectedDate.value
 
   if (!departments.value) {
     return
@@ -178,65 +213,49 @@ watchEffect(() => {
   updateScheduledCourses(date, departments.value)
 })
 
-// Update the list of rooms and course types on departments fetched
-watchPostEffect(() => {
-  if (!departments.value) {
-    return
-  }
-  rooms.value = {}
-  courseTypes.value = {}
-
-  departments.value.forEach(dept => {
-    // Fetch the rooms of each selected department
-    fetchRooms(dept.abbrev).then(value => {
-      rooms.value[dept.id] = value
-    })
-
-    fetchCourseTypes(dept.abbrev).then(value => {
-      courseTypes.value[dept.id] = value
-    })
-  })
-})
-
 // Display reservations of the selected room
-watchPostEffect(() => {
-  let params: { roomId?: number } = {}
+watchEffect(() => {
+  console.log('Filtering Room reservations')
+  const params: { roomId?: number } = {}
   if (selectedRoom.value) {
     params.roomId = selectedRoom.value.id
   }
 
   dateSlots.value = {}
-  roomReservations.value.forEach(reservation => {
+  roomReservations.value.forEach((reservation) => {
     if (params.roomId && reservation.room != params.roomId) {
       return
     }
 
-    let date = reservation.date.split('-')
-    let day = `${date[2]}/${date[1]}`
-    let slot = createRoomReservationSlot(reservation)
+    const date = reservation.date.split('-')
+    const day = `${date[2]}/${date[1]}`
+    const slot = createRoomReservationSlot(reservation)
     addSlot(day, slot)
   })
 
-  Object.keys(selectedDepartmentsCourses.value).map(Number).forEach(deptId => {
-    selectedDepartmentsCourses.value[deptId].forEach(course => {
+  Object.keys(selectedDepartmentsCourses.value)
+  .forEach((deptId) => {
+    const id = parseInt(deptId)
+    selectedDepartmentsCourses.value[id].forEach((course) => {
       if (params.roomId && course.room != params.roomId) {
         return
       }
-      let day = weekDays.value.find(weekDay => {
+      const day = weekDays.value.find((weekDay) => {
         return weekDay.ref === course.day
       })
       if (!day) {
         return
       }
-      let courseType = selectedDepartmentsCourseTypes.value.find(courseType => {
-        return courseType.name === course.course.type
-      })
+      const courseType = selectedDepartmentsCourseTypes.value.find(
+          (courseType) => {
+            return courseType.name === course.course.type
+          }
+      )
       if (!courseType) {
         return
       }
-
-      let date = day.date
-      let slot = createScheduledCourseSlot(course, courseType, deptId)
+      const date = day.date
+      const slot = createScheduledCourseSlot(course, courseType, id)
       addSlot(date, slot)
     })
   })
@@ -244,6 +263,7 @@ watchPostEffect(() => {
 
 // Time settings watcher
 watchEffect(() => {
+  console.log('Updating time settings')
   onTimeSettingsChanged(timeSettings.value)
 })
 
@@ -256,11 +276,17 @@ function onTimeSettingsChanged (timeSettings?: Array<TimeSettings>) {
   let maxFinishTime = timeSettings[0].day_finish_time
   let minLunchBreakStartTime = timeSettings[0].lunch_break_start_time
   let maxLunchBreakFinishTime = timeSettings[0].lunch_break_finish_time
-  timeSettings.forEach(setting => {
+  timeSettings.forEach((setting) => {
     minStartTime = Math.min(minStartTime, setting.day_start_time)
     maxFinishTime = Math.max(maxFinishTime, setting.day_finish_time)
-    minLunchBreakStartTime = Math.min(minLunchBreakStartTime, setting.lunch_break_start_time)
-    maxLunchBreakFinishTime = Math.max(maxLunchBreakFinishTime, setting.lunch_break_finish_time)
+    minLunchBreakStartTime = Math.min(
+        minLunchBreakStartTime,
+        setting.lunch_break_start_time
+    )
+    maxLunchBreakFinishTime = Math.max(
+        maxLunchBreakFinishTime,
+        setting.lunch_break_finish_time
+    )
   })
 
   dayStartTime.value = createTime(minStartTime)
@@ -270,66 +296,73 @@ function onTimeSettingsChanged (timeSettings?: Array<TimeSettings>) {
 }
 
 function createTime (time: number): Time {
-  let text = convertDecimalTimeToHuman(time / 60)
+  const text = convertDecimalTimeToHuman(time / 60)
   return new Time(time, text)
 }
 
 function createRoomReservationSlot (reservation: RoomReservation): CalendarSlot {
-  let startTimeRaw = reservation.start_time.split(':')
-  let startTimeValue = parseInt(startTimeRaw[0]) * 60 + parseInt(startTimeRaw[1])
-  let startTime = createTime(startTimeValue)
-  let endTimeRaw = reservation.end_time.split(':')
-  let endTimeValue = parseInt(endTimeRaw[0]) * 60 + parseInt(endTimeRaw[1])
-  let endTime: Time = createTime(endTimeValue)
+  const startTimeRaw = reservation.start_time.split(':')
+  const startTimeValue =
+      parseInt(startTimeRaw[0]) * 60 + parseInt(startTimeRaw[1])
+  const startTime = createTime(startTimeValue)
+  const endTimeRaw = reservation.end_time.split(':')
+  const endTimeValue = parseInt(endTimeRaw[0]) * 60 + parseInt(endTimeRaw[1])
+  const endTime: Time = createTime(endTimeValue)
 
   let backgroundColor = '#000000'
   if (reservation.type in roomReservationTypes.value) {
-    let type = roomReservationTypes.value[reservation.type]
+    const type = roomReservationTypes.value[reservation.type]
     backgroundColor = type.bg_color
   }
 
-  let slotData: CalendarRoomReservationSlotData = {
+  const slotData: CalendarRoomReservationSlotData = {
     reservation: reservation,
     startTime: startTime,
     endTime: endTime,
     title: reservation.title,
     id: `roomreservation-${reservation.room}-${reservation.date}-${reservation.start_time}`,
-    displayStyle: {background: backgroundColor}
+    displayStyle: {background: backgroundColor},
   }
   return {
     data: slotData,
-    component: shallowRef(CalendarRoomReservationSlot)
+    component: shallowRef(CalendarRoomReservationSlot),
   }
 }
 
-function createScheduledCourseSlot (course: ScheduledCourse, courseType: CourseType, deptId: number): CalendarSlot {
-  let startTime = createTime(course.start_time)
-  let endTime = createTime(course.start_time + courseType.duration)
+function createScheduledCourseSlot (
+    course: ScheduledCourse,
+    courseType: CourseType,
+    deptId: number
+): CalendarSlot {
+  const startTime = createTime(course.start_time)
+  const endTime = createTime(course.start_time + courseType.duration)
 
   let departmentName = ''
   if (departments.value) {
-    let department = departments.value.find(dept => dept.id === deptId)
+    const department = departments.value.find((dept) => dept.id === deptId)
     if (department) {
       departmentName = department.abbrev
     }
   }
-  let type = Object.values(roomReservationTypes.value).find(type => type.name === 'Course')
+  const type = Object.values(roomReservationTypes.value).find(
+      (type) => type.name === 'Course'
+  )
   let backgroundColor = '#000000'
   if (type) {
     backgroundColor = type.bg_color
   }
-  let slotData: CalendarScheduledCourseSlotData = {
+  const slotData: CalendarScheduledCourseSlotData = {
     course: course,
     department: departmentName,
     startTime: startTime,
     endTime: endTime,
     title: course.course.module.abbrev,
     id: `scheduledcourse-${course.course.id}`,
-    displayStyle: {background: backgroundColor}
+    displayStyle: {background: backgroundColor},
   }
   return {
     data: slotData,
-    component: shallowRef(CalendarScheduledCourseSlot)
+    component: shallowRef(CalendarScheduledCourseSlot),
   }
 }
 
@@ -342,27 +375,38 @@ function addSlot (date: string, slot: CalendarSlot) {
 }
 
 function updateRoomReservations (date: FlopWeek) {
-  let week = date.week
-  let year = date.year
+  const week = date.week
+  const year = date.year
 
   showLoading()
-  fetchRoomReservations(week, year, {}).then(value => {
+  fetchRoomReservations(week, year, {}).then((value) => {
     roomReservations.value = value
     hideLoading()
   })
 }
 
-function updateScheduledCourses (date: FlopWeek, departments: Array<Department>) {
-  let week = date.week
-  let year = date.year
+function updateScheduledCourses (
+    date: FlopWeek,
+    departments: Array<Department>
+) {
+  const week = date.week
+  const year = date.year
 
   showLoading()
   scheduledCourses.value = {}
   let count = departments.length
-  departments.forEach(dept => {
-    fetchScheduledCourses(week, year, dept.abbrev).then(value => {
-      scheduledCourses.value[dept.id] = value
-      if (--count == 0) {
+
+  if (count === 0) {
+    hideLoading()
+    return
+  }
+
+  let coursesList: { [p: number]: ScheduledCourse[] } = {}
+  departments.forEach((dept) => {
+    fetchScheduledCourses(week, year, dept.abbrev).then((value) => {
+      coursesList[dept.id] = value
+      if (--count === 0) {
+        scheduledCourses.value = coursesList
         hideLoading()
       }
     })
@@ -370,7 +414,7 @@ function updateScheduledCourses (date: FlopWeek, departments: Array<Department>)
 }
 
 function hideLoading (): void {
-  if (--(loadingCounter) <= 0) {
+  if (--loadingCounter <= 0) {
     loaderVisibility.value = 'hidden'
   }
 }
@@ -381,26 +425,52 @@ function showLoading (): void {
 }
 
 onMounted(() => {
-  showLoading()
-  fetchDepartments().then(value => {
+  fetchDepartments().then((value) => {
     departments.value = value
 
     // Select the current department by default
     if (departments.value) {
-      selectedDepartment.value = departments.value.find(dept => dept.abbrev === currentDepartment)
+      selectedDepartment.value = departments.value.find(
+          (dept) => dept.abbrev === currentDepartment
+      )
+
+      rooms.value = {}
+      courseTypes.value = {}
+      let roomsList: { [key: string]: Array<Room> } = {}
+      let typesList: { [key: string]: Array<CourseType> } = {}
+      let departmentsCount = departments.value.length
+      let roomsCounter = departmentsCount
+      let typesCounter = departmentsCount
+      departments.value.forEach((dept) => {
+        // Fetch the rooms of each selected department
+        fetchRooms(dept.abbrev).then((value) => {
+          roomsList[dept.id] = value
+          if (--roomsCounter === 0) {
+            // Update the rooms list ref only once every department is handled
+            rooms.value = roomsList
+          }
+        })
+
+        fetchCourseTypes(dept.abbrev).then((value) => {
+          typesList[dept.id] = value
+          if (--typesCounter === 0) {
+            // Update the course types list ref only once every department is handled
+            courseTypes.value = typesList
+          }
+        })
+      })
     }
   })
 
-  fetchTimeSettings().then(value => {
+  fetchTimeSettings().then((value) => {
     timeSettings.value = value
   })
 
-  fetchRoomReservationTypes().then(value => {
-    value.forEach(reservationType => {
+  fetchRoomReservationTypes().then((value) => {
+    value.forEach((reservationType) => {
       roomReservationTypes.value[reservationType.id] = reservationType
     })
   })
-  hideLoading()
 })
 
 // Fetch functions
@@ -420,7 +490,11 @@ async function fetchTimeSettings () {
   return await api.value.fetch.all.timeSettings()
 }
 
-async function fetchRoomReservations (week: number, year: number, params: { roomId?: number }) {
+async function fetchRoomReservations (
+    week: number,
+    year: number,
+    params: { roomId?: number }
+) {
   return await api.value.fetch.target.roomReservations(week, year, params)
 }
 
@@ -428,28 +502,31 @@ async function fetchRoomReservationTypes () {
   return await api.value.fetch.all.roomReservationTypes()
 }
 
-async function fetchScheduledCourses (week: number, year: number, department: string) {
+async function fetchScheduledCourses (
+    week: number,
+    year: number,
+    department: string
+) {
   return await api.value.fetch.target.scheduledCourses(week, year, department)
 }
 
 async function fetchCourseTypes (department: string) {
-  return await api.value.fetch.all.coursetypes(department)
+  return await api.value.fetch.all.courseTypes(department)
 }
 </script>
 
 <script lang="ts">
 export default {
   name: 'RoomReservationView',
-  components: {}
+  components: {},
 }
-
 </script>
 
 <style scoped>
 .loader {
   position: fixed;
   z-index: 9999;
-  background: rgba(0, 0, 0, 0.6) url('@/assets/images/logo-head-gribou-rc-hand.svg') no-repeat 50% 50%;
+  background: rgba(0, 0, 0, 0.6) url("@/assets/images/logo-head-gribou-rc-hand.svg") no-repeat 50% 50%;
   top: 0;
   left: 0;
   height: 100%;

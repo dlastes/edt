@@ -1,30 +1,34 @@
 <template>
-  <Popper class="frame" :show="isContextMenuOpened" :style="props.data.displayStyle"
-          :id="props.data.id">
-    <div @click="onClick" class="course">
+  <Popper
+      :id="props.data.id"
+      class="frame"
+      :show="isContextMenuOpened"
+      :style="props.data.displayStyle"
+  >
+    <div class="course" @click="onClick">
       <p class="m-0">{{ props.data.course.course.module.abbrev }}</p>
       <p class="m-0">{{ props.data.course.tutor }}</p>
       <p class="m-0">{{ props.data.department }}</p>
     </div>
     <template #content>
-      <CalendarSlotContextMenu :slot="props.data"></CalendarSlotContextMenu>
+      <CalendarSlotContextMenu :data="props.data"></CalendarSlotContextMenu>
     </template>
   </Popper>
 </template>
 
 <script setup lang="ts">
-import type { CalendarScheduledCourseSlotData, CalendarSlotInterface } from '@/assets/js/types'
+import type { CalendarScheduledCourseSlotData, CalendarSlotInterface, } from '@/assets/js/types'
 import CalendarSlotContextMenu from '@/components/calendar/CalendarSlotContextMenu.vue'
 import { onMounted, ref } from 'vue'
 
 interface Props {
-  data: CalendarScheduledCourseSlotData
+  data: CalendarScheduledCourseSlotData;
 }
 
 const props = defineProps<Props>()
 
 interface Emits {
-  (e: 'interface', id: string, slotInterface: CalendarSlotInterface): void
+  (e: 'interface', id: string, slotInterface: CalendarSlotInterface): void;
 }
 
 const emit = defineEmits<Emits>()
@@ -41,20 +45,19 @@ function openContextMenu (): boolean {
 }
 
 function closeContextMenu () {
-
+  // No interaction
 }
 
 function emitInterface () {
   emit('interface', props.data.id, {
     openContextMenu: openContextMenu,
-    closeContextMenu: closeContextMenu
+    closeContextMenu: closeContextMenu,
   })
 }
 
 onMounted(() => {
   emitInterface()
 })
-
 </script>
 
 <script lang="ts">
@@ -62,7 +65,6 @@ export default {
   name: 'CalendarScheduledCourseSlot',
   components: {},
 }
-
 </script>
 
 <style scoped>

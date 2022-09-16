@@ -1,30 +1,41 @@
 <template>
-  <Popper class="frame" :show="isContextMenuOpened" :style="props.data.displayStyle"
-          :id="props.data.id">
-    <div @click.left="onClick">
+  <Popper
+      :id="props.data.id"
+      class="frame"
+      :show="isContextMenuOpened"
+      :style="props.data.displayStyle"
+      @click.left="onClick"
+  >
+    <div>
+      <RoomReservationForm
+          :reservation="props.data.reservation"
+          :is-open="isEditing"
+          @closed="closeEdit"
+      ></RoomReservationForm>
       <p class="m-0">{{ props.data.title }}</p>
       <p class="m-0">{{ props.data.reservation.description }}</p>
       <p class="m-0">{{ props.data.reservation.responsible }}</p>
     </div>
     <template #content>
-      <CalendarSlotContextMenu :slot="props.data"></CalendarSlotContextMenu>
+      <CalendarSlotContextMenu :data="props.data"></CalendarSlotContextMenu>
     </template>
   </Popper>
 </template>
 
 <script setup lang="ts">
-import type { CalendarRoomReservationSlotData, CalendarSlotInterface } from '@/assets/js/types'
+import type { CalendarRoomReservationSlotData, CalendarSlotInterface, } from '@/assets/js/types'
 import CalendarSlotContextMenu from '@/components/calendar/CalendarSlotContextMenu.vue'
+import RoomReservationForm from '@/components/RoomReservationForm.vue'
 import { onMounted, ref } from 'vue'
 
 interface Props {
-  data: CalendarRoomReservationSlotData
+  data: CalendarRoomReservationSlotData;
 }
 
 const props = defineProps<Props>()
 
 interface Emits {
-  (e: 'interface', id: string, slotInterface: CalendarSlotInterface): void
+  (e: 'interface', id: string, slotInterface: CalendarSlotInterface): void;
 }
 
 const emit = defineEmits<Emits>()
@@ -32,6 +43,7 @@ const emit = defineEmits<Emits>()
 const isContextMenuOpened = ref<boolean>(false)
 const clickCount = ref(0)
 const timer = ref()
+const isEditing = ref(false)
 
 function onClick () {
   if (++clickCount.value == 1) {
@@ -47,11 +59,19 @@ function onClick () {
 }
 
 function onSingleClick () {
+  if (isEditing.value) {
+    // Ignore click when form is open
+    return
+  }
   console.log(`Click on ${props.data.title}`)
 }
 
 function onDoubleClick () {
-  console.log(`Double-click on: ${props.data.title}`)
+  if (isEditing.value) {
+    // Ignore click when form is open
+    return
+  }
+  openEdit()
 }
 
 function openContextMenu (): boolean {
@@ -63,17 +83,24 @@ function closeContextMenu () {
   isContextMenuOpened.value = false
 }
 
+function openEdit () {
+  isEditing.value = true
+}
+
+function closeEdit () {
+  isEditing.value = false
+}
+
 function emitInterface () {
   emit('interface', props.data.id, {
     openContextMenu: openContextMenu,
-    closeContextMenu: closeContextMenu
+    closeContextMenu: closeContextMenu,
   })
 }
 
 onMounted(() => {
   emitInterface()
 })
-
 </script>
 
 <script lang="ts">
@@ -81,7 +108,6 @@ export default {
   name: 'CalendarRoomReservationSlot',
   components: {},
 }
-
 </script>
 
 <style scoped>

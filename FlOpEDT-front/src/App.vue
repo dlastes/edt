@@ -3,10 +3,16 @@
     <h1>HEADER</h1>
     <ul>
       <li>
-        <router-link :to="{name: routeNames.departmentSelection}">Home</router-link>
+        <router-link :to="{ name: routeNames.departmentSelection }">
+          Home
+        </router-link>
       </li>
       <li v-if="'dept' in useRoute().params">
-        <router-link :to="{name: routeNames.roomReservation, params: useRoute().params}">Room Reservation</router-link>
+        <router-link
+            :to="{ name: routeNames.roomReservation, params: useRoute().params }"
+        >
+          Room Reservation
+        </router-link>
       </li>
     </ul>
   </header>
@@ -20,8 +26,7 @@
 
 <script setup lang="ts">
 import { routeNames } from '@/router'
-import { RouterLink, RouterView, useRoute } from 'vue-router'</script>
+import { RouterLink, RouterView, useRoute } from 'vue-router'
+</script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

@@ -10,17 +10,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import type { CalendarSlotData } from '@/assets/js/types'
-import { defineProps } from 'vue'
-
-interface Props {
-  slot: CalendarSlotData
-}
-
-const props = defineProps<Props>()
-
-</script>
+<script setup lang="ts"></script>
 
 <script lang="ts">
 export default {
@@ -29,6 +19,4 @@ export default {
 }
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>
