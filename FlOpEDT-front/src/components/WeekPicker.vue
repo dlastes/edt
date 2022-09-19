@@ -1,6 +1,5 @@
 <template>
   <div class="row">
-    <!-- Date picker -->
     <Datepicker
         v-model="selectDate"
         :locale="locale"
@@ -52,7 +51,7 @@ const nowLabel = ref('Aujourd\'hui')
 
 <script lang="ts">
 export default {
-  name: 'CustomDatePicker',
+  name: 'WeekPicker',
   components: {},
 }
 </script>

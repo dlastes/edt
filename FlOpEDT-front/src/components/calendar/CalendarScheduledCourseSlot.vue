@@ -4,22 +4,22 @@
       class="frame"
       :show="isContextMenuOpened"
       :style="props.data.displayStyle"
+      @click="onClick"
   >
-    <div class="course" @click="onClick">
+    <div class="course">
       <p class="m-0">{{ props.data.course.course.module.abbrev }}</p>
       <p class="m-0">{{ props.data.course.tutor }}</p>
       <p class="m-0">{{ props.data.department }}</p>
+      <p class="m-0">{{ roomName }}</p>
     </div>
     <template #content>
-      <CalendarSlotContextMenu :data="props.data"></CalendarSlotContextMenu>
     </template>
   </Popper>
 </template>
 
 <script setup lang="ts">
 import type { CalendarScheduledCourseSlotData, CalendarSlotInterface, } from '@/assets/js/types'
-import CalendarSlotContextMenu from '@/components/calendar/CalendarSlotContextMenu.vue'
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 interface Props {
   data: CalendarScheduledCourseSlotData;
@@ -34,6 +34,10 @@ interface Emits {
 const emit = defineEmits<Emits>()
 
 const isContextMenuOpened = ref<boolean>(false)
+const roomName = computed(() => {
+  const r = props.data.rooms[props.data.course.room]
+  return r?.name
+})
 
 function onClick () {
   console.log(props.data.title)

@@ -1,11 +1,9 @@
 import { api } from '@/assets/js/api'
-import { apiKey, currentWeekKey } from '@/assets/js/keys'
+import { apiKey, apiToken, currentWeekKey } from '@/assets/js/keys'
 import type { FlopWeek } from '@/assets/js/types'
 // Import Bootstrap CSS
 import '@/assets/scss/styles.scss'
-import CustomDatePicker from '@/components/DatePicker.vue'
 import router from '@/router'
-import Datepicker from '@vuepic/vue-datepicker'
 import '@vuepic/vue-datepicker/dist/main.css'
 import type { Ref } from 'vue'
 import { createApp, readonly, ref } from 'vue'
@@ -45,8 +43,8 @@ export function getDepartment(): string | null {
     return dept
 }
 
-app.component('DatePicker', Datepicker)
-    .component('CustomDatePicker', CustomDatePicker)
-    .component('Popper', Popper)
-
-app.mount('#app')
+api.fetch.target.token('DavidG', 'PASSE').then((value) => {
+    app.provide(apiToken, value.token)
+    app.component('Popper', Popper)
+    app.mount('#app')
+})

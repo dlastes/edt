@@ -13,7 +13,6 @@ class RoomReservation(models.Model):
     reservation_type = models.ForeignKey('RoomReservationType', on_delete=models.CASCADE, blank=True, null=True)
     title = models.CharField(max_length=30)
     description = models.TextField(null=True, blank=True)
-    with_key = models.BooleanField(default=False)
     email = models.BooleanField(default=False)
     date = models.DateField()
     start_time = models.TimeField()

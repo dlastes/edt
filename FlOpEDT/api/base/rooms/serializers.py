@@ -25,6 +25,9 @@ import base.models as bm
 
 from rest_framework import serializers
 
+from api.fetch.serializers import IDRoomSerializer
+
+
 class RoomTypesSerializer(serializers.ModelSerializer):
     class Meta:
         model = bm.RoomType
@@ -32,9 +35,11 @@ class RoomTypesSerializer(serializers.ModelSerializer):
 
 
 class RoomSerializer(serializers.ModelSerializer):
+    basic_rooms = IDRoomSerializer(many=True)
+
     class Meta:
         model = bm.Room
-        fields = '__all__'  # ['id', 'name', 'subroom_of', 'departments']
+        fields = ['id', 'name', 'subroom_of', 'departments', 'is_basic', 'basic_rooms']
 
 
 class RoomNameSerializer(serializers.ModelSerializer):
@@ -47,5 +52,3 @@ class RoomSortsSerializer(serializers.ModelSerializer):
     class Meta:
         model = bm.RoomSort
         fields = '__all__'
-
-

@@ -15,20 +15,30 @@
             <slot name="title"></slot>
           </h5>
           <button
+              v-if="!isSaving"
               type="button"
               class="btn-close"
               aria-label="Close"
-              @click.stop="close"
+              @click.stop="onCancel"
           ></button>
         </div>
         <div class="modal-body">
+          <!-- Alerts -->
+          <div>
+            <div
+                v-for="alert in alerts" :key="alert.message" :class="`alert-${alert.level}`"
+                class="alert alert-dismissible fade show" role="alert">
+              {{ alert.message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          </div>
           <slot name="body"></slot>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" @click.stop="close">
+          <button type="button" class="btn btn-secondary" @click.stop="cancel" :disabled="isSaving">
             Cancel
           </button>
-          <button type="button" class="btn btn-primary" @click.stop="close">
+          <button type="button" class="btn btn-primary" @click.stop="save" :disabled="isSaving">
             Save
           </button>
         </div>
@@ -38,17 +48,20 @@
 </template>
 
 <script setup lang="ts">
+import type { FormAlert, FormInterface } from '@/assets/js/types'
 import { Modal } from 'bootstrap'
 import { defineProps, onMounted, ref, watch } from 'vue'
 
 interface Emits {
-  (e: 'closed'): void;
+  (e: 'interface', formInterface: FormInterface): void;
 }
 
 const emit = defineEmits<Emits>()
 
 interface Props {
   isOpen: boolean;
+  onCancel: () => void;
+  onSave: () => void;
 }
 
 const props = defineProps<Props>()
@@ -56,9 +69,12 @@ const props = defineProps<Props>()
 const modalRef = ref()
 const isMounted = ref(false)
 
+const isSaving = ref(false)
+const alerts = ref<Array<FormAlert>>([])
+
 watch(
     () => props.isOpen,
-    (newValue, oldValue) => {
+    (newValue) => {
       if (newValue) {
         open()
       }
@@ -76,6 +92,17 @@ function open () {
   modal.show()
 }
 
+function cancel () {
+  props.onCancel()
+}
+
+function save () {
+  isSaving.value = true
+  addAlert('info', 'Sending data, please wait...')
+
+  props.onSave()
+}
+
 function close () {
   if (!isMounted.value) {
     return
@@ -84,12 +111,22 @@ function close () {
   if (!modal) {
     return
   }
+  dismissAlerts()
+  isSaving.value = false
   modal.hide()
-  emit('closed')
+}
+
+function addAlert (level: string, message: string) {
+  alerts.value.push({level: level, message: message})
+}
+
+function dismissAlerts () {
+  alerts.value = []
 }
 
 onMounted(() => {
   isMounted.value = true
+  emit('interface', {close: close, addAlert: addAlert})
 })
 </script>
 
