@@ -9,7 +9,7 @@ let get_parameter_from_constraint = (cst, name) => {
     let ret = {};
     let l = cst.parameters.filter(obj => obj['name'] === name);
     return l.length === 0 ? ret : l[0];
-}
+};
 
 let htmlElements = {
     iconWeight: document.getElementById('icon-weight'),
@@ -95,7 +95,11 @@ let currentSelectList = {
         }
         let next = currentSelectList._elements_list[next_index];
         next.classList.add('active');
-        document.getElementById(next.id).scrollIntoView({behavior: "auto", block: "nearest", inline: "nearest"});
+        document.getElementById(next.id).scrollIntoView({
+            behavior: 'auto',
+            block: 'nearest',
+            inline: 'nearest',
+        });
     },
     previous_entry: () => {
         if (currentSelectList.index > 0) {
@@ -144,8 +148,8 @@ let filter = {
         filtered_constraint_list = filtered_constraint_list.filter(pageid => {
             let constraint = constraints[pageid];
             let name = (constraint.title ?? database.constraint_types[constraint.name].local_name).toLowerCase();
-            let comment = (constraint.comment ?? "").toLowerCase();
-            return (name.includes(search) || comment?.includes(search));
+            let comment = (constraint.comment ?? '').toLowerCase();
+            return name.includes(search) || comment?.includes(search);
         });
     },
     by_tutor: tutorID => {
@@ -162,10 +166,17 @@ let filter = {
         filtered_constraint_list = filtered_constraint_list.filter(pageid => {
             let constraint = constraints[pageid];
 
-            // Keep only constraints having a 'tutors' parameter with at least one tutor
-            let paramTutor = constraint.parameters.find(parameter => parameter.name === 'tutors');
-            if (!paramTutor || paramTutor.id_list.length === 0) {
+            // Keep only constraints having a 'tutors' parameter
+            let paramTutor = constraint.parameters.find(
+                (parameter) => parameter.name === 'tutors'
+            );
+            if (!paramTutor) {
                 return false;
+            }
+
+            // If no tutor selected then all tutors are concerned
+            if (paramTutor.id_list.length === 0) {
+                return true;
             }
 
             // Keep the constraint if one of their tutors matches the provided ID
