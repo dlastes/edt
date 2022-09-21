@@ -213,6 +213,11 @@ export interface CalendarDragEvent {
 export interface CalendarSlot {
   data: CalendarSlotData
   component: ShallowRef<unknown>
+  actions: CalendarSlotActions
+}
+
+export interface CalendarSlotActions {
+  delete (toDelete: CalendarSlotData): void
 }
 
 export interface CalendarSlotData {
@@ -221,6 +226,7 @@ export interface CalendarSlotData {
   title: string
   id: string
   displayStyle: object
+  isNew: boolean
 }
 
 export interface CalendarRoomReservationSlotData extends CalendarSlotData {
@@ -228,7 +234,7 @@ export interface CalendarRoomReservationSlotData extends CalendarSlotData {
   rooms: { [roomId: number]: Room }
   reservationTypes: Array<RoomReservationType>
   users: { [userId: number]: User }
-  onFormSave: (reservation: RoomReservation) => void
+  onFormSave (reservation: RoomReservation): void
 }
 
 export interface CalendarScheduledCourseSlotData extends CalendarSlotData {
@@ -245,6 +251,7 @@ export interface CalendarSlotInterface {
 export interface FormInterface {
   close: () => void
   addAlert: (level: string, message: string) => void
+  dismissAlerts: () => void
 }
 
 export interface FormAlert {

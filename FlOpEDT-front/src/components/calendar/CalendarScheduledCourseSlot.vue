@@ -72,10 +72,6 @@ export default {
 </script>
 
 <style scoped>
-div {
-  min-height: 50px;
-}
-
 .frame {
   border-radius: 5px;
   width: 100%;

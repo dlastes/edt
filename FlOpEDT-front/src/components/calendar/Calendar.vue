@@ -36,7 +36,6 @@
       >
         <div
             class="position-relative h-100"
-            @click.left.self="dayColumnClicked(day.date)"
             @mousedown.left.self="dayColumnMouseDown(day.date, $event)"
             @mouseup.left.self="dayColumnMouseUp(day.date, $event)"
         >
@@ -45,6 +44,7 @@
               v-for="slot in displayableSlots[day.date]"
               :key="slot.data.id"
               :data="slot.data"
+              :actions="slot.actions"
               :style="computeStyle(slot.data)"
               class="noselect slot m-0 border border-dark"
               @click.right.prevent
@@ -85,6 +85,20 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+
+/**
+ * Value used to fit drag&drop slot creation when pressing the button, in minutes.
+ * Should be set among [15, 30, 60]
+ * @type {number}
+ */
+const snapValueStart = 15
+
+/**
+ * Value used to fit drag&drop slot creation when releasing the button, in minutes.
+ * Should be set among [15, 30, 60]
+ * @type {number}
+ */
+const snapStep = 30
 
 const displayableSlots = computed(() => {
   const out: { [index: string]: Array<CalendarSlot> } = {}
@@ -152,23 +166,29 @@ let dragEvent: CalendarDragEvent = {
  * Takes a click position in the Y-axis relative to the concerned column.
  * Returns the time in minutes from midnight corresponding to this position and taking the starting time offset into account.
  * @param {number} y The position in the Y-axis.
+ * @param snap
  * @returns {number} The value of the time.
  */
-function clickHeightToTime (y: number): number {
-  return props.startTime + (y / pixelsPerHour) * 60
+function clickHeightToTime (y: number, snap: number): number {
+  return Math.round((props.startTime + (y / pixelsPerHour) * 60) / snap) * snap
 }
 
 function dayColumnMouseDown (day: string, event: MouseEvent): void {
   let dayArray = day.split('/')
   dragEvent.startDate = new Date(`${props.year}-${dayArray[1]}-${dayArray[0]}`)
-  let time = clickHeightToTime(event.offsetY)
+  let time = clickHeightToTime(event.offsetY, snapValueStart)
   dragEvent.startTime = {text: convertDecimalTimeToHuman(time / 60), value: time}
 }
 
 function dayColumnMouseUp (day: string, event: MouseEvent): void {
   let dayArray = day.split('/')
   dragEvent.endDate = new Date(`${props.year}-${dayArray[1]}-${dayArray[0]}`)
-  let time = clickHeightToTime(event.offsetY)
+  let startTime = dragEvent.startTime.value
+  let time = clickHeightToTime(event.offsetY, snapStep)
+  if (time - startTime < 5) {
+    time = startTime + 60
+  }
+  time = startTime + Math.round((time - startTime) / snapStep) * snapStep
   dragEvent.endTime = {text: convertDecimalTimeToHuman(time / 60), value: time}
   emit('drag', dragEvent)
 }

@@ -16,6 +16,7 @@
           :users="props.data.users"
           @closed="closeEdit"
           @saved="props.data.onFormSave"
+          @cancelled="onCancel"
       ></RoomReservationForm>
       <p class="m-0">{{ props.data.title }}</p>
       <p class="m-0">{{ props.data.reservation.description }}</p>
@@ -34,13 +35,14 @@
 </template>
 
 <script setup lang="ts">
-import type { CalendarRoomReservationSlotData, CalendarSlotInterface } from '@/assets/js/types'
+import type { CalendarRoomReservationSlotData, CalendarSlotActions, CalendarSlotInterface } from '@/assets/js/types'
 import CalendarSlotContextMenu from '@/components/calendar/CalendarSlotContextMenu.vue'
 import RoomReservationForm from '@/components/RoomReservationForm.vue'
 import { computed, onMounted, ref } from 'vue'
 
 interface Props {
   data: CalendarRoomReservationSlotData;
+  actions: CalendarSlotActions;
 }
 
 const props = defineProps<Props>()
@@ -94,13 +96,19 @@ function onDoubleClick () {
 }
 
 function onDelete () {
-  // TODO: Remove from API
-  console.log('On delete')
+  props.actions.delete(props.data)
 }
 
 function onDuplicate () {
   // TODO: Duplicate reservation and open edit form
   console.log('On duplicate')
+}
+
+function onCancel () {
+  closeEdit()
+  if (props.data.isNew) {
+    onDelete()
+  }
 }
 
 function openContextMenu (): boolean {
@@ -120,6 +128,15 @@ function closeEdit () {
   isEditing.value = false
 }
 
+function cancelEdit () {
+  isEditing.value = false
+  if (!props.data.isNew) {
+    return
+  }
+  // New slot are removed if cancelled
+
+}
+
 function emitInterface () {
   emit('interface', props.data.id, {
     openContextMenu: openContextMenu,
@@ -129,6 +146,10 @@ function emitInterface () {
 
 onMounted(() => {
   emitInterface()
+  // Open the form if the slot has just been created
+  if (props.data.isNew) {
+    isEditing.value = true
+  }
 })
 </script>
 
@@ -140,10 +161,6 @@ export default {
 </script>
 
 <style scoped>
-div {
-  min-height: 50px;
-}
-
 .frame {
   border-radius: 5px;
   width: 100%;

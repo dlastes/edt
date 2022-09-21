@@ -1,6 +1,10 @@
 <template>
   <ModalForm
-      :is-open="props.isOpen" :on-cancel="onFormCancel" :on-save="onFormSave" @interface="onFormInterface"
+      :is-open="props.isOpen"
+      :is-locked="isFormLocked"
+      :on-cancel="onFormCancel"
+      :on-save="onFormSave"
+      @interface="onFormInterface"
       class="text-start">
     <template #title>Room reservation</template>
     <template #body>
@@ -35,7 +39,7 @@
             :id="generateId('room')"
             v-model="selectedRoom"
         >
-          <option :value="undefined" disabled>Select a room</option>
+          <option value="-1" disabled>Select a room</option>
           <option
               v-for="room in props.rooms" :key="room.id" :value="room.id">{{ room.name }}
           </option>
@@ -135,7 +139,7 @@
             :id="generateId('reservationType')"
             v-model="selectedType"
         >
-          <option :value="undefined" disabled>Select a reservation type</option>
+          <option :value="-1" disabled>Select a reservation type</option>
           <option
               v-for="type in props.reservationTypes" :key="type.id" :value="type.id">{{ type.name }}
           </option>
@@ -162,7 +166,10 @@ import { computed, defineProps, ref } from 'vue'
 
 interface Emits {
   (e: 'saved', reservation: RoomReservation): void;
+
   (e: 'closed'): void;
+
+  (e: 'cancelled'): void;
 }
 
 const emit = defineEmits<Emits>()
@@ -207,6 +214,7 @@ const reservationResponsibleUsername = computed(() => {
 })
 
 const formInterface = ref<FormInterface>()
+const isFormLocked = ref(false)
 
 const title = ref(props.reservation.title)
 const description = ref(props.reservation.description)
@@ -236,10 +244,11 @@ function resetValues () {
 
 function onFormCancel () {
   resetValues()
-  close()
+  cancel()
 }
 
 function onFormSave () {
+  isFormLocked.value = true
   const obj: RoomReservation = {
     date: date.value.replaceAll('/', '-'),
     description: description.value,
@@ -260,16 +269,18 @@ function onFormSave () {
 }
 
 function parseReason (reason: unknown) {
+  formInterface.value?.dismissAlerts()
   // Reason can be either a response body or a thrown error
   if (reason instanceof Object && !(reason instanceof Error)) {
     // Reason is a response body, display each message separately
-    let reasonObj = reason as {[key: string]: string}
+    let reasonObj = reason as { [key: string]: string }
     Object.keys(reasonObj).forEach(key => {
       formInterface.value?.addAlert('danger', `${key}: ${reasonObj[key]}`)
     })
   } else {
     formInterface.value?.addAlert('danger', `${reason}. Please contact an administrator.`)
   }
+  isFormLocked.value = false
 }
 
 function onFormInterface (value: FormInterface) {
@@ -293,10 +304,13 @@ function generateId (element: string) {
 }
 
 function close () {
-  if (formInterface.value) {
-    formInterface.value.close()
-  }
+  formInterface.value?.close()
   emit('closed')
+}
+
+function cancel() {
+  formInterface.value?.close()
+  emit('cancelled')
 }
 </script>
 

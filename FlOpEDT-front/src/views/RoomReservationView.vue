@@ -50,7 +50,7 @@
       </div>
       <!-- Calendar -->
       <div class="col">
-        <Calendar v-bind="calendarValues"></Calendar>
+        <Calendar v-bind="calendarValues" @drag="handleDrag"></Calendar>
       </div>
     </div>
   </div>
@@ -58,12 +58,14 @@
 
 <script setup lang="ts">
 import type { FlopAPI } from '@/assets/js/api'
-import { convertDecimalTimeToHuman } from '@/assets/js/helpers'
+import { convertDecimalTimeToHuman, toStringAtLeastTwoDigits } from '@/assets/js/helpers'
 import { apiKey, currentWeekKey, requireInjection } from '@/assets/js/keys'
 import type {
+  CalendarDragEvent,
   CalendarRoomReservationSlotData,
   CalendarScheduledCourseSlotData,
   CalendarSlot,
+  CalendarSlotData,
   CourseType,
   Department,
   FlopWeek,
@@ -130,7 +132,20 @@ const selectedDepartments = computed(() => {
   return selected
 })
 
-const dateSlots = ref<{ [index: string]: Array<CalendarSlot> }>({})
+const fetchedScheduledCoursesPerDay = ref<{ [index: string]: Array<CalendarSlot> }>({})
+const fetchedRoomReservationsPerDay = ref<{ [index: string]: Array<CalendarSlot> }>({})
+const addedRoomReservationsPerDay = ref<{ [index: string]: Array<CalendarSlot> }>({})
+const dateSlots = computed(() => {
+  let out: { [index: string]: Array<CalendarSlot> } = {}
+  for (let obj of [fetchedScheduledCoursesPerDay.value, fetchedRoomReservationsPerDay.value, addedRoomReservationsPerDay.value]) {
+    Object.keys(obj).forEach(key => {
+      obj[key].forEach(slot => {
+        addSlotTo(key, slot, out)
+      })
+    })
+  }
+  return out
+})
 
 // Update rooms list on department selection
 const selectedDepartmentsRooms = computed(() => {
@@ -197,6 +212,7 @@ const selectedDepartmentsCourseTypes = computed(() => {
 const calendarValues = computed(() => {
   return {
     days: weekDays.value,
+    year: `${selectedDate.value.year}`,
     slots: dateSlots.value,
     startTime:
         dayStartTime.value.value - (60 + (dayStartTime.value.value % 60)),
@@ -241,7 +257,7 @@ watchEffect(() => {
     roomId = selectedRoom.value.id
   }
 
-  dateSlots.value = {}
+  fetchedRoomReservationsPerDay.value = {}
   roomReservations.value.forEach((reservation) => {
     // Get reservations which room is listed or is a part of a room listed in the selected departments
     if (roomId) {
@@ -260,7 +276,7 @@ watchEffect(() => {
     const date = reservation.date.split('-')
     const day = `${date[2]}/${date[1]}`
     const slot = createRoomReservationSlot(reservation)
-    addSlot(day, slot)
+    addSlotTo(day, slot, fetchedRoomReservationsPerDay.value)
   })
 
   Object.keys(selectedDepartmentsCourses.value).forEach((deptId) => {
@@ -296,7 +312,7 @@ watchEffect(() => {
       }
       const date = day.date
       const slot = createScheduledCourseSlot(course, courseType, id)
-      addSlot(date, slot)
+      addSlotTo(date, slot, fetchedScheduledCoursesPerDay.value)
     })
   })
 })
@@ -340,7 +356,7 @@ function createTime (time: number): Time {
   return new Time(time, text)
 }
 
-function createRoomReservationSlot (reservation: RoomReservation): CalendarSlot {
+function createRoomReservationSlot (reservation: RoomReservation, isNew = false): CalendarSlot {
   const startTimeRaw = reservation.start_time.split(':')
   const startTimeValue =
       parseInt(startTimeRaw[0]) * 60 + parseInt(startTimeRaw[1])
@@ -363,20 +379,23 @@ function createRoomReservationSlot (reservation: RoomReservation): CalendarSlot 
     startTime: startTime,
     endTime: endTime,
     title: reservation.title,
-    id: `roomreservation-${reservation.room}-${reservation.date}-${reservation.start_time}`,
+    id: `roomreservation-${reservation.id}`,
     displayStyle: {background: backgroundColor},
     onFormSave: updateRoomReservation,
+    isNew: isNew,
   }
   return {
     data: slotData,
     component: shallowRef(CalendarRoomReservationSlot),
+    actions: {delete: deleteRoomReservationSlot},
   }
 }
 
 function createScheduledCourseSlot (
     course: ScheduledCourse,
     courseType: CourseType,
-    deptId: number
+    deptId: number,
+    isNew = false
 ): CalendarSlot {
   const startTime = createTime(course.start_time)
   const endTime = createTime(course.start_time + courseType.duration)
@@ -391,7 +410,7 @@ function createScheduledCourseSlot (
   const type = Object.values(roomReservationTypes.value).find(
       (type) => type.name === 'Course'
   )
-  let backgroundColor = '#000000'
+  let backgroundColor = '#ffffff'
   if (type) {
     backgroundColor = type.bg_color
   }
@@ -404,19 +423,25 @@ function createScheduledCourseSlot (
     title: course.course.module.abbrev,
     id: `scheduledcourse-${course.course.id}`,
     displayStyle: {background: backgroundColor},
+    isNew: isNew,
   }
   return {
     data: slotData,
     component: shallowRef(CalendarScheduledCourseSlot),
+    actions: {
+      // No course deletion
+      delete: (_: CalendarSlotData) => {
+        return
+      }
+    },
   }
 }
 
-function addSlot (date: string, slot: CalendarSlot) {
-  if (!dateSlots.value[date]) {
-    dateSlots.value[date] = []
+function addSlotTo (date: string, slot: CalendarSlot, collection: { [p: string]: Array<CalendarSlot> }) {
+  if (!collection[date]) {
+    collection[date] = []
   }
-
-  dateSlots.value[date].push(slot)
+  collection[date].push(slot)
 }
 
 function updateRoomReservations (date: FlopWeek) {
@@ -467,6 +492,30 @@ function updateRoomReservation (reservation: RoomReservation) {
   roomReservations.value[index] = reservation
 }
 
+function deleteRoomReservationSlot (toDelete: CalendarRoomReservationSlotData) {
+  let reservation = toDelete.reservation
+  // Split the date as its format is yyyy/MM/dd
+  let dateArray = reservation.date.split('/')
+  // Create the date id to look for the slot
+  let dateId = createSlotId(dateArray[2], dateArray[1])
+  if (toDelete.isNew) {
+    // Find the slots array of the matching date
+    let storedSlots = addedRoomReservationsPerDay.value[dateId]
+    if (!storedSlots) {
+      // Reservation date was not added, so nothing to delete
+      return
+    }
+    // Find the index in the array
+    let slotIndex = storedSlots.findIndex(s => s.data.id === toDelete.id)
+    if (slotIndex === -1) {
+      // Slot was not added, so nothing to delete
+      return
+    }
+    // Finally remove the slot
+    addedRoomReservationsPerDay.value[dateId].splice(slotIndex, 1)
+  }
+}
+
 function hideLoading (): void {
   if (--loadingCounter <= 0) {
     loaderVisibility.value = 'hidden'
@@ -476,6 +525,38 @@ function hideLoading (): void {
 function showLoading (): void {
   ++loadingCounter
   loaderVisibility.value = 'visible'
+}
+
+let newReservationId = -1
+
+function handleDrag (drag: CalendarDragEvent) {
+  if (drag.startDate.getDate() != drag.endDate.getDate()) {
+    console.error('Reserving a room for more than a day is not accepted.')
+    return
+  }
+  let day = toStringAtLeastTwoDigits(drag.startDate.getDate())
+  let month = toStringAtLeastTwoDigits(drag.startDate.getMonth() + 1)
+  let year = drag.startDate.getFullYear()
+  let date = `${year}/${month}/${day}`
+  let reservation: RoomReservation = {
+    date: date,
+    description: '',
+    email: true,
+    end_time: drag.endTime.text,
+    id: newReservationId--,
+    periodicity: -1,
+    reservation_type: -1,
+    responsible: -1,
+    room: selectedRoom.value?.id ?? -1,
+    start_time: drag.startTime.text,
+    title: ''
+  }
+  let slot = createRoomReservationSlot(reservation, true)
+  addSlotTo(createSlotId(day, month), slot, addedRoomReservationsPerDay.value)
+}
+
+function createSlotId (day: string | number, month: string | number): string {
+  return `${day}/${month}`
 }
 
 onMounted(() => {

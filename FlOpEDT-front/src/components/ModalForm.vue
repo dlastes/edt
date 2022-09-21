@@ -15,7 +15,7 @@
             <slot name="title"></slot>
           </h5>
           <button
-              v-if="!isSaving"
+              v-if="!props.isLocked"
               type="button"
               class="btn-close"
               aria-label="Close"
@@ -35,10 +35,10 @@
           <slot name="body"></slot>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" @click.stop="cancel" :disabled="isSaving">
+          <button type="button" class="btn btn-secondary" @click.stop="cancel" :disabled="props.isLocked">
             Cancel
           </button>
-          <button type="button" class="btn btn-primary" @click.stop="save" :disabled="isSaving">
+          <button type="button" class="btn btn-primary" @click.stop="save" :disabled="props.isLocked">
             Save
           </button>
         </div>
@@ -60,6 +60,7 @@ const emit = defineEmits<Emits>()
 
 interface Props {
   isOpen: boolean;
+  isLocked: boolean;
   onCancel: () => void;
   onSave: () => void;
 }
@@ -69,7 +70,6 @@ const props = defineProps<Props>()
 const modalRef = ref()
 const isMounted = ref(false)
 
-const isSaving = ref(false)
 const alerts = ref<Array<FormAlert>>([])
 
 watch(
@@ -97,9 +97,7 @@ function cancel () {
 }
 
 function save () {
-  isSaving.value = true
   addAlert('info', 'Sending data, please wait...')
-
   props.onSave()
 }
 
@@ -112,7 +110,6 @@ function close () {
     return
   }
   dismissAlerts()
-  isSaving.value = false
   modal.hide()
 }
 
@@ -126,7 +123,7 @@ function dismissAlerts () {
 
 onMounted(() => {
   isMounted.value = true
-  emit('interface', {close: close, addAlert: addAlert})
+  emit('interface', {close: close, addAlert: addAlert, dismissAlerts: dismissAlerts})
 })
 </script>
 
