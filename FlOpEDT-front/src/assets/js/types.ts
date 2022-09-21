@@ -203,6 +203,13 @@ export interface CourseType {
   duration: number
 }
 
+export interface CalendarDragEvent {
+  startDate: Date
+  startTime: Time
+  endDate: Date
+  endTime: Time
+}
+
 export interface CalendarSlot {
   data: CalendarSlotData
   component: ShallowRef<unknown>

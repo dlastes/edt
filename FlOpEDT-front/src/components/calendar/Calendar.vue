@@ -34,7 +34,12 @@
           :style="{ height: height }"
           style="min-width: 65px"
       >
-        <div class="position-relative h-100">
+        <div
+            class="position-relative h-100"
+            @click.left.self="dayColumnClicked(day.date)"
+            @mousedown.left.self="dayColumnMouseDown(day.date, $event)"
+            @mouseup.left.self="dayColumnMouseUp(day.date, $event)"
+        >
           <component
               :is="slot.component"
               v-for="slot in displayableSlots[day.date]"
@@ -55,8 +60,14 @@
 
 <script setup lang="ts">
 import { convertDecimalTimeToHuman } from '@/assets/js/helpers'
-import type { CalendarSlot, CalendarSlotData, CalendarSlotInterface, Time, } from '@/assets/js/types'
+import type { CalendarDragEvent, CalendarSlot, CalendarSlotData, CalendarSlotInterface, Time, } from '@/assets/js/types'
 import { computed, defineProps, ref } from 'vue'
+
+interface Emits {
+  (e: 'drag', event: CalendarDragEvent): void
+}
+
+const emit = defineEmits<Emits>()
 
 interface Props {
   days: {
@@ -65,6 +76,7 @@ interface Props {
       date: string;
     };
   };
+  year: string;
   slots: {
     [index: string]: Array<CalendarSlot>;
   };
@@ -127,6 +139,38 @@ function closeCurrentContextMenu () {
 
 function clicked () {
   closeCurrentContextMenu()
+}
+
+let dragEvent: CalendarDragEvent = {
+  startDate: new Date(),
+  startTime: {text: '', value: 0},
+  endDate: new Date(),
+  endTime: {text: '', value: 0}
+}
+
+/**
+ * Takes a click position in the Y-axis relative to the concerned column.
+ * Returns the time in minutes from midnight corresponding to this position and taking the starting time offset into account.
+ * @param {number} y The position in the Y-axis.
+ * @returns {number} The value of the time.
+ */
+function clickHeightToTime (y: number): number {
+  return props.startTime + (y / pixelsPerHour) * 60
+}
+
+function dayColumnMouseDown (day: string, event: MouseEvent): void {
+  let dayArray = day.split('/')
+  dragEvent.startDate = new Date(`${props.year}-${dayArray[1]}-${dayArray[0]}`)
+  let time = clickHeightToTime(event.offsetY)
+  dragEvent.startTime = {text: convertDecimalTimeToHuman(time / 60), value: time}
+}
+
+function dayColumnMouseUp (day: string, event: MouseEvent): void {
+  let dayArray = day.split('/')
+  dragEvent.endDate = new Date(`${props.year}-${dayArray[1]}-${dayArray[0]}`)
+  let time = clickHeightToTime(event.offsetY)
+  dragEvent.endTime = {text: convertDecimalTimeToHuman(time / 60), value: time}
+  emit('drag', dragEvent)
 }
 
 // Positioning and sizing
