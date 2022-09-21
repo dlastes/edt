@@ -20,6 +20,7 @@
 </template>
 
 <script setup lang="ts">
+import { toStringAtLeastTwoDigits } from '@/assets/js/helpers'
 import Datepicker from '@vuepic/vue-datepicker'
 import type { Ref } from 'vue'
 import { defineEmits, ref, watch, watchEffect } from 'vue'
@@ -57,13 +58,11 @@ watchEffect(() => {
       (refDate.getTime() - startDate.getTime()) / (24 * 60 * 60 * 1000)
   )
 
-  const day = refDate.getDate()
-  const dayStr = day < 10 ? `0${day}` : day
-  const month = refDate.getMonth() + 1
-  const monthStr = month < 10 ? `0${month}` : month
+  const day = toStringAtLeastTwoDigits(refDate.getDate())
+  const month = toStringAtLeastTwoDigits(refDate.getMonth() + 1)
   const year = refDate.getFullYear()
 
-  emit('update:date', `${year}/${monthStr}/${dayStr}`)
+  emit('update:date', `${year}/${month}/${day}`)
   emit('update:week', Math.ceil(days / 7))
   emit('update:year', year)
 })
