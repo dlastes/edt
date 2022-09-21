@@ -40,7 +40,7 @@ let htmlElements = {
     numberSelectedConstraints: document.getElementById('num-selected-constraints'),
     commitChangesButton: document.getElementById('apply-changes'),
     fetchConstraintsButton: document.getElementById('fetch-constraints'),
-    applyFiltersButton: document.getElementById('clear-filters'),
+    clearFiltersButton: document.getElementById('clear-filters'),
     cancelEditConstraintButton: document.getElementById('cancel-edit-constraint'),
     confirmEditConstraintButton: document.getElementById('confirm-edit-constraint'),
     selectedConstraintsEditWeightSlider: document.getElementById('selected-constraints-edit-weight-slider'),
@@ -480,7 +480,7 @@ let fetchers = {
                 Object.values(jsonObj).forEach(obj => {
                     database['tutors'][obj['username']] = obj;
                 });
-                htmlElements.filterTutor.value = gettext('All tutors');
+                htmlElements.filterTutor.querySelector('input').value = '';
             })
             .catch(err => {
                 console.error('something went wrong while fetching tutors');
@@ -898,7 +898,7 @@ let applyChanges = (e) => {
 // clear input fields for filters
 let clearFilters = (e) => {
     htmlElements.filterSearch.value = '';
-    htmlElements.filterTutor.value = gettext('All tutors');
+    htmlElements.filterTutor.querySelector('input').value = '';
     htmlElements.filterGroup.value = '-1';
     htmlElements.filterAllWeeks.checked = false;
     filter.current.search = '';
@@ -971,7 +971,7 @@ htmlElements.cancelEditConstraintButton.addEventListener('click', cancelNewConst
 
 htmlElements.commitChangesButton.addEventListener('click', applyChanges);
 htmlElements.fetchConstraintsButton.addEventListener('click', fetchers.fetchConstraints);
-htmlElements.applyFiltersButton.addEventListener('click', clearFilters);
+htmlElements.clearFiltersButton.addEventListener('click', clearFilters);
 
 let selected_constraints = [];
 let lastSelectedConstraint = null;
