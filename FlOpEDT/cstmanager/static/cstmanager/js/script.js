@@ -145,6 +145,8 @@ let filter = {
             return;
         }
 
+        search = search.toLowerCase()
+
         filtered_constraint_list = filtered_constraint_list.filter(pageid => {
             let constraint = constraints[pageid];
             let name = (constraint.title ?? database.constraint_types[constraint.name].local_name).toLowerCase();
