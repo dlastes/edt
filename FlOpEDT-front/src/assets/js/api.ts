@@ -69,11 +69,11 @@ async function fetchData (url: string, params: { [k: string]: never }) {
   return json
 }
 
-async function sendData (
+async function sendData<T> (
     method: string,
     url: string,
     optional: { data?: unknown, id?: number; authToken?: string }
-) {
+): Promise<T | never> {
   if (!['PUT', 'POST', 'DELETE'].includes(method)) {
     return Promise.reject('Method must be either PUT, POST, or DELETE')
   }
@@ -111,24 +111,24 @@ async function sendData (
   console.log(`Updating ${finalUrl}...`)
 
   // Wait for the response
-  return await fetch(finalUrl, requestInit).then(response => {
+  return await fetch(finalUrl, requestInit).then(async response => {
+    const data = await response.json()
     if (!response.ok) {
-      throw Error(response.statusText)
+      const error = data || `Error ${response.status}: ${response.statusText}`
+      return Promise.reject(error)
     }
-    return response
-  }).then(response => {
-    return response.json()
+    return data
   }).catch(reason => {
     return Promise.reject(reason)
   })
 }
 
-async function putData (
+async function putData<T> (
     url: string,
     id: number,
     data: unknown,
     authToken?: string
-) {
+): Promise<T | never> {
   const optional: { [key: string]: unknown } = {
     id: id,
     data: data
@@ -139,7 +139,7 @@ async function putData (
   return await sendData('PUT', url, optional)
 }
 
-async function postData (url: string, data: unknown, authToken?: string) {
+async function postData<T> (url: string, data: unknown, authToken?: string): Promise<T | never> {
   const optional: { [key: string]: unknown } = {
     data: data,
   }
@@ -236,7 +236,13 @@ export interface FlopAPI {
     roomReservation (
         value: RoomReservation,
         authToken?: string
-    ): Promise<unknown>
+    ): Promise<RoomReservation>
+  }
+  post: {
+    roomReservation (
+        value: RoomReservation,
+        authToken?: string
+    ): Promise<RoomReservation>
   }
   delete: {
     roomReservation (id: number, authToken?: string): Promise<unknown>
@@ -340,7 +346,7 @@ const api: FlopAPI = {
         )
       },
       token (username: string, password: string) {
-        return postData(urls.authToken, {
+        return postData<{ token: string }>(urls.authToken, {
           username: username,
           password: password,
         })
@@ -349,7 +355,12 @@ const api: FlopAPI = {
   },
   put: {
     roomReservation (value: RoomReservation, authToken?: string) {
-      return putData(urls.roomreservation, value.id, value, authToken)
+      return putData<RoomReservation>(urls.roomreservation, value.id, value, authToken)
+    },
+  },
+  post: {
+    roomReservation (value: RoomReservation, authToken?: string) {
+      return postData(urls.roomreservation, value, authToken)
     },
   },
   delete: {

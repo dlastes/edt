@@ -16,7 +16,7 @@
             class="form-control"
             placeholder="Title"
             maxlength="30"
-            :value="title"
+            v-model="title"
         />
         <label :for="generateId('title')" class="form-label">Title</label>
       </div>
@@ -28,7 +28,7 @@
             class="form-control"
             placeholder="Description"
             rows="2"
-            :value="description"
+            v-model="description"
         ></textarea>
         <label :for="generateId('description')" class="form-label">Description</label>
       </div>
@@ -178,6 +178,7 @@ const emit = defineEmits<Emits>()
 interface Props {
   reservation: RoomReservation;
   isOpen: boolean;
+  isNew: boolean;
   rooms: { [roomId: number]: Room };
   reservationTypes: Array<RoomReservationType>;
   users: { [userId: number]: User };
@@ -211,7 +212,7 @@ const shouldEndTimePickerReset = ref(false)
 
 const reservationResponsibleUsername = computed(() => {
   let user = props.users[props.reservation.responsible]
-  return user ? user.username : 'Unknown'
+  return user ? `${user.first_name} ${user.last_name} (${user.username})` : 'Unknown'
 })
 
 const formInterface = ref<FormInterface>()
@@ -255,7 +256,7 @@ function onFormSave () {
     description: description.value,
     email: email.value,
     end_time: ReservationTime.toString(endTime.value),
-    id: props.reservation.id,
+    id: Math.max(0, props.reservation.id),
     periodicity: 1,
     responsible: selectedResponsible.value,
     room: selectedRoom.value,
@@ -263,8 +264,10 @@ function onFormSave () {
     title: title.value,
     reservation_type: selectedType.value
   }
-  api.put.roomReservation(obj, authToken)
-  .then(_ => {
+  let method = props.isNew ? api.post : api.put
+  method.roomReservation(obj, authToken)
+  .then(value => {
+        obj.id = value.id
         emit('saved', obj)
         close()
       },
@@ -272,7 +275,7 @@ function onFormSave () {
   .catch(reason => handleReason(reason))
 }
 
-function handleReason(reason: unknown) {
+function handleReason (reason: unknown) {
   formInterface.value?.dismissAlerts()
   parseReason(reason, formInterface.value?.addAlert)
   isFormLocked.value = false
@@ -299,6 +302,7 @@ function generateId (element: string) {
 }
 
 function close () {
+  isFormLocked.value = false
   formInterface.value?.close()
   emit('closed')
 }

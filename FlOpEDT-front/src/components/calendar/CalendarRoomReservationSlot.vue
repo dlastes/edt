@@ -11,11 +11,12 @@
       <RoomReservationForm
           :reservation="props.data.reservation"
           :is-open="isEditing"
+          :is-new="props.data.isNew"
           :rooms="props.data.rooms"
           :reservation-types="props.data.reservationTypes"
           :users="props.data.users"
           @closed="closeEdit"
-          @saved="props.data.onFormSave"
+          @saved="onSave"
           @cancelled="onCancel"
       ></RoomReservationForm>
       <p class="m-0">{{ props.data.title }}</p>
@@ -35,7 +36,12 @@
 </template>
 
 <script setup lang="ts">
-import type { CalendarRoomReservationSlotData, CalendarSlotActions, CalendarSlotInterface } from '@/assets/js/types'
+import type {
+  CalendarRoomReservationSlotData,
+  CalendarSlotActions,
+  CalendarSlotInterface,
+  RoomReservation
+} from '@/assets/js/types'
 import CalendarSlotContextMenu from '@/components/calendar/CalendarSlotContextMenu.vue'
 import RoomReservationForm from '@/components/RoomReservationForm.vue'
 import { computed, onMounted, ref } from 'vue'
@@ -95,8 +101,14 @@ function onDoubleClick () {
   openEdit()
 }
 
+function onSave (reservation: RoomReservation) {
+  let slot = Object.assign({}, props.data);
+  slot.reservation = reservation
+  props.actions.save?.(slot, props.data)
+}
+
 function onDelete () {
-  props.actions.delete(props.data)
+  props.actions.delete?.(props.data)
 }
 
 function onDuplicate () {

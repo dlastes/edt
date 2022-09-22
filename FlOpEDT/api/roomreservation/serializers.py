@@ -7,7 +7,7 @@ from people.models import User
 
 class RoomReservationSerializer(serializers.Serializer):
     def create(self, validated_data):
-        pass
+        return rm.RoomReservation.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
         instance.responsible = validated_data.get('responsible', instance.responsible)
@@ -23,7 +23,7 @@ class RoomReservationSerializer(serializers.Serializer):
         instance.save()
         return instance
 
-    id = serializers.IntegerField()
+    id = serializers.IntegerField(read_only=True)
     responsible = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), many=False)
     room = serializers.PrimaryKeyRelatedField(queryset=Room.objects.all(), many=False)
     reservation_type = serializers.PrimaryKeyRelatedField(queryset=rm.RoomReservationType.objects.all(), many=False)

@@ -247,7 +247,7 @@ watchEffect(() => {
   if (!departments.value) {
     return
   }
-  updateScheduledCourses(date, departments.value)
+  //updateScheduledCourses(date, departments.value)
 })
 
 // Display reservations of the selected room
@@ -383,13 +383,12 @@ function createRoomReservationSlot (reservation: RoomReservation, isNew = false)
     title: reservation.title,
     id: `roomreservation-${reservation.id}`,
     displayStyle: {background: backgroundColor},
-    onFormSave: updateRoomReservation,
     isNew: isNew,
   }
   return {
     data: slotData,
     component: shallowRef(CalendarRoomReservationSlot),
-    actions: {delete: deleteRoomReservationSlot},
+    actions: {delete: deleteRoomReservationSlot, save: updateRoomReservation},
   }
 }
 
@@ -431,10 +430,10 @@ function createScheduledCourseSlot (
     data: slotData,
     component: shallowRef(CalendarScheduledCourseSlot),
     actions: {
+      // No course save
+      save: undefined,
       // No course deletion
-      delete: (_: CalendarSlotData) => {
-        return
-      }
+      delete: undefined,
     },
   }
 }
@@ -485,13 +484,32 @@ function updateScheduledCourses (
   })
 }
 
-function updateRoomReservation (reservation: RoomReservation) {
-  let index = roomReservations.value.findIndex(reserv => reserv.id === reservation.id)
+function updateRoomReservation (newData: CalendarRoomReservationSlotData, oldData: CalendarRoomReservationSlotData) {
+  let newReservation = newData.reservation
+  let oldReservation = oldData.reservation
+
+  let dateArray = newReservation.date.split('-')
+  let dateId = createSlotId(dateArray[2], dateArray[1])
+
+  let isNew = oldReservation.id < 0
+  // Find the reservation index depending on if the reservation has just been added or not
+  let index: number
+  if (isNew) {
+    index = addedRoomReservationsPerDay.value[dateId].findIndex(slot => slot.data.id === oldData.id)
+  } else {
+    // Can use oldReservation.id because id can only be changed on new reservations
+    index = roomReservations.value.findIndex(reserv => reserv.id === oldReservation.id)
+  }
   if (index === -1) {
-    console.error(`Could not find reservation with id: ${reservation.id}`)
+    console.error(`Could not find reservation with id: ${oldReservation.id}`)
     return
   }
-  roomReservations.value[index] = reservation
+  if (isNew) {
+    addedRoomReservationsPerDay.value[dateId][index].data = newData
+    newData.isNew = false
+  } else {
+    roomReservations.value[index] = newReservation
+  }
 }
 
 function handleReason (level: string, message: string) {
@@ -564,7 +582,7 @@ function handleDrag (drag: CalendarDragEvent) {
     id: newReservationId--,
     periodicity: -1,
     reservation_type: -1,
-    responsible: -1,
+    responsible: 553,
     room: selectedRoom.value?.id ?? -1,
     start_time: drag.startTime.text,
     title: ''

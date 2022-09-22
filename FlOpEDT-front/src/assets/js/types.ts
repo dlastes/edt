@@ -217,7 +217,8 @@ export interface CalendarSlot {
 }
 
 export interface CalendarSlotActions {
-  delete (toDelete: CalendarSlotData): void
+  delete? (toDelete: CalendarSlotData): void
+  save? (newValue: CalendarSlotData, oldValue?: CalendarSlotData): void
 }
 
 export interface CalendarSlotData {
@@ -234,7 +235,6 @@ export interface CalendarRoomReservationSlotData extends CalendarSlotData {
   rooms: { [roomId: number]: Room }
   reservationTypes: Array<RoomReservationType>
   users: { [userId: number]: User }
-  onFormSave (reservation: RoomReservation): void
 }
 
 export interface CalendarScheduledCourseSlotData extends CalendarSlotData {
