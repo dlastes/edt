@@ -72,11 +72,10 @@ async function fetchData (url: string, params: { [k: string]: never }) {
 async function sendData (
     method: string,
     url: string,
-    data: unknown,
-    optional: { id?: number; authToken?: string }
+    optional: { data?: unknown, id?: number; authToken?: string }
 ) {
-  if (!(method === 'PUT' || method === 'POST')) {
-    return Promise.reject('Method must be either PUT or POST')
+  if (!['PUT', 'POST', 'DELETE'].includes(method)) {
+    return Promise.reject('Method must be either PUT, POST, or DELETE')
   }
 
   // Setup headers
@@ -98,7 +97,9 @@ async function sendData (
     headers: requestHeaders,
     redirect: 'follow',
     referrerPolicy: 'no-referrer',
-    body: JSON.stringify(data),
+  }
+  if (optional.data) {
+    requestInit.body = JSON.stringify(optional.data)
   }
 
   // Create url
@@ -130,19 +131,36 @@ async function putData (
 ) {
   const optional: { [key: string]: unknown } = {
     id: id,
+    data: data
   }
   if (authToken) {
     optional.authToken = authToken
   }
-  return await sendData('PUT', url, data, optional)
+  return await sendData('PUT', url, optional)
 }
 
 async function postData (url: string, data: unknown, authToken?: string) {
-  const optional: { [key: string]: unknown } = {}
+  const optional: { [key: string]: unknown } = {
+    data: data,
+  }
   if (authToken) {
     optional.authToken = authToken
   }
-  return await sendData('POST', url, data, optional)
+  return await sendData('POST', url, optional)
+}
+
+function deleteData (
+    url: string,
+    id: number,
+    authToken?: string
+) {
+  const optional: { [key: string]: unknown } = {
+    id: id,
+  }
+  if (authToken) {
+    optional.authToken = authToken
+  }
+  return sendData('DELETE', url, optional)
 }
 
 const urls = {
@@ -176,143 +194,168 @@ function buildUrl (base: string, uri: string) {
 export interface FlopAPI {
   fetch: {
     all: {
-      departments: () => Promise<Array<Department>>
-      rooms: (department: string) => Promise<Array<Room>>
-      timeSettings: () => Promise<Array<TimeSettings>>
-      courseTypes: (department: string) => Promise<Array<CourseType>>
-      roomReservationTypes: () => Promise<Array<RoomReservationType>>
-      users: () => Promise<Array<User>>
+      departments (): Promise<Array<Department>>
+      rooms (department: string): Promise<Array<Room>>
+      timeSettings (): Promise<Array<TimeSettings>>
+      courseTypes (department: string): Promise<Array<CourseType>>
+      roomReservationTypes (): Promise<Array<RoomReservationType>>
+      users (): Promise<Array<User>>
     }
     target: {
-      room: (id: number, additionalParams?: object) => Promise<Room>
-      weekdays: (
+      room (id: number, additionalParams?: object): Promise<Room>
+      weekdays (
           week: number,
           year: number,
           additionalParams?: object
-      ) => Promise<Array<WeekDay>>
-      roomReservations: (
+      ): Promise<Array<WeekDay>>
+      roomReservations (
           week: number,
           year: number,
           params: { roomId?: number },
           additionalParams?: object
-      ) => Promise<Array<RoomReservation>>
-      courses: (
+      ): Promise<Array<RoomReservation>>
+      courses (
           week: number,
           year: number,
           params: { department?: string },
           additionalParams?: object
-      ) => Promise<Array<Course>>
-      scheduledCourses: (
+      ): Promise<Array<Course>>
+      scheduledCourses (
           week: number,
           year: number,
           department: string,
           additionalParams?: object
-      ) => Promise<Array<ScheduledCourse>>
-      token: (
+      ): Promise<Array<ScheduledCourse>>
+      token (
           username: string,
           password: string
-      ) => Promise<{ token: string }>
+      ): Promise<{ token: string }>
     }
   }
   put: {
-    roomReservation: (
+    roomReservation (
         value: RoomReservation,
         authToken?: string
-    ) => Promise<unknown>
+    ): Promise<unknown>
+  }
+  delete: {
+    roomReservation (id: number, authToken?: string): Promise<unknown>
   }
 }
 
 const api: FlopAPI = {
   fetch: {
     all: {
-      departments: () => fetcher(urls.departments),
-      rooms: (department: string) =>
-          fetcher(urls.rooms, {dept: department}),
-      timeSettings: () => fetcher(urls.timesettings),
-      courseTypes: (department: string) =>
-          fetcher(urls.coursetypes, {dept: department}),
-      roomReservationTypes: () => fetcher(urls.roomreservationtype),
-      users: () => fetcher(urls.users),
+      departments () {
+        return fetcher(urls.departments)
+      },
+      rooms (department: string) {
+        return fetcher(urls.rooms, {dept: department})
+      },
+      timeSettings () {
+        return fetcher(urls.timesettings)
+      },
+      courseTypes (department: string) {
+        return fetcher(urls.coursetypes, {dept: department})
+      },
+      roomReservationTypes () {
+        return fetcher(urls.roomreservationtype)
+      },
+      users () {
+        return fetcher(urls.users)
+      },
     },
     target: {
-      room: (id: number, additionalParams?: object) =>
-          fetcher(buildUrl(urls.rooms, id.toString()), additionalParams),
-      weekdays: (week: number, year: number, additionalParams?: object) =>
-          fetcher(
-              urls.weekdays,
-              {
-                week: week,
-                year: year,
-              },
-              additionalParams
-          ),
-      roomReservations: (
+      room (id: number, additionalParams?: object) {
+        return fetcher(buildUrl(urls.rooms, id.toString()), additionalParams)
+      },
+      weekdays (week: number, year: number, additionalParams?: object) {
+        return fetcher(
+            urls.weekdays,
+            {
+              week: week,
+              year: year,
+            },
+            additionalParams
+        )
+      },
+      roomReservations (
           week: number,
           year: number,
           params: { roomId?: number },
           additionalParams?: object
-      ) =>
-          fetcher(
-              urls.roomreservation,
-              {
-                ...{
-                  week: week,
-                  year: year,
-                },
-                ...{
-                  ...(params.roomId && {room: params.roomId}),
-                  ...(!params.roomId && {}),
-                },
+      ) {
+        return fetcher(
+            urls.roomreservation,
+            {
+              ...{
+                week: week,
+                year: year,
               },
-              additionalParams
-          ),
-      courses: (
+              ...{
+                ...(params.roomId && {room: params.roomId}),
+                ...(!params.roomId && {}),
+              },
+            },
+            additionalParams
+        )
+      },
+      courses (
           week: number,
           year: number,
           params: { department?: string },
           additionalParams?: object
-      ) =>
-          fetcher(
-              urls.courses,
-              {
-                ...{
-                  week: week,
-                  year: year,
-                },
-                ...{
-                  ...(params.department && {
-                    dept: params.department,
-                  }),
-                  ...(!params.department && {}),
-                },
+      ) {
+        return fetcher(
+            urls.courses,
+            {
+              ...{
+                week: week,
+                year: year,
               },
-              additionalParams
-          ),
-      scheduledCourses: (
+              ...{
+                ...(params.department && {
+                  dept: params.department,
+                }),
+                ...(!params.department && {}),
+              },
+            },
+            additionalParams
+        )
+      },
+      scheduledCourses (
           week: number,
           year: number,
           department: string,
           additionalParams?: object
-      ) =>
-          fetcher(
-              urls.scheduledcourses,
-              {
-                week: week,
-                year: year,
-                dept: department,
-              },
-              additionalParams
-          ),
-      token: (username: string, password: string) =>
-          postData(urls.authToken, {
-            username: username,
-            password: password,
-          }),
+      ) {
+        return fetcher(
+            urls.scheduledcourses,
+            {
+              week: week,
+              year: year,
+              dept: department,
+            },
+            additionalParams
+        )
+      },
+      token (username: string, password: string) {
+        return postData(urls.authToken, {
+          username: username,
+          password: password,
+        })
+      },
     },
   },
   put: {
-    roomReservation: (value: RoomReservation, authToken?: string) =>
-        putData(urls.roomreservation, value.id, value, authToken),
+    roomReservation (value: RoomReservation, authToken?: string) {
+      return putData(urls.roomreservation, value.id, value, authToken)
+    },
   },
+  delete: {
+    roomReservation (id: number, authToken?: string): Promise<unknown> {
+      return deleteData(urls.roomreservation, id, authToken)
+    }
+  }
 }
 export { api }

@@ -21,8 +21,6 @@ class RoomReservationSerializer(serializers.Serializer):
         instance.end_time = validated_data.get('end_time', instance.end_time)
         instance.periodicity = validated_data.get('periodicity', instance.periodicity)
         instance.save()
-        print(validated_data)
-        print(instance.reservation_type)
         return instance
 
     id = serializers.IntegerField()

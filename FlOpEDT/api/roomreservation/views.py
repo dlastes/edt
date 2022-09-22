@@ -1,6 +1,6 @@
 from django.utils.decorators import method_decorator
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import viewsets
+from rest_framework import viewsets, response, status
 
 import roomreservation.models as rm
 from api.roomreservation import serializers
@@ -29,6 +29,12 @@ class RoomReservationViewSet(viewsets.ModelViewSet):
             all_res = all_res.filter(date__year=year)
 
         return all_res
+
+    def destroy(self, *args, **kwargs):
+        serializer = self.get_serializer(self.get_object())
+        data = serializer.data
+        super().destroy(*args, **kwargs)
+        return response.Response(data, status=status.HTTP_200_OK)
 
     filterset_fields = '__all__'
 

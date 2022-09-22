@@ -128,15 +128,6 @@ function closeEdit () {
   isEditing.value = false
 }
 
-function cancelEdit () {
-  isEditing.value = false
-  if (!props.data.isNew) {
-    return
-  }
-  // New slot are removed if cancelled
-
-}
-
 function emitInterface () {
   emit('interface', props.data.id, {
     openContextMenu: openContextMenu,

@@ -156,6 +156,7 @@
 </template>
 
 <script setup lang="ts">
+import { parseReason } from '@/assets/js/helpers'
 import { apiKey, apiToken, requireInjection } from '@/assets/js/keys'
 import type { FormInterface, RoomReservation, RoomReservationType, User } from '@/assets/js/types'
 import { Room } from '@/assets/js/types'
@@ -262,24 +263,18 @@ function onFormSave () {
     title: title.value,
     reservation_type: selectedType.value
   }
-  api.put.roomReservation(obj, authToken).then(_ => {
-    emit('saved', obj)
-    close()
-  }, parseReason).catch(parseReason)
+  api.put.roomReservation(obj, authToken)
+  .then(_ => {
+        emit('saved', obj)
+        close()
+      },
+      reason => handleReason(reason))
+  .catch(reason => handleReason(reason))
 }
 
-function parseReason (reason: unknown) {
+function handleReason(reason: unknown) {
   formInterface.value?.dismissAlerts()
-  // Reason can be either a response body or a thrown error
-  if (reason instanceof Object && !(reason instanceof Error)) {
-    // Reason is a response body, display each message separately
-    let reasonObj = reason as { [key: string]: string }
-    Object.keys(reasonObj).forEach(key => {
-      formInterface.value?.addAlert('danger', `${key}: ${reasonObj[key]}`)
-    })
-  } else {
-    formInterface.value?.addAlert('danger', `${reason}. Please contact an administrator.`)
-  }
+  parseReason(reason, formInterface.value?.addAlert)
   isFormLocked.value = false
 }
 
@@ -308,7 +303,7 @@ function close () {
   emit('closed')
 }
 
-function cancel() {
+function cancel () {
   formInterface.value?.close()
   emit('cancelled')
 }

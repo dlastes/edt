@@ -58,8 +58,8 @@
 
 <script setup lang="ts">
 import type { FlopAPI } from '@/assets/js/api'
-import { convertDecimalTimeToHuman, toStringAtLeastTwoDigits } from '@/assets/js/helpers'
-import { apiKey, currentWeekKey, requireInjection } from '@/assets/js/keys'
+import { convertDecimalTimeToHuman, parseReason, toStringAtLeastTwoDigits } from '@/assets/js/helpers'
+import { apiKey, apiToken, currentWeekKey, requireInjection } from '@/assets/js/keys'
 import type {
   CalendarDragEvent,
   CalendarRoomReservationSlotData,
@@ -84,6 +84,7 @@ import { getDepartment } from '@/main'
 import { computed, onMounted, ref, shallowRef, watchEffect, } from 'vue'
 
 const api = ref<FlopAPI>(requireInjection(apiKey))
+const authToken = requireInjection(apiToken)
 const currentWeek = ref(requireInjection(currentWeekKey))
 const currentDepartment = getDepartment()
 let loadingCounter = 0
@@ -279,6 +280,7 @@ watchEffect(() => {
     addSlotTo(day, slot, fetchedRoomReservationsPerDay.value)
   })
 
+  console.log('Filtering scheduled courses')
   Object.keys(selectedDepartmentsCourses.value).forEach((deptId) => {
     const id = parseInt(deptId)
     selectedDepartmentsCourses.value[id].forEach((course) => {
@@ -492,28 +494,44 @@ function updateRoomReservation (reservation: RoomReservation) {
   roomReservations.value[index] = reservation
 }
 
+function handleReason (level: string, message: string) {
+  console.error(`${level}: ${message}`)
+}
+
 function deleteRoomReservationSlot (toDelete: CalendarRoomReservationSlotData) {
   let reservation = toDelete.reservation
-  // Split the date as its format is yyyy/MM/dd
-  let dateArray = reservation.date.split('/')
-  // Create the date id to look for the slot
-  let dateId = createSlotId(dateArray[2], dateArray[1])
+
   if (toDelete.isNew) {
-    // Find the slots array of the matching date
-    let storedSlots = addedRoomReservationsPerDay.value[dateId]
-    if (!storedSlots) {
-      // Reservation date was not added, so nothing to delete
-      return
-    }
-    // Find the index in the array
-    let slotIndex = storedSlots.findIndex(s => s.data.id === toDelete.id)
-    if (slotIndex === -1) {
-      // Slot was not added, so nothing to delete
-      return
-    }
-    // Finally remove the slot
-    addedRoomReservationsPerDay.value[dateId].splice(slotIndex, 1)
+    // Split the date as its format is yyyy-MM-dd
+    let dateArray = reservation.date.split('-')
+    // Create the date id to look for the slot
+    let dateId = createSlotId(dateArray[2], dateArray[1])
+    removeSlotFrom(dateId, toDelete, addedRoomReservationsPerDay.value)
+    return
   }
+
+  // Target reservation is in the database, so we need to remove it first
+  api.value.delete.roomReservation(reservation.id, authToken).then(_ => {
+    // Filter the list of reservations
+    roomReservations.value = roomReservations.value.filter(r => r.id != reservation.id)
+  }, reason => parseReason(reason, handleReason)).catch(reason => parseReason(reason, handleReason))
+}
+
+function removeSlotFrom (dateId: string, toDelete: CalendarSlotData, collection: { [p: string]: CalendarSlot[] }) {
+  // Find the slots array of the matching date
+  let storedSlots = collection[dateId]
+  if (!storedSlots) {
+    // Reservation date was not added, so nothing to delete
+    return
+  }
+  // Find the index in the array
+  let slotIndex = storedSlots.findIndex(s => s.data.id === toDelete.id)
+  if (slotIndex === -1) {
+    // Slot was not added, so nothing to delete
+    return
+  }
+  // Finally remove the slot
+  collection[dateId].splice(slotIndex, 1)
 }
 
 function hideLoading (): void {
@@ -537,7 +555,7 @@ function handleDrag (drag: CalendarDragEvent) {
   let day = toStringAtLeastTwoDigits(drag.startDate.getDate())
   let month = toStringAtLeastTwoDigits(drag.startDate.getMonth() + 1)
   let year = drag.startDate.getFullYear()
-  let date = `${year}/${month}/${day}`
+  let date = `${year}-${month}-${day}`
   let reservation: RoomReservation = {
     date: date,
     description: '',
