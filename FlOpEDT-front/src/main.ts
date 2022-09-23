@@ -21,9 +21,7 @@ app.provide(apiKey, readonly(api))
 // Provide the current week and year
 const now = new Date()
 const startDate = new Date(now.getFullYear(), 0, 1)
-const days = Math.floor(
-    (now.getTime() - startDate.getTime()) / (24 * 60 * 60 * 1000)
-)
+const days = Math.floor((now.getTime() - startDate.getTime()) / (24 * 60 * 60 * 1000))
 const week = Math.ceil(days / 7)
 
 const currentWeek: Ref<FlopWeek> = ref({
@@ -45,6 +43,6 @@ export function getDepartment(): string | null {
 
 api.fetch.target.token('DavidG', 'PASSE').then((value) => {
     app.provide(apiToken, value.token)
-    app.component('Popper', Popper)
+    app.component('PopperComponent', Popper)
     app.mount('#app')
 })

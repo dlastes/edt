@@ -1,5 +1,5 @@
 <template>
-  <main class="text-center">You are in department {{ department }}.</main>
+    <main class="text-center">You are in department {{ department }}.</main>
 </template>
 
 <script setup lang="ts">

@@ -1,17 +1,17 @@
 <template>
-  <div class="row">
-    <Datepicker
-        v-model="selectDate"
-        :locale="locale"
-        inline
-        week-numbers
-        week-picker
-        :enable-time-picker="false"
-        auto-apply
-        show-now-button
-        :now-button-label="nowLabel"
-    />
-  </div>
+    <div class="row">
+        <Datepicker
+            v-model="selectDate"
+            :locale="locale"
+            inline
+            week-numbers
+            week-picker
+            :enable-time-picker="false"
+            auto-apply
+            show-now-button
+            :now-button-label="nowLabel"
+        />
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -20,9 +20,9 @@ import { defineEmits, ref, watchEffect } from 'vue'
 import Datepicker from '@vuepic/vue-datepicker'
 
 interface Emits {
-  (e: 'update:week', value: number): void;
+    (e: 'update:week', value: number): void
 
-  (e: 'update:year', value: number): void;
+    (e: 'update:year', value: number): void
 }
 
 const emits = defineEmits<Emits>()
@@ -30,29 +30,28 @@ const emits = defineEmits<Emits>()
 const selectDate: Ref<Array<Date>> = ref([])
 
 watchEffect(() => {
-  const refDate = selectDate.value[0]
-  if (!refDate) {
-    return 1
-  }
-  const startDate = new Date(refDate.getFullYear(), 0, 1)
-  const days = Math.floor(
-      (refDate.getTime() - startDate.getTime()) / (24 * 60 * 60 * 1000)
-  )
+    const refDate = selectDate.value[0]
+    if (!refDate) {
+        return 1
+    }
+    const startDate = new Date(refDate.getFullYear(), 0, 1)
+    const days = Math.floor(
+        (refDate.getTime() - startDate.getTime()) / (24 * 60 * 60 * 1000)
+    )
 
-  emits('update:week', Math.ceil(days / 7))
-  emits('update:year', refDate.getFullYear())
+    emits('update:week', Math.ceil(days / 7))
+    emits('update:year', refDate.getFullYear())
 })
 
 const locale = ref('fr')
 
-const nowLabel = ref('Aujourd\'hui')
-
+const nowLabel = ref("Aujourd'hui")
 </script>
 
 <script lang="ts">
 export default {
-  name: 'WeekPicker',
-  components: {},
+    name: 'WeekPicker',
+    components: {},
 }
 </script>
 

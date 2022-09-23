@@ -13,15 +13,18 @@ export function toStringAtLeastTwoDigits(element: number) {
     return `${element < 10 ? `0${element}` : element}`
 }
 
-export function parseReason (reason: unknown, onAlert?: (level: string, message: string) => void) {
-  // Reason can be either a response body or a thrown error
-  if (reason instanceof Object && !(reason instanceof Error)) {
-    // Reason is a response body, display each message separately
-    const reasonObj = reason as { [key: string]: string }
-    Object.keys(reasonObj).forEach(key => {
-        onAlert?.('danger', `${key}: ${reasonObj[key]}`)
-    })
-  } else {
-    onAlert?.('danger', `${reason}. Please contact an administrator.`)
-  }
+export function parseReason(
+    reason: unknown,
+    onAlert?: (level: string, message: string) => void
+) {
+    // Reason can be either a response body or a thrown error
+    if (reason instanceof Object && !(reason instanceof Error)) {
+        // Reason is a response body, display each message separately
+        const reasonObj = reason as { [key: string]: string }
+        Object.keys(reasonObj).forEach((key) => {
+            onAlert?.('danger', `${key}: ${reasonObj[key]}`)
+        })
+    } else {
+        onAlert?.('danger', `${reason}. Please contact an administrator.`)
+    }
 }
