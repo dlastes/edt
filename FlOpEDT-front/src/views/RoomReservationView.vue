@@ -5,17 +5,12 @@
             <div class="row">
                 <!-- Week picker and filters -->
                 <div class="col-auto">
-                    <WeekPicker
-                        :week="selectedDate.week"
-                        :year="selectedDate.year"
-                    ></WeekPicker>
+                    <WeekPicker v-model:week="selectedDate.week" v-model:year="selectedDate.year"></WeekPicker>
                     <!-- Filters -->
                     <div class="col-auto">
                         <!-- Room filter -->
                         <div class="mb-3">
-                            <label for="select-room" class="form-label"
-                                >Room:</label
-                            >
+                            <label for="select-room" class="form-label">Room:</label>
                             <select
                                 id="select-room"
                                 v-model="selectedRoom"
@@ -24,9 +19,11 @@
                             >
                                 <option :value="undefined">All rooms</option>
                                 <option
-                                    v-for="room in Object.values(
-                                        selectedDepartmentsRooms
-                                    ).filter((r) => r.is_basic)"
+                                    v-for="room in Object.values(rooms.perIdOfSelectedDepartments.value)
+                                        .filter((r) => r.is_basic)
+                                        .sort((r1, r2) => {
+                                            return r1.name.toLowerCase().localeCompare(r2.name.toLowerCase())
+                                        })"
                                     :key="room.id"
                                     :value="room"
                                 >
@@ -36,23 +33,15 @@
                         </div>
                         <!-- Department filter -->
                         <div class="mb-3">
-                            <label for="select-department" class="form-label"
-                                >Department:</label
-                            >
+                            <label for="select-department" class="form-label">Department:</label>
                             <select
                                 id="select-department"
                                 v-model="selectedDepartment"
                                 class="form-select w-auto ms-1"
                                 aria-label="Select department"
                             >
-                                <option :value="undefined">
-                                    All departments
-                                </option>
-                                <option
-                                    v-for="dept in departments"
-                                    :key="dept.id"
-                                    :value="dept"
-                                >
+                                <option :value="undefined">All departments</option>
+                                <option v-for="dept in departments.list.value" :key="dept.id" :value="dept">
                                     {{ dept.abbrev }}
                                 </option>
                             </select>
@@ -61,10 +50,7 @@
                 </div>
                 <!-- Calendar -->
                 <div class="col">
-                    <Calendar
-                        @drag="handleDrag"
-                        :values="calendarValues"
-                    ></Calendar>
+                    <Calendar @drag="handleDrag" :values="calendarValues"></Calendar>
                 </div>
             </div>
         </div>
@@ -73,23 +59,13 @@
 
 <script setup lang="ts">
 import type { FlopAPI } from '@/assets/js/api'
-import {
-    convertDecimalTimeToHuman,
-    parseReason,
-    toStringAtLeastTwoDigits,
-} from '@/assets/js/helpers'
-import {
-    apiKey,
-    apiToken,
-    currentWeekKey,
-    requireInjection,
-} from '@/assets/js/keys'
+import { convertDecimalTimeToHuman, listGroupBy, parseReason, toStringAtLeastTwoDigits } from '@/assets/js/helpers'
+import { apiKey, apiToken, currentWeekKey, requireInjection } from '@/assets/js/keys'
 import type {
     CalendarDragEvent,
     CalendarRoomReservationSlotData,
     CalendarScheduledCourseSlotData,
     CalendarSlot,
-    CalendarSlotData,
     CourseType,
     Department,
     FlopWeek,
@@ -102,11 +78,12 @@ import type {
 } from '@/assets/js/types'
 import { ScheduledCourse, Time } from '@/assets/js/types'
 import Calendar from '@/components/calendar/Calendar.vue'
-import CalendarRoomReservationSlot from '@/components/calendar/CalendarRoomReservationSlot.vue'
 import CalendarScheduledCourseSlot from '@/components/calendar/CalendarScheduledCourseSlot.vue'
 import WeekPicker from '@/components/WeekPicker.vue'
 import { getDepartment } from '@/main'
+import type { ComputedRef, Ref } from 'vue'
 import { computed, onMounted, ref, shallowRef, watchEffect } from 'vue'
+import CalendarRoomReservationSlot from '@/components/calendar/CalendarRoomReservationSlot.vue'
 
 const api = ref<FlopAPI>(requireInjection(apiKey))
 const authToken = requireInjection(apiToken)
@@ -114,17 +91,121 @@ const currentWeek = ref(requireInjection(currentWeekKey))
 const currentDepartment = getDepartment()
 let loadingCounter = 0
 
+interface Rooms {
+    list: ComputedRef<Array<Room>>
+    perDepartment: Ref<{ [departmentId: string]: Array<Room> }>
+    perSelectedDepartments: ComputedRef<{ [departmentId: string]: Array<Room> }>
+    listPerSelectedDepartments: ComputedRef<Array<Room>>
+    perIdOfSelectedDepartments: ComputedRef<{ [roomId: string]: Room }>
+    perId: ComputedRef<{ [roomId: string]: Room }>
+}
+
+interface ScheduledCourses {
+    list: ComputedRef<Array<ScheduledCourse>>
+    perDepartment: Ref<{ [departmentId: string]: Array<ScheduledCourse> }>
+    perDay: ComputedRef<{ [day: string]: Array<ScheduledCourse> }>
+    perSelectedDepartments: ComputedRef<{ [departmentId: string]: Array<ScheduledCourse> }>
+}
+
+interface CourseTypes {
+    perDepartment: Ref<{ [departmentId: string]: Array<CourseType> }>
+    listPerSelectedDepartments: ComputedRef<Array<CourseType>>
+}
+
+interface RoomReservations {
+    list: Ref<Array<RoomReservation>>
+    perDay: ComputedRef<{ [day: string]: Array<RoomReservation> }>
+}
+
+interface RoomReservationTypes {
+    list: Ref<Array<RoomReservationType>>
+    perId: ComputedRef<{ [typeId: string]: RoomReservationType }>
+}
+
+interface Users {
+    list: Ref<Array<User>>
+    perId: ComputedRef<{ [userId: string]: User }>
+}
+
 // API data
-const departments = ref<Array<Department>>([])
-const weekDays = ref<Array<WeekDay>>([])
-const rooms = ref<{ [departmentId: number]: Array<Room> }>({})
-const scheduledCourses = ref<{
-    [departmentId: number]: Array<ScheduledCourse>
-}>({})
-const courseTypes = ref<{ [departmentId: number]: Array<CourseType> }>({})
-const roomReservations = ref<Array<RoomReservation>>([])
-const roomReservationTypes = ref<{ [id: number]: RoomReservationType }>({})
-const allUsers = ref<{ [userId: number]: User }>({})
+const departments = {
+    list: ref<Array<Department>>([]),
+}
+
+const weekDays = {
+    list: ref<Array<WeekDay>>([]),
+}
+
+const rooms: Rooms = {
+    list: computed(() => {
+        const out: Array<Room> = []
+        Object.values(rooms.perDepartment.value).forEach((rooms) => {
+            out.push(...rooms.filter((room) => !out.includes(room)))
+        })
+        return out
+    }),
+    perDepartment: ref({}),
+    perSelectedDepartments: computed(() => {
+        return filterBySelectedDepartments(rooms.perDepartment.value)
+    }),
+    listPerSelectedDepartments: computed(() => {
+        const out: Array<Room> = []
+        Object.values(rooms.perSelectedDepartments.value).forEach((rooms) => {
+            out.push(...rooms.filter((room) => !out.includes(room)))
+        })
+        return out
+    }),
+    perIdOfSelectedDepartments: computed(() => {
+        return Object.fromEntries(rooms.listPerSelectedDepartments.value.map((r) => [r.id, r]))
+    }),
+    perId: computed(() => {
+        return Object.fromEntries(rooms.list.value.map((r) => [r.id, r]))
+    }),
+}
+
+const scheduledCourses: ScheduledCourses = {
+    list: computed(() => {
+        return Object.values(scheduledCourses.perDepartment.value).flat(1)
+    }),
+    perDepartment: ref({}),
+    perDay: computed(() => {
+        return listGroupBy(scheduledCourses.list.value, (course) => course.day)
+    }),
+    perSelectedDepartments: computed(() => {
+        return filterBySelectedDepartments(scheduledCourses.perDepartment.value)
+    }),
+}
+
+const courseTypes: CourseTypes = {
+    perDepartment: ref({}),
+    listPerSelectedDepartments: computed(() => {
+        return Object.values(filterBySelectedDepartments(courseTypes.perDepartment.value)).flat(1)
+    }),
+}
+
+const roomReservations: RoomReservations = {
+    list: ref([]),
+    perDay: computed(() => {
+        return listGroupBy(roomReservations.list.value, (reserv) => {
+            const date = new Date(reserv.date)
+            return createSlotId(date.getDate(), date.getMonth() + 1)
+        })
+    }),
+}
+
+const roomReservationTypes: RoomReservationTypes = {
+    list: ref([]),
+    perId: computed(() => {
+        return Object.fromEntries(roomReservationTypes.list.value.map((t) => [t.id, t]))
+    }),
+}
+
+const users: Users = {
+    list: ref([]),
+    perId: computed(() => {
+        return Object.fromEntries(users.list.value.map((user) => [user.id, user]))
+    }),
+}
 
 // Time Settings
 const timeSettings = ref<Array<TimeSettings>>()
@@ -148,11 +229,11 @@ const selectedDepartments = computed(() => {
 
     if (!selectedDepartment.value) {
         // All departments
-        if (!departments.value) {
+        if (!departments.list.value) {
             // No department fetched, cannot continue
             return []
         }
-        selected = departments.value
+        selected = departments.list.value
     } else {
         // Department selected, get its name
         selected.push(selectedDepartment.value)
@@ -160,22 +241,96 @@ const selectedDepartments = computed(() => {
     return selected
 })
 
-const fetchedScheduledCoursesPerDay = ref<{
-    [index: string]: Array<CalendarSlot>
-}>({})
-const fetchedRoomReservationsPerDay = ref<{
-    [index: string]: Array<CalendarSlot>
-}>({})
-const addedRoomReservationsPerDay = ref<{
-    [index: string]: Array<CalendarSlot>
-}>({})
-const dateSlots = computed(() => {
+/**
+ * Computes the slots to display all the room reservations, grouped by day.
+ */
+const roomReservationSlots = computed<{ [day: string]: Array<CalendarSlot> }>(() => {
+    const out: { [day: string]: Array<CalendarSlot> } = {}
+    Object.keys(roomReservations.perDay.value).forEach((day) => {
+        roomReservations.perDay.value[day].forEach((reservation: RoomReservation) => {
+            const roomId = selectedRoom?.value?.id
+            // Get reservations which room is listed or is a part of a room listed in the selected departments
+            if (roomId) {
+                // A room is selected
+                // Get its values
+                const room = rooms.listPerSelectedDepartments.value.find((r) => r.id === reservation.room)
+                if (!room) {
+                    // The room is not listed in the selected departments
+                    return
+                }
+                if (!room.basic_rooms.find((r) => r.id === roomId)) {
+                    // The room is not the one selected or a part of the selected room
+                    return
+                }
+            }
+            const slot = createRoomReservationSlot(reservation)
+            addSlotTo(day, slot, out)
+        })
+    })
+    return out
+})
+
+/**
+ * Computes the slots to display all the scheduled courses, grouped by day.
+ */
+const scheduledCoursesSlots = computed<{ [date: string]: Array<CalendarSlot> }>(() => {
+    const out: { [date: string]: Array<CalendarSlot> } = {}
+    Object.entries(scheduledCourses.perSelectedDepartments.value).forEach((entry) => {
+        const deptId = entry[0]
+        entry[1].forEach((course) => {
+            const roomId = selectedRoom?.value?.id
+
+            // Get courses which room is listed or is a part of a room listed in the selected departments
+            if (roomId) {
+                // A room is selected
+                // Get its values
+                const room = rooms.listPerSelectedDepartments.value.find((r) => r.id === course.room)
+                if (!room) {
+                    // The room is not listed in the selected departments
+                    return
+                }
+                if (!room.basic_rooms.find((r) => r.id === roomId)) {
+                    // The room is not the one selected or a part of the selected room
+                    return
+                }
+            }
+            const day = weekDays.list.value.find((weekDay) => {
+                return weekDay.ref === course.day
+            })
+            if (!day) {
+                return
+            }
+            const courseType = courseTypes.listPerSelectedDepartments.value.find((courseType) => {
+                return courseType.name === course.course.type
+            })
+            if (!courseType) {
+                return
+            }
+            const date = day.date
+            const slot = createScheduledCourseSlot(course, courseType, deptId)
+            addSlotTo(date, slot, out)
+        })
+    })
+    return out
+})
+
+const temporaryReservation = ref<RoomReservation>()
+const temporaryCalendarSlots = computed<{ [date: string]: Array<CalendarSlot> }>(() => {
     const out: { [index: string]: Array<CalendarSlot> } = {}
-    for (const obj of [
-        fetchedScheduledCoursesPerDay.value,
-        fetchedRoomReservationsPerDay.value,
-        addedRoomReservationsPerDay.value,
-    ]) {
+    if (temporaryReservation.value) {
+        const reservation = temporaryReservation.value
+        const slot = createRoomReservationSlot(reservation)
+        const date = new Date(reservation.date)
+        const id = createSlotId(date.getDate(), date.getMonth() + 1)
+        addSlotTo(id, slot, out)
+    }
+    return out
+})
+
+const calendarSlots = computed(() => {
+    const out: { [index: string]: Array<CalendarSlot> } = {}
+
+    for (const obj of [roomReservationSlots.value, scheduledCoursesSlots.value, temporaryCalendarSlots.value]) {
         Object.keys(obj).forEach((key) => {
             obj[key].forEach((slot) => {
                 addSlotTo(key, slot, out)
@@ -185,88 +340,22 @@ const dateSlots = computed(() => {
     return out
 })
 
-// Update rooms list on department selection
-const selectedDepartmentsRooms = computed(() => {
-    let departmentsList: Department[]
-    if (!selectedDepartments.value) {
-        departmentsList = departments.value
-    } else {
-        departmentsList = selectedDepartments.value
-    }
-
-    const objectList: { [roomId: number]: Room } = {}
-    departmentsList.forEach((dept) => {
-        if (!(dept.id in rooms.value)) {
-            return
-        }
-        rooms.value[dept.id].forEach((room) => {
-            if (!(room.id in objectList)) {
-                objectList[room.id] = room
-            }
-        })
-    })
-    return objectList
-})
-
-const allRooms = computed(() => {
-    const departmentsList: Department[] = departments.value
-
-    const objectList: { [roomId: number]: Room } = {}
-    departmentsList.forEach((dept) => {
-        if (!(dept.id in rooms.value)) {
-            return
-        }
-        rooms.value[dept.id].forEach((room) => {
-            if (!(room.id in objectList)) {
-                objectList[room.id] = room
-            }
-        })
-    })
-    return objectList
-})
-
-const selectedDepartmentsCourses = computed(() => {
-    const courses: { [departmentId: number]: Array<ScheduledCourse> } = {}
-    selectedDepartments.value.forEach((dept) => {
-        if (!(dept.id in scheduledCourses.value)) {
-            return
-        }
-        courses[dept.id] = scheduledCourses.value[dept.id]
-    })
-    return courses
-})
-
-const selectedDepartmentsCourseTypes = computed(() => {
-    const out: Array<CourseType> = []
-    selectedDepartments.value.forEach((dept) => {
-        if (!(dept.id in courseTypes.value)) {
-            return
-        }
-        out.push(...courseTypes.value[dept.id])
-    })
-    return [...out]
-})
-
 const calendarValues = computed(() => {
     return {
-        days: weekDays.value,
+        days: weekDays.list.value,
         year: `${selectedDate.value.year}`,
-        slots: dateSlots.value,
-        startTime:
-            dayStartTime.value.value - (60 + (dayStartTime.value.value % 60)),
-        endTime:
-            dayFinishTime.value.value + (60 - (dayFinishTime.value.value % 60)),
+        slots: calendarSlots.value,
+        startTime: dayStartTime.value.value - (60 + (dayStartTime.value.value % 60)),
+        endTime: dayFinishTime.value.value + (60 - (dayFinishTime.value.value % 60)),
     }
 })
 
 // Update weekDays
 watchEffect(() => {
     console.log('Updating Week days')
-    fetchWeekDays(selectedDate.value.week, selectedDate.value.year).then(
-        (value) => {
-            weekDays.value = value
-        }
-    )
+    fetchWeekDays(selectedDate.value.week, selectedDate.value.year).then((value) => {
+        weekDays.list.value = value
+    })
 })
 
 // Week selection watcher
@@ -281,79 +370,10 @@ watchEffect(() => {
     console.log('Updating Scheduled courses')
     const date = selectedDate.value
 
-    if (!departments.value) {
+    if (!departments.list.value) {
         return
     }
-    updateScheduledCourses(date, departments.value)
-})
-
-// Display reservations of the selected room
-watchEffect(() => {
-    console.log('Filtering Room reservations')
-    let roomId: number | undefined
-    if (selectedRoom.value) {
-        roomId = selectedRoom.value.id
-    }
-
-    fetchedRoomReservationsPerDay.value = {}
-    roomReservations.value.forEach((reservation) => {
-        // Get reservations which room is listed or is a part of a room listed in the selected departments
-        if (roomId) {
-            // A room is selected
-            // Get its values
-            if (!(reservation.room in selectedDepartmentsRooms.value)) {
-                // The room is not listed in the selected departments
-                return
-            }
-            const room = selectedDepartmentsRooms.value[reservation.room]
-            if (!room.basic_rooms.find((r) => r.id === roomId)) {
-                // The room is not the one selected or a part of the selected room
-                return
-            }
-        }
-        const date = reservation.date.split('-')
-        const day = `${date[2]}/${date[1]}`
-        const slot = createRoomReservationSlot(reservation)
-        addSlotTo(day, slot, fetchedRoomReservationsPerDay.value)
-    })
-
-    console.log('Filtering scheduled courses')
-    Object.keys(selectedDepartmentsCourses.value).forEach((deptId) => {
-        const id = parseInt(deptId)
-        selectedDepartmentsCourses.value[id].forEach((course) => {
-            // Get courses which room is listed or is a part of a room listed in the selected departments
-            if (roomId) {
-                // A room is selected
-                // Get its values
-                if (!(course.room in selectedDepartmentsRooms.value)) {
-                    // The room is not listed in the selected departments
-                    return
-                }
-                const room = selectedDepartmentsRooms.value[course.room]
-                if (!room.basic_rooms.find((r) => r.id === roomId)) {
-                    // The room is not the one selected or a part of the selected room
-                    return
-                }
-            }
-            const day = weekDays.value.find((weekDay) => {
-                return weekDay.ref === course.day
-            })
-            if (!day) {
-                return
-            }
-            const courseType = selectedDepartmentsCourseTypes.value.find(
-                (courseType) => {
-                    return courseType.name === course.course.type
-                }
-            )
-            if (!courseType) {
-                return
-            }
-            const date = day.date
-            const slot = createScheduledCourseSlot(course, courseType, id)
-            addSlotTo(date, slot, fetchedScheduledCoursesPerDay.value)
-        })
-    })
+    updateScheduledCourses(date, departments.list.value)
 })
 
 // Time settings watcher
@@ -361,6 +381,20 @@ watchEffect(() => {
     console.log('Updating time settings')
     onTimeSettingsChanged(timeSettings.value)
 })
+
+/**
+ * Takes an object having departments id as key and an array.
+ * Returns the filtered entries of selected departments.
+ * @param object
+ */
+function filterBySelectedDepartments<T>(object: { [key: string]: Array<T> }) {
+    const out: { [departmentId: string]: Array<T> } = Object.fromEntries(
+        Object.entries(object).filter(
+            ([key]) => selectedDepartments.value.findIndex((dept) => `${dept.id}` === key) >= 0
+        )
+    )
+    return out
+}
 
 function onTimeSettingsChanged(timeSettings?: Array<TimeSettings>) {
     if (!timeSettings) {
@@ -374,14 +408,8 @@ function onTimeSettingsChanged(timeSettings?: Array<TimeSettings>) {
     timeSettings.forEach((setting) => {
         minStartTime = Math.min(minStartTime, setting.day_start_time)
         maxFinishTime = Math.max(maxFinishTime, setting.day_finish_time)
-        minLunchBreakStartTime = Math.min(
-            minLunchBreakStartTime,
-            setting.lunch_break_start_time
-        )
-        maxLunchBreakFinishTime = Math.max(
-            maxLunchBreakFinishTime,
-            setting.lunch_break_finish_time
-        )
+        minLunchBreakStartTime = Math.min(minLunchBreakStartTime, setting.lunch_break_start_time)
+        maxLunchBreakFinishTime = Math.max(maxLunchBreakFinishTime, setting.lunch_break_finish_time)
     })
 
     dayStartTime.value = createTime(minStartTime)
@@ -395,35 +423,30 @@ function createTime(time: number): Time {
     return new Time(time, text)
 }
 
-function createRoomReservationSlot(
-    reservation: RoomReservation,
-    isNew = false
-): CalendarSlot {
+function createRoomReservationSlot(reservation: RoomReservation): CalendarSlot {
     const startTimeRaw = reservation.start_time.split(':')
-    const startTimeValue =
-        parseInt(startTimeRaw[0]) * 60 + parseInt(startTimeRaw[1])
+    const startTimeValue = parseInt(startTimeRaw[0]) * 60 + parseInt(startTimeRaw[1])
     const startTime = createTime(startTimeValue)
     const endTimeRaw = reservation.end_time.split(':')
     const endTimeValue = parseInt(endTimeRaw[0]) * 60 + parseInt(endTimeRaw[1])
     const endTime: Time = createTime(endTimeValue)
 
     let backgroundColor = '#ffffff'
-    if (reservation.reservation_type in roomReservationTypes.value) {
-        const type = roomReservationTypes.value[reservation.reservation_type]
+    if (reservation.reservation_type in roomReservationTypes.perId.value) {
+        const type = roomReservationTypes.perId.value[reservation.reservation_type]
         backgroundColor = type.bg_color
     }
 
     const slotData: CalendarRoomReservationSlotData = {
         reservation: reservation,
-        rooms: allRooms.value,
-        users: allUsers.value,
-        reservationTypes: Object.values(roomReservationTypes.value),
+        rooms: rooms.perId.value,
+        users: users.perId.value,
+        reservationTypes: Object.values(roomReservationTypes.list.value),
         startTime: startTime,
         endTime: endTime,
         title: reservation.title,
         id: `roomreservation-${reservation.id}`,
         displayStyle: { background: backgroundColor },
-        isNew: isNew,
     }
     return {
         data: slotData,
@@ -435,25 +458,18 @@ function createRoomReservationSlot(
     }
 }
 
-function createScheduledCourseSlot(
-    course: ScheduledCourse,
-    courseType: CourseType,
-    deptId: number,
-    isNew = false
-): CalendarSlot {
+function createScheduledCourseSlot(course: ScheduledCourse, courseType: CourseType, deptId: string): CalendarSlot {
     const startTime = createTime(course.start_time)
     const endTime = createTime(course.start_time + courseType.duration)
 
     let departmentName = ''
-    if (departments.value) {
-        const department = departments.value.find((dept) => dept.id === deptId)
+    if (departments.list.value) {
+        const department = departments.list.value.find((dept) => `${dept.id}` === deptId)
         if (department) {
             departmentName = department.abbrev
         }
     }
-    const type = Object.values(roomReservationTypes.value).find(
-        (type) => type.name === 'Course'
-    )
+    const type = Object.values(roomReservationTypes.list.value).find((type) => type.name === 'Course')
     let backgroundColor = '#ffffff'
     if (type) {
         backgroundColor = type.bg_color
@@ -461,13 +477,12 @@ function createScheduledCourseSlot(
     const slotData: CalendarScheduledCourseSlotData = {
         course: course,
         department: departmentName,
-        rooms: selectedDepartmentsRooms.value,
+        rooms: rooms.perIdOfSelectedDepartments.value,
         startTime: startTime,
         endTime: endTime,
         title: course.course.module.abbrev,
         id: `scheduledcourse-${course.course.id}`,
         displayStyle: { background: backgroundColor },
-        isNew: isNew,
     }
     return {
         data: slotData,
@@ -481,11 +496,7 @@ function createScheduledCourseSlot(
     }
 }
 
-function addSlotTo(
-    date: string,
-    slot: CalendarSlot,
-    collection: { [p: string]: Array<CalendarSlot> }
-) {
+function addSlotTo(date: string, slot: CalendarSlot, collection: { [p: string]: Array<CalendarSlot> }) {
     if (!collection[date]) {
         collection[date] = []
     }
@@ -498,20 +509,18 @@ function updateRoomReservations(date: FlopWeek) {
 
     showLoading()
     fetchRoomReservations(week, year, {}).then((value) => {
-        roomReservations.value = value
+        roomReservations.list.value = value
         hideLoading()
     })
+    temporaryReservation.value = undefined
 }
 
-function updateScheduledCourses(
-    date: FlopWeek,
-    departments: Array<Department>
-) {
+function updateScheduledCourses(date: FlopWeek, departments: Array<Department>) {
     const week = date.week
     const year = date.year
 
     showLoading()
-    scheduledCourses.value = {}
+    scheduledCourses.perDepartment.value = {}
     let count = departments.length
 
     if (count === 0) {
@@ -519,53 +528,40 @@ function updateScheduledCourses(
         return
     }
 
-    const coursesList: { [p: number]: ScheduledCourse[] } = {}
+    const coursesList: { [p: string]: ScheduledCourse[] } = {}
     departments.forEach((dept) => {
         fetchScheduledCourses(week, year, dept.abbrev).then((value) => {
             coursesList[dept.id] = value
             if (--count === 0) {
-                scheduledCourses.value = coursesList
+                scheduledCourses.perDepartment.value = coursesList
                 hideLoading()
             }
         })
     })
 }
 
-function updateRoomReservation(
-    newData: CalendarRoomReservationSlotData,
-    oldData: CalendarRoomReservationSlotData
-) {
+function updateRoomReservation(newData: CalendarRoomReservationSlotData, oldData: CalendarRoomReservationSlotData) {
     const newReservation = newData.reservation
     const oldReservation = oldData.reservation
 
-    const dateArray = newReservation.date.split('-')
-    const dateId = createSlotId(dateArray[2], dateArray[1])
-
-    const isNew = oldReservation.id < 0
-    // Find the reservation index depending on if the reservation has just been added or not
-    let index: number
-    if (isNew) {
-        index = addedRoomReservationsPerDay.value[dateId].findIndex(
-            (slot) => slot.data.id === oldData.id
-        )
-    } else {
-        // Can use oldReservation.id because id can only be changed on new reservations
-        index = roomReservations.value.findIndex(
-            (reserv) => reserv.id === oldReservation.id
-        )
-    }
-    if (index === -1) {
-        console.error(
-            `Could not find reservation with id: ${oldReservation.id}`
-        )
+    if (oldReservation.id < 0) {
+        // The reservation is a new one, just add it to the list
+        roomReservations.list.value.push(newData.reservation)
+        // Clear the temporary slot
+        temporaryReservation.value = undefined
         return
     }
-    if (isNew) {
-        addedRoomReservationsPerDay.value[dateId][index].data = newData
-        newData.isNew = false
-    } else {
-        roomReservations.value[index] = newReservation
+
+    // Find the reservation index from the list of reservations
+    const index = roomReservations.list.value.findIndex((reserv) => reserv.id === oldReservation.id)
+
+    if (index < 0) {
+        // Reservation not found
+        console.error(`Could not find reservation with id: ${oldReservation.id}`)
+        return
     }
+    // Replace the reservation at index
+    roomReservations.list.value[index] = newReservation
 }
 
 function handleReason(level: string, message: string) {
@@ -575,12 +571,8 @@ function handleReason(level: string, message: string) {
 function deleteRoomReservationSlot(toDelete: CalendarRoomReservationSlotData) {
     const reservation = toDelete.reservation
 
-    if (toDelete.isNew) {
-        // Split the date as its format is yyyy-MM-dd
-        const dateArray = reservation.date.split('-')
-        // Create the date id to look for the slot
-        const dateId = createSlotId(dateArray[2], dateArray[1])
-        removeSlotFrom(dateId, toDelete, addedRoomReservationsPerDay.value)
+    if (reservation.id < 0) {
+        temporaryReservation.value = undefined
         return
     }
 
@@ -590,34 +582,11 @@ function deleteRoomReservationSlot(toDelete: CalendarRoomReservationSlotData) {
         .then(
             (_) => {
                 // Filter the list of reservations
-                roomReservations.value = roomReservations.value.filter(
-                    (r) => r.id != reservation.id
-                )
+                roomReservations.list.value = roomReservations.list.value.filter((r) => r.id != reservation.id)
             },
             (reason) => parseReason(reason, handleReason)
         )
         .catch((reason) => parseReason(reason, handleReason))
-}
-
-function removeSlotFrom(
-    dateId: string,
-    toDelete: CalendarSlotData,
-    collection: { [p: string]: CalendarSlot[] }
-) {
-    // Find the slots array of the matching date
-    const storedSlots = collection[dateId]
-    if (!storedSlots) {
-        // Reservation date was not added, so nothing to delete
-        return
-    }
-    // Find the index in the array
-    const slotIndex = storedSlots.findIndex((s) => s.data.id === toDelete.id)
-    if (slotIndex === -1) {
-        // Slot was not added, so nothing to delete
-        return
-    }
-    // Finally remove the slot
-    collection[dateId].splice(slotIndex, 1)
 }
 
 function hideLoading(): void {
@@ -655,38 +624,35 @@ function handleDrag(drag: CalendarDragEvent) {
         start_time: drag.startTime.text,
         title: '',
     }
-    const slot = createRoomReservationSlot(reservation, true)
-    addSlotTo(createSlotId(day, month), slot, addedRoomReservationsPerDay.value)
+    temporaryReservation.value = reservation
 }
 
 function createSlotId(day: string | number, month: string | number): string {
-    return `${day}/${month}`
+    return `${toStringAtLeastTwoDigits(day)}/${toStringAtLeastTwoDigits(month)}`
 }
 
 onMounted(() => {
     fetchDepartments().then((value) => {
-        departments.value = value
+        departments.list.value = value
 
         // Select the current department by default
-        if (departments.value) {
-            selectedDepartment.value = departments.value.find(
-                (dept) => dept.abbrev === currentDepartment
-            )
+        if (departments.list.value) {
+            selectedDepartment.value = departments.list.value.find((dept) => dept.abbrev === currentDepartment)
 
-            rooms.value = {}
-            courseTypes.value = {}
+            rooms.perDepartment.value = {}
+            courseTypes.perDepartment.value = {}
             const roomsList: { [key: string]: Array<Room> } = {}
             const typesList: { [key: string]: Array<CourseType> } = {}
-            const departmentsCount = departments.value.length
+            const departmentsCount = departments.list.value.length
             let roomsCounter = departmentsCount
             let typesCounter = departmentsCount
-            departments.value.forEach((dept) => {
+            departments.list.value.forEach((dept) => {
                 // Fetch the rooms of each selected department
                 fetchRooms(dept.abbrev).then((value) => {
                     roomsList[dept.id] = value
                     if (--roomsCounter === 0) {
                         // Update the rooms list ref only once every department is handled
-                        rooms.value = roomsList
+                        rooms.perDepartment.value = roomsList
                     }
                 })
 
@@ -694,7 +660,7 @@ onMounted(() => {
                     typesList[dept.id] = value
                     if (--typesCounter === 0) {
                         // Update the course types list ref only once every department is handled
-                        courseTypes.value = typesList
+                        courseTypes.perDepartment.value = typesList
                     }
                 })
             })
@@ -706,15 +672,11 @@ onMounted(() => {
     })
 
     fetchRoomReservationTypes().then((value) => {
-        value.forEach((reservationType) => {
-            roomReservationTypes.value[reservationType.id] = reservationType
-        })
+        roomReservationTypes.list.value = value
     })
 
     fetchUsers().then((value) => {
-        value.forEach((user) => {
-            allUsers.value[user.id] = user
-        })
+        users.list.value = value
     })
 })
 
@@ -735,11 +697,7 @@ async function fetchTimeSettings() {
     return await api.value.fetch.all.timeSettings()
 }
 
-async function fetchRoomReservations(
-    week: number,
-    year: number,
-    params: { roomId?: number }
-) {
+async function fetchRoomReservations(week: number, year: number, params: { roomId?: number }) {
     return await api.value.fetch.target.roomReservations(week, year, params)
 }
 
@@ -747,11 +705,7 @@ async function fetchRoomReservationTypes() {
     return await api.value.fetch.all.roomReservationTypes()
 }
 
-async function fetchScheduledCourses(
-    week: number,
-    year: number,
-    department: string
-) {
+async function fetchScheduledCourses(week: number, year: number, department: string) {
     return await api.value.fetch.target.scheduledCourses(week, year, department)
 }
 
@@ -775,8 +729,7 @@ export default {
 .loader {
     position: fixed;
     z-index: 9999;
-    background: rgba(0, 0, 0, 0.6)
-        url('@/assets/images/logo-head-gribou-rc-hand.svg') no-repeat 50% 50%;
+    background: rgba(0, 0, 0, 0.6) url('@/assets/images/logo-head-gribou-rc-hand.svg') no-repeat 50% 50%;
     top: 0;
     left: 0;
     height: 100%;

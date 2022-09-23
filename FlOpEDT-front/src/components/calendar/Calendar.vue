@@ -44,7 +44,7 @@
                     @mouseup.left.self="dayColumnMouseUp(day.date, $event)"
                 >
                     <component
-                        :is="slot.component"
+                        :is="slot.component.value"
                         v-for="slot in displayableSlots[day.date]"
                         :key="slot.data.id"
                         :data="slot.data"
@@ -107,9 +107,7 @@ const displayableSlots = computed(() => {
         if (!(index in out)) {
             out[index] = []
         }
-        out[index] = props.values.slots[index].filter((tmpSlot) =>
-            canBeDisplayed(tmpSlot.data)
-        )
+        out[index] = props.values.slots[index].filter((tmpSlot) => canBeDisplayed(tmpSlot.data))
     })
     return out
 })
@@ -171,17 +169,12 @@ const dragEvent: CalendarDragEvent = {
  * @returns {number} The value of the time.
  */
 function clickHeightToTime(y: number, snap: number): number {
-    return (
-        Math.round((props.values.startTime + (y / pixelsPerHour) * 60) / snap) *
-        snap
-    )
+    return Math.round((props.values.startTime + (y / pixelsPerHour) * 60) / snap) * snap
 }
 
 function dayColumnMouseDown(day: string, event: MouseEvent): void {
     const dayArray = day.split('/')
-    dragEvent.startDate = new Date(
-        `${props.values.year}-${dayArray[1]}-${dayArray[0]}`
-    )
+    dragEvent.startDate = new Date(`${props.values.year}-${dayArray[1]}-${dayArray[0]}`)
     const time = clickHeightToTime(event.offsetY, snapValueStart)
     dragEvent.startTime = {
         text: convertDecimalTimeToHuman(time / 60),
@@ -191,9 +184,7 @@ function dayColumnMouseDown(day: string, event: MouseEvent): void {
 
 function dayColumnMouseUp(day: string, event: MouseEvent): void {
     const dayArray = day.split('/')
-    dragEvent.endDate = new Date(
-        `${props.values.year}-${dayArray[1]}-${dayArray[0]}`
-    )
+    dragEvent.endDate = new Date(`${props.values.year}-${dayArray[1]}-${dayArray[0]}`)
     const startTime = dragEvent.startTime.value
     let time = clickHeightToTime(event.offsetY, snapStep)
     if (time - startTime < 5) {
@@ -211,11 +202,7 @@ function dayColumnMouseUp(day: string, event: MouseEvent): void {
 
 const pixelsPerHour = 50
 const heightValue = computed(() => {
-    return (
-        pixelsPerHour *
-        (Math.trunc(props.values.endTime / 60) -
-            Math.trunc(props.values.startTime / 60))
-    )
+    return pixelsPerHour * (Math.trunc(props.values.endTime / 60) - Math.trunc(props.values.startTime / 60))
 })
 
 const height = computed(() => {
@@ -223,10 +210,7 @@ const height = computed(() => {
 })
 
 function positionRelativeToColumn(value: number): number {
-    return (
-        (100 * (value - props.values.startTime)) /
-        (props.values.endTime - props.values.startTime)
-    )
+    return (100 * (value - props.values.startTime)) / (props.values.endTime - props.values.startTime)
 }
 
 function computeHeight(slot: CalendarSlotData): string {
@@ -245,14 +229,15 @@ function computeYOffset(time: number): string {
 function canBeDisplayed(slot: CalendarSlotData): boolean {
     const out = slot.startTime.value >= props.values.startTime
     if (!out) {
-        console.log(
-            `Slot ${slot.title} cannot be displayed because it does not begin after day start time`
-        )
+        console.log(`Slot ${slot.title} cannot be displayed because it does not begin after day start time`)
     }
     return out
 }
 
 function computeStyle(slot: CalendarSlotData): StyleValue {
+    if (slot.id.endsWith('-1')) {
+        console.log(slot)
+    }
     const top = computeYOffset(slot.startTime.value)
     const height = computeHeight(slot)
     return {

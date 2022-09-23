@@ -218,7 +218,7 @@ export interface CalendarProps {
 
 export interface CalendarSlot {
     data: CalendarSlotData
-    component: ShallowRef<unknown>
+    component: ShallowRef
     actions: CalendarSlotActions
 }
 
@@ -234,7 +234,6 @@ export interface CalendarSlotData {
     title: string
     id: string
     displayStyle: object
-    isNew: boolean
 }
 
 export interface CalendarRoomReservationSlotData extends CalendarSlotData {

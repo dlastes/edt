@@ -7,20 +7,19 @@
         @click="onClick"
     >
         <div class="course">
-            <p class="m-0">{{ props.data.course.course.module.abbrev }}</p>
-            <p class="m-0">{{ props.data.course.tutor }}</p>
-            <p class="m-0">{{ props.data.department }}</p>
-            <p class="m-0">{{ roomName }}</p>
+            <div class="row">
+                <p class="col-xl-6">{{ props.data.course.course.module.abbrev }}</p>
+                <p class="col-xl-6">{{ props.data.department }}</p>
+                <p class="col-xl-6">{{ props.data.course.tutor }}</p>
+                <p class="col-xl-6">{{ roomName }}</p>
+            </div>
         </div>
         <template #content></template>
     </PopperComponent>
 </template>
 
 <script setup lang="ts">
-import type {
-    CalendarScheduledCourseSlotData,
-    CalendarSlotInterface,
-} from '@/assets/js/types'
+import type { CalendarScheduledCourseSlotData, CalendarSlotInterface } from '@/assets/js/types'
 import { computed, onMounted, ref } from 'vue'
 
 interface Props {
@@ -80,7 +79,7 @@ export default {
 }
 
 p {
-    font-size: 0.625em;
+    font-size: 0.75em;
     font-weight: bold;
     margin: 0;
 }

@@ -2,27 +2,9 @@
     <div class="card p-0 m-0">
         <div class="card-body p-1 m-0">
             <div class="btn-group" role="group" aria-label="Slot context menu">
-                <button
-                    type="button"
-                    class="btn btn-primary"
-                    @click="props.onEdit"
-                >
-                    Edit
-                </button>
-                <button
-                    type="button"
-                    class="btn btn-danger"
-                    @click="props.onDelete"
-                >
-                    Delete
-                </button>
-                <button
-                    type="button"
-                    class="btn btn-info"
-                    @click="props.onDuplicate"
-                >
-                    Duplicate
-                </button>
+                <button type="button" class="btn btn-primary" @click="props.onEdit">Edit</button>
+                <button type="button" class="btn btn-danger" @click="props.onDelete">Delete</button>
+                <button type="button" class="btn btn-info" @click="props.onDuplicate">Duplicate</button>
             </div>
         </div>
     </div>

@@ -11,7 +11,7 @@
             <RoomReservationForm
                 :reservation="props.data.reservation"
                 :is-open="isEditing"
-                :is-new="props.data.isNew"
+                :is-new="props.data.reservation.id < 0"
                 :rooms="props.data.rooms"
                 :reservation-types="props.data.reservationTypes"
                 :users="props.data.users"
@@ -19,10 +19,12 @@
                 @saved="onSave"
                 @cancelled="onCancel"
             ></RoomReservationForm>
-            <p class="m-0">{{ props.data.title }}</p>
-            <p class="m-0">{{ props.data.reservation.description }}</p>
-            <p class="m-0">{{ responsible }}</p>
-            <p class="m-0">{{ roomName }}</p>
+            <div class="row m-0">
+                <p class="col-xl-6">{{ props.data.title }}</p>
+                <p class="col-xl-6">{{ props.data.reservation.description }}</p>
+                <p class="col-xl-6">{{ responsible }}</p>
+                <p class="col-xl-6">{{ roomName }}</p>
+            </div>
         </div>
         <template #content>
             <CalendarSlotContextMenu
@@ -118,7 +120,7 @@ function onDuplicate() {
 
 function onCancel() {
     closeEdit()
-    if (props.data.isNew) {
+    if (props.data.reservation.id < 0) {
         onDelete()
     }
 }
@@ -150,7 +152,7 @@ function emitInterface() {
 onMounted(() => {
     emitInterface()
     // Open the form if the slot has just been created
-    if (props.data.isNew) {
+    if (props.data.reservation.id < 0) {
         isEditing.value = true
     }
 })
@@ -170,8 +172,9 @@ export default {
 }
 
 p {
-    font-size: 0.625em;
+    font-size: 0.75em;
     font-weight: bold;
     margin: 0;
+    padding: 0 0 0 5px;
 }
 </style>
