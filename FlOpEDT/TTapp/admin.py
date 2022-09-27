@@ -204,19 +204,16 @@ class MinGroupsHalfDaysAdmin(DepartmentModelAdmin):
         if queryset and db_field.name == 'groups':
             return queryset.filter(basic=True).distinct()
 
-        return queryset                          
-
+        return queryset
 
 
 class AvoidBothTimesAdmin(DepartmentModelAdmin):
-    list_display = ('tutor', 'group', 'time1', 'time2', 'comment',
+    list_display = ('time1', 'time2', 'comment',
                     'weight',
                     'is_active')
     ordering = ()
     list_filter = (('weeks__nb', DropdownFilterAll),
                    ('train_progs', DropdownFilterRel),
-                   ('tutor', DropdownFilterRel),
-                   ('group', DropdownFilterRel),
                    ('time1', DropdownFilterRel),
                    ('time2', DropdownFilterRel),
                    )
