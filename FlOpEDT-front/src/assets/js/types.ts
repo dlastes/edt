@@ -208,19 +208,30 @@ export interface CalendarProps {
         }
     }
     year: string
+}
+
+export interface HourCalendarProps extends CalendarProps {
     slots: {
         // The slot date formatted as yyyy-MM-dd
         [index: string]: Array<CalendarSlot>
     }
-}
-
-export interface HourCalendarProps extends CalendarProps {
     startTime: number
     endTime: number
 }
 
+export interface RoomCalendarProps extends CalendarProps {
+    slots: {
+        // The slot date formatted as yyyy-MM-dd
+        [index: string]: {
+            // The room id
+            [index: string]: Array<CalendarSlot>
+        }
+    }
+    rooms: Array<Room>
+}
+
 export interface CalendarSlot {
-    data: CalendarSlotData
+    slotData: CalendarSlotData
     component: ShallowRef
     actions: CalendarSlotActions
 }
@@ -232,6 +243,7 @@ export interface CalendarSlotActions {
 }
 
 export interface CalendarSlotData {
+    day: string
     startTime: Time
     endTime: Time
     title: string

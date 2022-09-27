@@ -46,13 +46,13 @@
                     <component
                         :is="slot.component.value"
                         v-for="slot in displayableSlots[day.date]"
-                        :key="slot.data.id"
-                        :data="slot.data"
+                        :key="slot.slotData.id"
+                        :data="slot.slotData"
                         :actions="slot.actions"
-                        :style="computeStyle(slot.data)"
+                        :style="computeStyle(slot.slotData)"
                         class="noselect slot m-0 border border-dark"
                         @click.right.prevent
-                        @contextmenu="openContextMenu(slot.data.id)"
+                        @contextmenu="openContextMenu(slot.slotData.id)"
                         @interface="storeSlotInterface"
                     >
                     </component>
@@ -107,7 +107,7 @@ const displayableSlots = computed(() => {
         if (!(index in out)) {
             out[index] = []
         }
-        out[index] = props.values.slots[index].filter((tmpSlot) => canBeDisplayed(tmpSlot.data))
+        out[index] = props.values.slots[index].filter((tmpSlot) => canBeDisplayed(tmpSlot.slotData))
     })
     return out
 })

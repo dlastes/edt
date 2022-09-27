@@ -6,13 +6,8 @@
         :style="props.data.displayStyle"
         @click="onClick"
     >
-        <div class="course">
-            <div class="row">
-                <p class="col-xl-6">{{ props.data.course.course.module.abbrev }}</p>
-                <p class="col-xl-6">{{ props.data.department }}</p>
-                <p class="col-xl-6">{{ props.data.course.tutor }}</p>
-                <p class="col-xl-6">{{ roomName }}</p>
-            </div>
+        <div class="row m-0 course">
+            <slot name="text"></slot>
         </div>
         <template #content></template>
     </PopperComponent>
@@ -20,7 +15,7 @@
 
 <script setup lang="ts">
 import type { CalendarScheduledCourseSlotData, CalendarSlotInterface } from '@/assets/js/types'
-import { computed, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 
 interface Props {
     data: CalendarScheduledCourseSlotData
@@ -35,10 +30,6 @@ interface Emits {
 const emit = defineEmits<Emits>()
 
 const isContextMenuOpened = ref<boolean>(false)
-const roomName = computed(() => {
-    const r = props.data.rooms[props.data.course.room]
-    return r?.name
-})
 
 function onClick() {
     console.log(props.data.title)
@@ -78,10 +69,11 @@ export default {
     width: 100%;
 }
 
-p {
+:slotted(p) {
     font-size: 0.75em;
     font-weight: bold;
     margin: 0;
+    padding: 0 5px 0 5px;
 }
 
 .course {

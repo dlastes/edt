@@ -19,20 +19,19 @@
                 @saved="onSave"
                 @cancelled="onCancel"
             ></RoomReservationForm>
-            <div class="row m-0">
-                <p class="col-xl-6">{{ props.data.title }}</p>
-                <p class="col-xl-6">{{ props.data.reservation.description }}</p>
-                <p class="col-xl-6">{{ responsible }}</p>
-                <p class="col-xl-6">{{ roomName }}</p>
+            <div class="row m-0 h-100">
+                <slot name="text"></slot>
             </div>
         </div>
         <template #content>
-            <CalendarSlotContextMenu
-                :data="props.data"
-                :on-delete="onDelete"
-                :on-edit="onDoubleClick"
-                :on-duplicate="onDuplicate"
-            ></CalendarSlotContextMenu>
+            <slot name="contextmenu">
+                <CalendarSlotContextMenu
+                    :data="props.data"
+                    :on-delete="onDelete"
+                    :on-edit="onDoubleClick"
+                    :on-duplicate="onDuplicate"
+                ></CalendarSlotContextMenu>
+            </slot>
         </template>
     </PopperComponent>
 </template>
@@ -46,7 +45,7 @@ import type {
 } from '@/assets/js/types'
 import CalendarSlotContextMenu from '@/components/calendar/CalendarSlotContextMenu.vue'
 import RoomReservationForm from '@/components/RoomReservationForm.vue'
-import { computed, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 
 interface Props {
     data: CalendarRoomReservationSlotData
@@ -65,14 +64,6 @@ const isContextMenuOpened = ref<boolean>(false)
 const clickCount = ref(0)
 const timer = ref()
 const isEditing = ref(false)
-const responsible = computed(() => {
-    const user = props.data.users[props.data.reservation.responsible]
-    return user?.username
-})
-const roomName = computed(() => {
-    const r = props.data.rooms[props.data.reservation.room]
-    return r?.name
-})
 
 function onClick() {
     if (++clickCount.value == 1) {
@@ -171,10 +162,10 @@ export default {
     width: 100%;
 }
 
-p {
+:slotted(p) {
     font-size: 0.75em;
     font-weight: bold;
     margin: 0;
-    padding: 0 0 0 5px;
+    padding: 0 5px 0 5px;
 }
 </style>
