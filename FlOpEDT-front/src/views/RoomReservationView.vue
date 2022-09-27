@@ -50,7 +50,7 @@
                 </div>
                 <!-- Calendar -->
                 <div class="col">
-                    <Calendar @drag="handleDrag" :values="calendarValues"></Calendar>
+                    <HourCalendar @drag="handleDrag" :values="calendarValues"></HourCalendar>
                 </div>
             </div>
         </div>
@@ -77,7 +77,7 @@ import type {
     WeekDay,
 } from '@/assets/js/types'
 import { ScheduledCourse, Time } from '@/assets/js/types'
-import Calendar from '@/components/calendar/Calendar.vue'
+import HourCalendar from '@/components/calendar/HourCalendar.vue'
 import CalendarScheduledCourseSlot from '@/components/calendar/CalendarScheduledCourseSlot.vue'
 import WeekPicker from '@/components/WeekPicker.vue'
 import { getDepartment } from '@/main'

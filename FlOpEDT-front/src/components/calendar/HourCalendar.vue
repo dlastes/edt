@@ -260,7 +260,7 @@ function computeHourStyle(hour: Time): StyleValue {
 
 <script lang="ts">
 export default {
-    name: 'CalendarComponent',
+    name: 'HourCalendar',
     components: {},
 }
 </script>
