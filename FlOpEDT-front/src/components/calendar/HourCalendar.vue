@@ -66,10 +66,10 @@
 import { convertDecimalTimeToHuman } from '@/assets/js/helpers'
 import type {
     CalendarDragEvent,
-    CalendarProps,
     CalendarSlot,
     CalendarSlotData,
     CalendarSlotInterface,
+    HourCalendarProps,
     Time,
 } from '@/assets/js/types'
 import type { StyleValue } from 'vue'
@@ -82,7 +82,7 @@ interface Emits {
 const emit = defineEmits<Emits>()
 
 interface Props {
-    values: CalendarProps
+    values: HourCalendarProps
 }
 
 const props = defineProps<Props>()

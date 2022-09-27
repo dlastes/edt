@@ -212,6 +212,9 @@ export interface CalendarProps {
         // The slot date formatted as yyyy-MM-dd
         [index: string]: Array<CalendarSlot>
     }
+}
+
+export interface HourCalendarProps extends CalendarProps {
     startTime: number
     endTime: number
 }
