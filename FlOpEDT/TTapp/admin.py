@@ -380,6 +380,6 @@ admin.site.register(LimitSimultaneousCoursesNumber, BasicConstraintAdmin)
 admin.site.register(LocateAllCourses, RoomConstraintAdmin)
 admin.site.register(LimitTutorMoves, RoomConstraintAdmin)
 admin.site.register(LimitGroupMoves, RoomConstraintAdmin)
-admin.site.register(AvoidBothTimesSameDay, AvoidBothTimesSameDay)
+admin.site.register(AvoidBothTimesSameDay, AvoidBothTimesAdmin)
 
 
