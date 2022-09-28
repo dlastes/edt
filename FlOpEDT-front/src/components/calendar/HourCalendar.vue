@@ -1,65 +1,69 @@
 <template>
-    <table class="w-100" @click="clicked">
-        <tr class="p-0 flex-nowrap">
-            <th class="p-0 me-3"></th>
-            <th
-                v-for="day in props.values.days"
-                :key="day.date"
-                class="col text-center border-dark border-bottom border-end border-top"
-                :class="{
-                    'border-start border-dark': day === props.values.days[0],
-                }"
-            >
-                <div>{{ day.name }} {{ day.date }}</div>
-            </th>
-        </tr>
-        <tr class="flex-nowrap position-relative" :style="{ height: height }">
-            <td class="p-0 h-100" style="min-width: 50px; width: 50px">
-                <div
-                    v-for="hour in hourIndicators"
-                    :key="hour.value"
-                    :style="computeHourStyle(hour)"
-                    class="translate-middle-y"
-                >
-                    <h6 class="text-wrap">{{ hour.text }}</h6>
-                    <hr
-                        class="border border-primary border-1 w-100 position-absolute top-0"
-                        style="transform: translateY(-3px)"
-                    />
-                </div>
-            </td>
-            <td
-                v-for="day in props.values.days"
-                :key="day.date"
-                class="col border-dark border-bottom border-end p-0"
-                :class="{
-                    'border-start border-dark': day === props.values.days[0],
-                }"
-                :style="{ height: height }"
-                style="min-width: 65px"
-            >
-                <div
-                    class="position-relative h-100"
-                    @mousedown.left.self="dayColumnMouseDown(day.date, $event)"
-                    @mouseup.left.self="dayColumnMouseUp(day.date, $event)"
-                >
-                    <component
-                        :is="slot.component.value"
-                        v-for="slot in displayableSlots[day.date]"
-                        :key="slot.slotData.id"
-                        :data="slot.slotData"
-                        :actions="slot.actions"
-                        :style="computeStyle(slot.slotData)"
-                        class="noselect slot m-0 border border-dark"
-                        @click.right.prevent
-                        @contextmenu="openContextMenu(slot.slotData.id)"
-                        @interface="storeSlotInterface"
+    <BaseCalendar ref="calendar">
+        <template #table>
+            <table class="w-100">
+                <tr class="p-0 flex-nowrap">
+                    <th class="p-0 me-3"></th>
+                    <th
+                        v-for="day in props.values.days"
+                        :key="day.date"
+                        class="col text-center border-dark border-bottom border-end border-top"
+                        :class="{
+                            'border-start border-dark': day === props.values.days[0],
+                        }"
                     >
-                    </component>
-                </div>
-            </td>
-        </tr>
-    </table>
+                        <div>{{ day.name }} {{ day.date }}</div>
+                    </th>
+                </tr>
+                <tr class="flex-nowrap position-relative" :style="{ height: height }">
+                    <td class="p-0 h-100" style="min-width: 50px; width: 50px">
+                        <div
+                            v-for="hour in hourIndicators"
+                            :key="hour.value"
+                            :style="computeHourStyle(hour)"
+                            class="translate-middle-y"
+                        >
+                            <h6 class="text-wrap">{{ hour.text }}</h6>
+                            <hr
+                                class="border border-primary border-1 w-100 position-absolute top-0"
+                                style="transform: translateY(-3px)"
+                            />
+                        </div>
+                    </td>
+                    <td
+                        v-for="day in props.values.days"
+                        :key="day.date"
+                        class="col border-dark border-bottom border-end p-0"
+                        :class="{
+                            'border-start border-dark': day === props.values.days[0],
+                        }"
+                        :style="{ height: height }"
+                        style="min-width: 65px"
+                    >
+                        <div
+                            class="position-relative h-100"
+                            @mousedown.left.self="dayColumnMouseDown(day.date, $event)"
+                            @mouseup.left.self="dayColumnMouseUp(day.date, $event)"
+                        >
+                            <component
+                                :is="slot.component.value"
+                                v-for="slot in displayableSlots[day.date]"
+                                :key="slot.slotData.id"
+                                :data="slot.slotData"
+                                :actions="slot.actions"
+                                :style="computeStyle(slot.slotData)"
+                                class="noselect slot m-0 border border-dark"
+                                @click.right.prevent
+                                @contextmenu="contextMenu(slot.slotData.id)"
+                                @interface="storeSlotInterface"
+                            >
+                            </component>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </template>
+    </BaseCalendar>
 </template>
 
 <script setup lang="ts">
@@ -72,8 +76,9 @@ import type {
     HourCalendarProps,
     Time,
 } from '@/assets/js/types'
-import type { StyleValue } from 'vue'
+import type { StyleValue, VueElementConstructor } from 'vue'
 import { computed, defineProps, ref } from 'vue'
+import BaseCalendar from '@/components/calendar/BaseCalendar.vue'
 
 interface Emits {
     (e: 'drag', event: CalendarDragEvent): void
@@ -125,34 +130,6 @@ const hourIndicators = computed(() => {
     }
     return hours
 })
-
-const slotInterfaces = ref<{ [key: string]: CalendarSlotInterface }>({})
-
-const currentContextMenu = ref<string>('')
-
-function storeSlotInterface(id: string, slotInterface: CalendarSlotInterface) {
-    slotInterfaces.value[id] = slotInterface
-}
-
-function openContextMenu(slotId: string) {
-    closeCurrentContextMenu()
-
-    // Store the current context menu if opened successfully
-    if (slotInterfaces.value[slotId].openContextMenu()) {
-        currentContextMenu.value = slotId
-    }
-}
-
-function closeCurrentContextMenu() {
-    // Close currently opened context menu (if exists)
-    if (currentContextMenu.value) {
-        slotInterfaces.value[currentContextMenu.value].closeContextMenu()
-    }
-}
-
-function clicked() {
-    closeCurrentContextMenu()
-}
 
 const dragEvent: CalendarDragEvent = {
     startDate: new Date(),
@@ -235,9 +212,6 @@ function canBeDisplayed(slot: CalendarSlotData): boolean {
 }
 
 function computeStyle(slot: CalendarSlotData): StyleValue {
-    if (slot.id.endsWith('-1')) {
-        console.log(slot)
-    }
     const top = computeYOffset(slot.startTime.value)
     const height = computeHeight(slot)
     return {
@@ -254,6 +228,20 @@ function computeHourStyle(hour: Time): StyleValue {
         top: top,
         position: 'absolute',
         width: '100%',
+    }
+}
+
+const calendar = ref()
+
+function contextMenu(id: string) {
+    if (calendar.value) {
+        calendar.value.openContextMenu(id)
+    }
+}
+
+function storeSlotInterface(id: string, slotInterface: CalendarSlotInterface) {
+    if (calendar.value) {
+        calendar.value.storeSlotInterface(id, slotInterface)
     }
 }
 </script>
