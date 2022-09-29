@@ -1,8 +1,11 @@
 import type {
+    BooleanRoomAttributeValue,
     Course,
     CourseType,
     Department,
+    NumericRoomAttributeValue,
     Room,
+    RoomAttribute,
     RoomReservation,
     RoomReservationType,
     ScheduledCourse,
@@ -168,6 +171,10 @@ const urls = {
     coursetypes: 'courses/type',
     users: 'user/users',
     authToken: 'api-token-auth',
+    booleanroomattributes: 'rooms/booleanattributes',
+    numericroomattributes: 'rooms/numericattributes',
+    booleanroomattributevalues: 'rooms/booleanattributevalues',
+    numericroomattributevalues: 'rooms/numericattributevalues',
 }
 
 /**
@@ -192,6 +199,10 @@ export interface FlopAPI {
             courseTypes(department: string): Promise<Array<CourseType>>
             roomReservationTypes(): Promise<Array<RoomReservationType>>
             users(): Promise<Array<User>>
+            booleanRoomAttributes(): Promise<Array<RoomAttribute>>
+            numericRoomAttributes(): Promise<Array<RoomAttribute>>
+            booleanRoomAttributeValues(): Promise<Array<BooleanRoomAttributeValue>>
+            numericRoomAttributeValues(): Promise<Array<NumericRoomAttributeValue>>
         }
         target: {
             room(id: number, additionalParams?: object): Promise<Room>
@@ -248,6 +259,18 @@ const api: FlopAPI = {
             },
             users() {
                 return fetcher(urls.users)
+            },
+            booleanRoomAttributes() {
+                return fetcher(urls.booleanroomattributes)
+            },
+            numericRoomAttributes() {
+                return fetcher(urls.numericroomattributes)
+            },
+            booleanRoomAttributeValues() {
+                return fetcher(urls.booleanroomattributevalues)
+            },
+            numericRoomAttributeValues() {
+                return fetcher(urls.numericroomattributevalues)
             },
         },
         target: {

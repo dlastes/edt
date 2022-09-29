@@ -279,3 +279,37 @@ export interface FormAlert {
     level: string // info | warning | danger | success
     message: string
 }
+
+export interface RoomAttribute {
+    id: number
+    name: string
+    description: string
+}
+
+export interface RoomAttributeValue {
+    id: number
+    room: number
+    attribute: number
+}
+
+export interface BooleanRoomAttributeValue extends RoomAttributeValue {
+    value: boolean
+}
+
+export interface NumericRoomAttributeValue extends RoomAttributeValue {
+    value: number
+}
+
+export interface DynamicSelectElementValue {
+    id: number
+    name: string
+}
+
+export interface DynamicSelectElementBooleanValue extends DynamicSelectElementValue {
+    value: boolean
+}
+
+export interface DynamicSelectElementNumericValue extends DynamicSelectElementValue {
+    min: number
+    max: number
+}

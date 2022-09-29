@@ -4,47 +4,90 @@
         <div class="container-fluid">
             <div class="row">
                 <!-- Week picker and filters -->
-                <div class="col-auto">
+                <div class="col-6 col-md-5 col-lg-4 col-xl-3">
                     <WeekPicker v-model:week="selectedDate.week" v-model:year="selectedDate.year"></WeekPicker>
-                    <!-- Filters -->
-                    <div class="col-auto">
-                        <!-- Room filter -->
-                        <div class="mb-3">
-                            <label for="select-room" class="form-label">Room:</label>
-                            <select
-                                id="select-room"
-                                v-model="selectedRoom"
-                                class="form-select w-auto"
-                                aria-label="Select room"
-                            >
-                                <option :value="undefined">All rooms</option>
-                                <option
-                                    v-for="room in Object.values(rooms.perIdOfSelectedDepartments.value)
-                                        .filter((r) => r.is_basic)
-                                        .sort((r1, r2) => {
-                                            return r1.name.toLowerCase().localeCompare(r2.name.toLowerCase())
-                                        })"
-                                    :key="room.id"
-                                    :value="room"
+                    <div class="row">
+                        <!-- Filters -->
+                        <div class="col">
+                            <!-- Room filter -->
+                            <div class="mb-3">
+                                <label for="select-room" class="form-label">Room:</label>
+                                <select
+                                    id="select-room"
+                                    v-model="selectedRoom"
+                                    class="form-select w-auto"
+                                    aria-label="Select room"
                                 >
-                                    {{ room.name }}
-                                </option>
-                            </select>
-                        </div>
-                        <!-- Department filter -->
-                        <div class="mb-3">
-                            <label for="select-department" class="form-label">Department:</label>
-                            <select
-                                id="select-department"
-                                v-model="selectedDepartment"
-                                class="form-select w-auto ms-1"
-                                aria-label="Select department"
-                            >
-                                <option :value="undefined">All departments</option>
-                                <option v-for="dept in departments.list.value" :key="dept.id" :value="dept">
-                                    {{ dept.abbrev }}
-                                </option>
-                            </select>
+                                    <option :value="undefined">All rooms</option>
+                                    <option
+                                        v-for="room in Object.values(rooms.perIdFilterBySelectedDepartments.value)
+                                            .filter((r) => r.is_basic)
+                                            .sort((r1, r2) => {
+                                                return r1.name.toLowerCase().localeCompare(r2.name.toLowerCase())
+                                            })"
+                                        :key="room.id"
+                                        :value="room"
+                                    >
+                                        {{ room.name }}
+                                    </option>
+                                </select>
+                            </div>
+                            <!-- Department filter -->
+                            <div class="mb-3">
+                                <label for="select-department" class="form-label">Department:</label>
+                                <select
+                                    id="select-department"
+                                    v-model="selectedDepartment"
+                                    class="form-select w-auto ms-1"
+                                    aria-label="Select department"
+                                >
+                                    <option :value="undefined">All departments</option>
+                                    <option v-for="dept in departments.list.value" :key="dept.id" :value="dept">
+                                        {{ dept.abbrev }}
+                                    </option>
+                                </select>
+                            </div>
+                            <!-- Room attribute filters -->
+                            <div v-if="!selectedRoom">
+                                <!-- Boolean attributes -->
+                                <div class="mb-3">
+                                    <DynamicSelect
+                                        v-bind="{
+                                            component: DynamicSelectedElementBoolean,
+                                            id: 'select-attribute-bool',
+                                            label: 'Toggle attributes:',
+                                            values:    roomAttributes.booleanList.value.map((attribute) => {
+        const out: DynamicSelectElementBooleanValue = {
+            id: attribute.id,
+            name: attribute.name,
+            value: false,
+        }
+        return out
+    })
+                                        }"
+                                        v-model:selected-values="selectedBooleanAttributes"
+                                    ></DynamicSelect>
+                                </div>
+                                <div class="mb-3">
+                                    <DynamicSelect
+                                        v-bind="{
+                                            component: DynamicSelectedElementNumeric,
+                                            id: 'select-attribute-num',
+                                            label: 'Value attributes:',
+                                            values: roomAttributes.numericList.value.map((attribute) => {
+        const out: DynamicSelectElementNumericValue = {
+            id: attribute.id,
+            name: attribute.name,
+            min: 0,
+            max: 50,
+        }
+        return out
+    })
+                                        }"
+                                        v-model:selected-values="selectedNumericAttributes"
+                                    ></DynamicSelect>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -63,6 +106,7 @@ import type { FlopAPI } from '@/assets/js/api'
 import { convertDecimalTimeToHuman, listGroupBy, parseReason, toStringAtLeastTwoDigits } from '@/assets/js/helpers'
 import { apiKey, apiToken, currentWeekKey, requireInjection } from '@/assets/js/keys'
 import type {
+    BooleanRoomAttributeValue,
     CalendarDragEvent,
     CalendarProps,
     CalendarRoomReservationSlotData,
@@ -70,9 +114,15 @@ import type {
     CalendarSlot,
     CourseType,
     Department,
+    DynamicSelectElementBooleanValue,
+    DynamicSelectElementNumericValue,
+    DynamicSelectElementValue,
     FlopWeek,
     HourCalendarProps,
+    NumericRoomAttributeValue,
     Room,
+    RoomAttribute,
+    RoomAttributeValue,
     RoomCalendarProps,
     RoomReservation,
     RoomReservationType,
@@ -91,6 +141,9 @@ import HourCalendarRoomReservationSlot from '@/components/calendar/HourCalendarR
 import RoomCalendarRoomReservationSlot from '@/components/calendar/RoomCalendarRoomReservationSlot.vue'
 import HourCalendarScheduledCourseSlot from '@/components/calendar/HourCalendarScheduledCourseSlot.vue'
 import RoomCalendarScheduledCourseSlot from '@/components/calendar/RoomCalendarScheduledCourseSlot.vue'
+import DynamicSelect from '@/components/dynamicSelect/DynamicSelect.vue'
+import DynamicSelectedElementNumeric from '@/components/dynamicSelect/DynamicSelectedElementNumeric.vue'
+import DynamicSelectedElementBoolean from '@/components/dynamicSelect/DynamicSelectedElementBoolean.vue'
 
 const api = ref<FlopAPI>(requireInjection(apiKey))
 const authToken = requireInjection(apiToken)
@@ -103,8 +156,9 @@ interface Rooms {
     perDepartment: Ref<{ [departmentId: string]: Array<Room> }>
     perDepartmentFilterBySelectedDepartments: ComputedRef<{ [departmentId: string]: Array<Room> }>
     listFilterBySelectedDepartments: ComputedRef<Array<Room>>
-    perIdOfSelectedDepartments: ComputedRef<{ [roomId: string]: Room }>
+    perIdFilterBySelectedDepartments: ComputedRef<{ [roomId: string]: Room }>
     perId: ComputedRef<{ [roomId: string]: Room }>
+    listFilterBySelectedDepartmentsAndFilters: ComputedRef<Array<Room>>
 }
 
 interface ScheduledCourses {
@@ -141,6 +195,16 @@ interface Users {
     perId: ComputedRef<{ [userId: string]: User }>
 }
 
+interface RoomAttributes {
+    booleanList: Ref<Array<RoomAttribute>>
+    numericList: Ref<Array<RoomAttribute>>
+}
+
+interface RoomAttributeValues {
+    booleanList: Ref<Array<BooleanRoomAttributeValue>>
+    numericList: Ref<Array<NumericRoomAttributeValue>>
+}
+
 // API data
 const departments = {
     list: ref<Array<Department>>([]),
@@ -169,7 +233,7 @@ const rooms: Rooms = {
         })
         return out
     }),
-    perIdOfSelectedDepartments: computed(() => {
+    perIdFilterBySelectedDepartments: computed(() => {
         return Object.fromEntries(
             rooms.listFilterBySelectedDepartments.value
                 .filter((r) => r.is_basic)
@@ -181,6 +245,64 @@ const rooms: Rooms = {
     }),
     perId: computed(() => {
         return Object.fromEntries(rooms.list.value.map((r) => [r.id, r]))
+    }),
+    listFilterBySelectedDepartmentsAndFilters: computed(() => {
+        const filters: Array<
+            [
+                Array<DynamicSelectElementValue>,
+                Array<RoomAttributeValue>,
+                // Comparison between the filter value and the room's attribute value
+                (filterVal: any, attributeVal: any) => boolean
+            ]
+        > = [
+            [
+                selectedBooleanAttributes.value,
+                roomAttributeValues.booleanList.value,
+                (filterVal: DynamicSelectElementBooleanValue, attributeVal: BooleanRoomAttributeValue) =>
+                    filterVal.value !== attributeVal.value,
+            ],
+            [
+                selectedNumericAttributes.value,
+                roomAttributeValues.numericList.value,
+                (filterVal: DynamicSelectElementNumericValue, attributeVal: NumericRoomAttributeValue) => {
+                    return Number(attributeVal.value) >= filterVal.min && Number(attributeVal.value) <= filterVal.max
+                },
+            ],
+        ]
+        return Object.values(rooms.perIdFilterBySelectedDepartments.value).filter((room) => {
+            const roomId = room.id
+            let matchFilters = true
+
+            filters.forEach((filterEntry) => {
+                if (!matchFilters) {
+                    // Skip the next checks if one failed
+                    return
+                }
+                const selectedFilterAttributes = filterEntry[0]
+                const attributeValues = filterEntry[1]
+                const comparisonPredicate = filterEntry[2]
+                // Consider only filters if at least one is selected
+                if (selectedFilterAttributes.length > 0) {
+                    selectedFilterAttributes.forEach((selectedFilterAttribute) => {
+                        // Get the values of the current attribute
+                        const filteredAttributeValues = attributeValues.filter(
+                            (attributeValue) => attributeValue.attribute === selectedFilterAttribute.id
+                        )
+                        // Consider only attributes with at least one value
+                        if (filteredAttributeValues.length > 0) {
+                            // Try to find the value matching the room
+                            const attributeValue = filteredAttributeValues.find((filt) => filt.room === roomId)
+                            if (attributeValue && !comparisonPredicate(selectedFilterAttribute, attributeValue)) {
+                                // The room has an attribute with a value which does not match the filter
+                                matchFilters = false
+                                return
+                            }
+                        }
+                    })
+                }
+            })
+            return matchFilters
+        })
     }),
 }
 
@@ -209,7 +331,12 @@ const scheduledCourses: ScheduledCourses = {
     perDayPerRoomFilterBySelectedDepartments: computed(() => {
         const out: { [day: string]: { [roomId: string]: Array<ScheduledCourse> } } = {}
         Object.entries(scheduledCourses.perDay.value).forEach((entry) => {
-            out[entry[0]] = listGroupBy(entry[1], (course) => `${course.room}`)
+            const day = entry[0]
+            const courses = entry[1].filter((course) => {
+                const dept = getScheduledCourseDepartment(course)
+                return dept && selectedDepartments.value.includes(dept)
+            })
+            out[day] = listGroupBy(courses, (course) => `${course.room}`)
         })
         return out
     }),
@@ -273,6 +400,16 @@ const users: Users = {
     }),
 }
 
+const roomAttributes: RoomAttributes = {
+    booleanList: ref([]),
+    numericList: ref([]),
+}
+
+const roomAttributeValues: RoomAttributeValues = {
+    booleanList: ref([]),
+    numericList: ref([]),
+}
+
 // Time Settings
 const timeSettings = ref<Array<TimeSettings>>()
 const dayStartTime = ref<Time>({ value: 0, text: '' })
@@ -309,6 +446,12 @@ const selectedDepartments = computed(() => {
     }
     return selected
 })
+
+// The attributes selected in the boolean filter
+const selectedBooleanAttributes = ref<Array<DynamicSelectElementBooleanValue>>([])
+
+// The attributes selected in the numeric filter
+const selectedNumericAttributes = ref<Array<DynamicSelectElementNumericValue>>([])
 
 /**
  * Computes the slots to display all the room reservations, grouped by day.
@@ -406,10 +549,11 @@ const scheduledCoursesSlots: ScheduledCourseSlots = {
                         }
 
                         // Get the course's department
-                        const deptId = getScheduledCourseDepartment(course)
-                        if (!deptId) {
+                        const dept = getScheduledCourseDepartment(course)
+                        if (!dept) {
                             return
                         }
+                        const deptId = `${dept.id}`
                         slots.push(createScheduledCourseSlot(course, courseType, deptId))
                     })
                     return [e[0], slots]
@@ -514,7 +658,11 @@ const roomCalendarValues = computed<RoomCalendarProps>(() => {
         {
             slots: slots,
             rooms: rooms.listFilterBySelectedDepartments.value
-                .filter((room) => room.is_basic)
+                .filter(
+                    (room) =>
+                        room.is_basic &&
+                        rooms.listFilterBySelectedDepartmentsAndFilters.value.findIndex((r) => r.id === room.id) >= 0
+                )
                 .sort((r1, r2) => r1.name.localeCompare(r2.name)),
         },
         calendarValues.value
@@ -610,7 +758,7 @@ function createRoomReservationSlot(reservation: RoomReservation): CalendarSlot {
 
     const slotData: CalendarRoomReservationSlotData = {
         reservation: reservation,
-        rooms: rooms.perIdOfSelectedDepartments.value,
+        rooms: rooms.perIdFilterBySelectedDepartments.value,
         users: users.perId.value,
         reservationTypes: Object.values(roomReservationTypes.list.value),
         day: reservation.date,
@@ -649,7 +797,7 @@ function createScheduledCourseSlot(course: ScheduledCourse, courseType: CourseTy
     const slotData: CalendarScheduledCourseSlotData = {
         course: course,
         department: departmentName,
-        rooms: rooms.perIdOfSelectedDepartments.value,
+        rooms: rooms.perIdFilterBySelectedDepartments.value,
         day: course.day,
         startTime: startTime,
         endTime: endTime,
@@ -847,11 +995,15 @@ function isRoomSelected(roomId: number): boolean {
     return true
 }
 
-function getScheduledCourseDepartment(course: ScheduledCourse): string | undefined {
+function getScheduledCourseDepartment(course: ScheduledCourse): Department | undefined {
     const departmentEntry = Object.entries(scheduledCourses.perDepartment.value).find((entry) => {
         return entry[1].find((c) => c.id === course.id)
     })
-    return departmentEntry ? departmentEntry[0] : undefined
+    if (departmentEntry) {
+        const deptId = departmentEntry[0]
+        return departments.list.value.find((dept) => `${dept.id}` === deptId)
+    }
+    return undefined
 }
 
 onMounted(() => {
@@ -901,6 +1053,22 @@ onMounted(() => {
     fetchUsers().then((value) => {
         users.list.value = value
     })
+
+    fetchBooleanRoomAttributes().then((value) => {
+        roomAttributes.booleanList.value = value
+    })
+
+    fetchNumericRoomAttributes().then((value) => {
+        roomAttributes.numericList.value = value
+    })
+
+    fetchBooleanRoomAttributeValues().then((value) => {
+        roomAttributeValues.booleanList.value = value
+    })
+
+    fetchNumericRoomAttributeValues().then((value) => {
+        roomAttributeValues.numericList.value = value
+    })
 })
 
 // Fetch functions
@@ -938,6 +1106,22 @@ async function fetchCourseTypes(department: string) {
 
 async function fetchUsers() {
     return await api.value.fetch.all.users()
+}
+
+async function fetchBooleanRoomAttributes() {
+    return await api.value.fetch.all.booleanRoomAttributes()
+}
+
+async function fetchNumericRoomAttributes() {
+    return await api.value.fetch.all.numericRoomAttributes()
+}
+
+async function fetchBooleanRoomAttributeValues() {
+    return await api.value.fetch.all.booleanRoomAttributeValues()
+}
+
+async function fetchNumericRoomAttributeValues() {
+    return await api.value.fetch.all.numericRoomAttributeValues()
 }
 </script>
 
