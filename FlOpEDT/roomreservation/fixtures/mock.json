@@ -67,7 +67,7 @@
       "title": "AAA",
       "description": "aaa",
       "email": false,
-      "date": "2022-09-16",
+      "date": "2022-09-30",
       "start_time": "08:00:00",
       "end_time": "09:30:00",
       "periodicity_id": 1,
@@ -83,7 +83,7 @@
       "title": "BBB",
       "description": "bbb",
       "email": false,
-      "date": "2022-09-15",
+      "date": "2022-09-29",
       "start_time": "09:30:00",
       "end_time": "11:00:00",
       "periodicity_id": 1,
@@ -99,7 +99,7 @@
       "title": "CCC",
       "description": "ccc",
       "email": false,
-      "date": "2022-09-14",
+      "date": "2022-09-28",
       "start_time": "12:15:00",
       "end_time": "13:45:00",
       "periodicity_id": 1,
@@ -115,13 +115,148 @@
       "title": "DDD",
       "description": "ddd",
       "email": false,
-      "date": "2022-09-13",
+      "date": "2022-09-27",
       "start_time": "08:00:00",
       "end_time": "18:45:00",
       "periodicity_id": 1,
       "reservation_type_id": 1,
       "responsible_id": 1,
       "room_id": 4
+    }
+  },
+  {
+    "model": "base.RoomAttribute",
+    "pk": 1,
+    "fields": {
+      "name": "Has visio",
+      "description": "The room is equipped with a projector"
+    }
+  },
+  {
+    "model": "base.RoomAttribute",
+    "pk": 2,
+    "fields": {
+      "name": "Chairs",
+      "description": "The number of chairs the room has"
+    }
+  },
+  {
+    "model": "base.RoomAttribute",
+    "pk": 3,
+    "fields": {
+      "name": "Floor",
+      "description": "The floor number the room is located at"
+    }
+  },
+  {
+    "model": "base.BooleanRoomAttribute",
+    "pk": 1,
+    "fields": {
+      "attribute": 1
+    }
+  },
+  {
+    "model": "base.NumericRoomAttribute",
+    "pk": 1,
+    "fields": {
+      "attribute": 2
+    }
+  },
+  {
+    "model": "base.NumericRoomAttribute",
+    "pk": 2,
+    "fields": {
+      "attribute": 3
+    }
+  },
+  {
+    "model": "base.BooleanRoomAttributeValues",
+    "pk": 1,
+    "fields": {
+      "value": true,
+      "room": 1,
+      "attribute": 1
+    }
+  },
+  {
+    "model": "base.BooleanRoomAttributeValues",
+    "pk": 2,
+    "fields": {
+      "value": false,
+      "room": 2,
+      "attribute": 1
+    }
+  },
+  {
+    "model": "base.NumericRoomAttributeValues",
+    "pk": 1,
+    "fields": {
+      "value": "35.00",
+      "room": 1,
+      "attribute": 2
+    }
+  },
+  {
+    "model": "base.NumericRoomAttributeValues",
+    "pk": 2,
+    "fields": {
+      "value": "30.00",
+      "room": 2,
+      "attribute": 2
+    }
+  },
+  {
+    "model": "base.NumericRoomAttributeValues",
+    "pk": 3,
+    "fields": {
+      "value": "30.00",
+      "room": 3,
+      "attribute": 2
+    }
+  },
+  {
+    "model": "base.NumericRoomAttributeValues",
+    "pk": 4,
+    "fields": {
+      "value": "20.00",
+      "room": 4,
+      "attribute": 2
+    }
+  },
+  {
+    "model": "base.NumericRoomAttributeValues",
+    "pk": 5,
+    "fields": {
+      "value": "0.00",
+      "room": 1,
+      "attribute": 3
+    }
+  },
+  {
+    "model": "base.NumericRoomAttributeValues",
+    "pk": 6,
+    "fields": {
+      "value": "1.00",
+      "room": 2,
+      "attribute": 3
+    }
+  },
+  {
+    "model": "base.NumericRoomAttributeValues",
+    "pk": 7,
+    "fields": {
+      "value": "1.00",
+      "room": 3,
+      "attribute": 3
+    }
+  },
+  {
+    "model": "base.NumericRoomAttributeValues",
+    "pk": 8,
+    "fields": {
+      "value": "0.00",
+      "room": 4,
+      "attribute": 3
     }
   }
 ]
