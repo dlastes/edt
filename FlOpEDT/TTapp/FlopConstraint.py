@@ -61,7 +61,7 @@ class FlopConstraint(models.Model):
 
     def local_weight(self):
         if self.weight is None:
-            return 10
+            return 1
         return float(self.weight) / max_weight
 
     class Meta:
