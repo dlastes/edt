@@ -152,7 +152,7 @@ class BooleanRoomAttributeValuesViewSet(viewsets.ModelViewSet):
     ViewSet to see all the boolean room attribute values.
     """
     permission_classes = [IsAdminOrReadOnly]
-    queryset = bm.BooleanRoomAttributeValues.objects.all()
+    queryset = bm.BooleanRoomAttributeValue.objects.all()
     serializer_class = serializers.BooleanRoomAttributeValuesSerializer
 
     filterset_fields = '__all__'
@@ -163,7 +163,7 @@ class NumericRoomAttributeValuesViewSet(viewsets.ModelViewSet):
     ViewSet to see all the boolean room attribute values.
     """
     permission_classes = [IsAdminOrReadOnly]
-    queryset = bm.NumericRoomAttributeValues.objects.all()
+    queryset = bm.NumericRoomAttributeValue.objects.all()
     serializer_class = serializers.NumericRoomAttributeValuesSerializer
 
     filterset_fields = '__all__'

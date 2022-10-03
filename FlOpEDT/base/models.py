@@ -366,6 +366,12 @@ class RoomAttribute(models.Model):
     name = models.CharField(max_length=20)
     description = models.TextField(null=True)
 
+    def is_boolean(self):
+        return hasattr(self, "booleanroomattribute")
+
+    def is_numeric(self):
+        return hasattr(self, "numericroomattribute")
+
     def __str__(self):
         return self.name
 
@@ -384,13 +390,13 @@ class NumericRoomAttribute(RoomAttribute):
         return self.name + ' (numeric)'
 
 
-class BooleanRoomAttributeValues(models.Model):
+class BooleanRoomAttributeValue(models.Model):
     room = models.ForeignKey('Room', on_delete=models.CASCADE)
     attribute = models.ForeignKey('BooleanRoomAttribute', on_delete=models.CASCADE)
     value = models.BooleanField()
 
 
-class NumericRoomAttributeValues(models.Model):
+class NumericRoomAttributeValue(models.Model):
     room = models.ForeignKey('Room', on_delete=models.CASCADE)
     attribute = models.ForeignKey('NumericRoomAttribute', on_delete=models.CASCADE)
     value = models.DecimalField(max_digits=7, decimal_places=2)

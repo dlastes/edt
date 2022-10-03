@@ -74,11 +74,11 @@ class NumericRoomAttributeSerializer(RoomAttributeSerializer):
 
 class BooleanRoomAttributeValuesSerializer(serializers.ModelSerializer):
     class Meta:
-        model = bm.BooleanRoomAttributeValues
+        model = bm.BooleanRoomAttributeValue
         fields = '__all__'
 
 
 class NumericRoomAttributeValuesSerializer(serializers.ModelSerializer):
     class Meta:
-        model = bm.NumericRoomAttributeValues
+        model = bm.NumericRoomAttributeValue
         fields = '__all__'

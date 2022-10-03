@@ -21,31 +21,10 @@
 <!-- you develop activities involving the FlOpEDT/FlOpScheduler software   -->
 <!-- without disclosing the source code of your own applications.          -->
 
-{% extends "flopeditor/base_crud.html" %}
+{% extends "flopeditor/rooms.html" %}
 {% load static %}
-{% block nav-classes-rooms %} active {% endblock %}
+{% block card-nav-classes-rooms %}{% endblock %}
+{% block card-nav-classes-room-types %}{% endblock %}
+{% block card-nav-classes-room-attributes %}active{% endblock %}
 
-{% block card_header %}
-    <li class="nav-item">
-        <a  class="nav-link {% block card-nav-classes-rooms %}active{% endblock %}"
-            href="{% url 'flopeditor:flopeditor-department-rooms' department_abbrev=department.abbrev %}">
-            Salles
-        </a>
-    </li>
-      <li class="nav-item">
-          <a  class="nav-link {% block card-nav-classes-room-types %}{% endblock %}"
-              href="{% url 'flopeditor:flopeditor-department-room-types' department_abbrev=department.abbrev %}">
-              Catégories de salles
-          </a>
-      </li>
-    <li class="nav-item">
-          <a  class="nav-link {% block card-nav-classes-room-attributes %}{% endblock %}"
-              href="{% url 'flopeditor:flopeditor-department-room-attributes' department_abbrev=department.abbrev %}">
-              Attributs de salles
-          </a>
-      </li>
-{% endblock %}
-
-
-{% block crud_js_url %}{% url 'flopeditor:flopeditor-crud-rooms' department_abbrev=department.abbrev %}{% endblock %}
-<!-- {---% url 'flopeditor:flopeditor-crud-xxxxx' department_abbrev=department.abbrev %} -->
+{% block crud_js_url %}{% url 'flopeditor:flopeditor-crud-room-attributes' department_abbrev=department.abbrev %}{% endblock %}
