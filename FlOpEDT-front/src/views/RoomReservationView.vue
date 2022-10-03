@@ -49,44 +49,14 @@
                             </div>
                             <!-- Room attribute filters -->
                             <div v-if="!selectedRoom">
-                                <!-- Boolean attributes -->
                                 <div class="mb-3">
                                     <DynamicSelect
                                         v-bind="{
-                                            component: DynamicSelectedElementBoolean,
                                             id: 'select-attribute-bool',
-                                            label: 'Toggle attributes:',
-                                            values:    roomAttributes.booleanList.value.map((attribute) => {
-        const out: DynamicSelectElementBooleanValue = {
-            id: attribute.id,
-            name: attribute.name,
-            value: false,
-        }
-        return out
-    })
+                                            label: 'Filter by attributes:',
+                                            values: createFiltersValues(),
                                         }"
-                                        v-model:selected-values="selectedBooleanAttributes"
-                                    ></DynamicSelect>
-                                </div>
-                                <div class="mb-3">
-                                    <DynamicSelect
-                                        v-bind="{
-                                            component: DynamicSelectedElementNumeric,
-                                            id: 'select-attribute-num',
-                                            label: 'Value attributes:',
-                                            values: roomAttributes.numericList.value.map((attribute) => {
-        const out: DynamicSelectElementNumericValue = {
-            id: attribute.id,
-            name: attribute.name,
-            min: 0,
-            max: 50,
-            initialMin: 0,
-            initialMax: 50
-        }
-        return out
-    })
-                                        }"
-                                        v-model:selected-values="selectedNumericAttributes"
+                                        v-model:selected-values="selectedRoomAttributes"
                                     ></DynamicSelect>
                                 </div>
                             </div>
@@ -137,7 +107,7 @@ import HourCalendar from '@/components/calendar/HourCalendar.vue'
 import WeekPicker from '@/components/WeekPicker.vue'
 import { getDepartment } from '@/main'
 import type { ComputedRef, Ref } from 'vue'
-import { computed, onMounted, ref, shallowRef, watchEffect } from 'vue'
+import { computed, markRaw, onMounted, ref, shallowRef, watchEffect } from 'vue'
 import RoomCalendar from '@/components/calendar/RoomCalendar.vue'
 import HourCalendarRoomReservationSlot from '@/components/calendar/HourCalendarRoomReservationSlot.vue'
 import RoomCalendarRoomReservationSlot from '@/components/calendar/RoomCalendarRoomReservationSlot.vue'
@@ -152,6 +122,11 @@ const authToken = requireInjection(apiToken)
 const currentWeek = ref(requireInjection(currentWeekKey))
 const currentDepartment = getDepartment()
 let loadingCounter = 0
+
+interface RoomAttributeEntry {
+    component: any
+    value: DynamicSelectElementValue
+}
 
 interface Rooms {
     list: ComputedRef<Array<Room>>
@@ -449,11 +424,21 @@ const selectedDepartments = computed(() => {
     return selected
 })
 
-// The attributes selected in the boolean filter
-const selectedBooleanAttributes = ref<Array<DynamicSelectElementBooleanValue>>([])
+const selectedRoomAttributes = ref<Array<RoomAttributeEntry>>([])
 
-// The attributes selected in the numeric filter
-const selectedNumericAttributes = ref<Array<DynamicSelectElementNumericValue>>([])
+// The boolean attributes selected in the filter
+const selectedBooleanAttributes = computed(() => {
+    return selectedRoomAttributes.value
+        .filter((entry) => entry.component === markRaw(DynamicSelectedElementBoolean))
+        .map((entry) => entry.value)
+})
+
+// The numeric  attributes selected in the filter
+const selectedNumericAttributes = computed(() => {
+    return selectedRoomAttributes.value
+        .filter((entry) => entry.component === markRaw(DynamicSelectedElementNumeric))
+        .map((entry) => entry.value)
+})
 
 /**
  * Computes the slots to display all the room reservations, grouped by day.
@@ -817,6 +802,39 @@ function createScheduledCourseSlot(course: ScheduledCourse, courseType: CourseTy
             delete: undefined,
         },
     }
+}
+
+function createFiltersValues(): Array<RoomAttributeEntry> {
+    const out = []
+
+    out.push(
+        ...roomAttributes.booleanList.value.map((attribute) => {
+            return {
+                component: markRaw(DynamicSelectedElementBoolean),
+                value: {
+                    id: attribute.id,
+                    name: attribute.name,
+                    value: false,
+                },
+            }
+        })
+    )
+    out.push(
+        ...roomAttributes.numericList.value.map((attribute) => {
+            return {
+                component: markRaw(DynamicSelectedElementNumeric),
+                value: {
+                    id: attribute.id,
+                    name: attribute.name,
+                    min: 0,
+                    max: 50,
+                    initialMin: 0,
+                    initialMax: 50,
+                },
+            }
+        })
+    )
+    return out
 }
 
 function addTo<T>(collection: { [p: string]: Array<T> }, id: string | number, element: T): void {

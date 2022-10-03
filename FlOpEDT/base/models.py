@@ -366,19 +366,20 @@ class RoomAttribute(models.Model):
     name = models.CharField(max_length=20)
     description = models.TextField(null=True)
 
-    class Meta:
-        abstract = True
-
     def __str__(self):
         return self.name
 
 
 class BooleanRoomAttribute(RoomAttribute):
+    attribute = models.OneToOneField(RoomAttribute, parent_link=True, on_delete=models.CASCADE)
+
     def __str__(self):
         return self.name + ' (boolean)'
 
 
 class NumericRoomAttribute(RoomAttribute):
+    attribute = models.OneToOneField(RoomAttribute, parent_link=True, on_delete=models.CASCADE)
+
     def __str__(self):
         return self.name + ' (numeric)'
 

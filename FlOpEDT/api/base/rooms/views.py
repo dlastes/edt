@@ -114,6 +114,17 @@ class RoomSortsViewSet(viewsets.ModelViewSet):
     filterset_fields = '__all__'
 
 
+class RoomAttributeViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet to see all the boolean room attributes.
+    """
+    permission_classes = [IsAdminOrReadOnly]
+    queryset = bm.RoomAttribute.objects.all()
+    serializer_class = serializers.RoomAttributeSerializer
+
+    filterset_fields = '__all__'
+
+
 class BooleanRoomAttributeViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the boolean room attributes.

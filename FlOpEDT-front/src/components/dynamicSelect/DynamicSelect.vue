@@ -3,22 +3,27 @@
         <label :for="props.id" class="form-label">{{ props.label }}</label>
         <select :id="props.id" class="form-select w-auto ms-1" aria-label="Select department">
             <option :value="undefined">Select an attribute</option>
-            <option v-for="value in unselected" :key="value.id" :value="value.id" @click="selectValue(value.id)">
-                {{ value.name }}
+            <option
+                v-for="value in unselected"
+                :key="value.value.id"
+                :value="value.value.id"
+                @click="selectValue(value.value.id)"
+            >
+                {{ value.value.name }}
             </option>
         </select>
         <ul class="list-group">
             <li
                 v-for="index in Array.from(Array(selected.length).keys())"
-                :key="selected[index].id"
-                :value="selected[index]"
+                :key="selected[index].value.id"
+                :value="selected[index].value"
                 class="list-group-item"
             >
                 <component
-                    :is="props.component"
-                    :value="selected[index]"
-                    @update:value="updateValue(selected[index].id, $event)"
-                    @removed="unselectValue(selected[index].id)"
+                    :is="selected[index].component"
+                    :value="selected[index].value"
+                    @update:value="updateValue(selected[index].value.id, $event)"
+                    @removed="unselectValue(selected[index].value.id)"
                 ></component>
             </li>
         </ul>
@@ -29,10 +34,14 @@
 import { computed, ref, watchEffect } from 'vue'
 import type { DynamicSelectElementValue } from '@/assets/js/types'
 
-interface Props {
+interface ValueEntry {
     component: any
-    values: Array<DynamicSelectElementValue>
-    selectedValues: Array<DynamicSelectElementValue>
+    value: DynamicSelectElementValue
+}
+
+interface Props {
+    values: Array<ValueEntry>
+    selectedValues: Array<ValueEntry>
     label: string
     id: string
 }
@@ -40,7 +49,7 @@ interface Props {
 const props = defineProps<Props>()
 
 interface Emits {
-    (e: 'update:selectedValues', values: Array<DynamicSelectElementValue>): void
+    (e: 'update:selectedValues', values: Array<ValueEntry>): void
 }
 
 const emit = defineEmits<Emits>()
@@ -52,22 +61,22 @@ watchEffect(() => {
 })
 
 function updateValue(id: number, value: DynamicSelectElementValue) {
-    const index = updatedValues.value.findIndex((val) => val.id === id)
+    const index = updatedValues.value.findIndex((val) => val.value.id === id)
     if (index < 0) {
         return
     }
-    updatedValues.value[index] = value
+    updatedValues.value[index].value = value
     emitUpdate()
 }
 
-const selectedIds = ref<Array<number>>(props.selectedValues.map((value) => value.id))
+const selectedIds = ref<Array<number>>(props.selectedValues.map((value) => value.value.id))
 
 const selected = computed(() => {
-    return updatedValues.value.filter((val) => selectedIds.value.includes(val.id))
+    return updatedValues.value.filter((val) => selectedIds.value.includes(val.value.id))
 })
 
 const unselected = computed(() => {
-    return updatedValues.value.filter((val) => !selectedIds.value.includes(val.id))
+    return updatedValues.value.filter((val) => !selectedIds.value.includes(val.value.id))
 })
 
 function selectValue(id: number) {
