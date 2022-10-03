@@ -1,34 +1,21 @@
 <template>
     <DynamicSelectedElement :value="props.value">
         <template #input>
-            <div>
-                <label :for="`${props.value.name}-range-min`" class="form-label">Min: {{ minVal }}</label>
-                <input
-                    type="range"
-                    class="form-range"
-                    :id="`${props.value.name}-range-min`"
-                    v-model.number="minVal"
-                    :max="maxVal"
-                />
-            </div>
-            <div>
-                <label :for="`${props.value.name}-range-max`" class="form-label">Max: {{ maxVal }}</label>
-                <input
-                    type="range"
-                    class="form-range"
-                    :id="`${props.value.name}-range-max`"
-                    v-model.number="maxVal"
-                    :min="minVal"
-                />
-            </div>
+            <DoubleThumbSlider
+                :initial-min="props.value.initialMin"
+                :initial-max="props.value.initialMax"
+                v-model:min="minValue"
+                v-model:max="maxValue"
+            ></DoubleThumbSlider>
         </template>
     </DynamicSelectedElement>
 </template>
 
 <script setup lang="ts">
 import DynamicSelectedElement from '@/components/dynamicSelect/DynamicSelectedElement.vue'
-import { computed, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
 import type { DynamicSelectElementNumericValue } from '@/assets/js/types'
+import DoubleThumbSlider from '@/components/DoubleThumbSlider.vue'
 
 interface Props {
     value: DynamicSelectElementNumericValue
@@ -37,33 +24,34 @@ interface Props {
 const props = defineProps<Props>()
 
 interface Emits {
+    /**
+     * Calls the update of the `value` model.
+     * @param e The event that triggers the model change.
+     * @param value The new value of the model.
+     */
     (e: 'update:value', value: DynamicSelectElementNumericValue): void
 }
 
 const emit = defineEmits<Emits>()
 
-const elementValue = ref(props.value)
+// The value used to update the model.
+const inputValues = ref(props.value)
 
-const minVal = computed({
-    get() {
-        return elementValue.value.min
-    },
-    set(value) {
-        elementValue.value.min = value
-    },
+// The min value from the range slider
+const minValue = ref(inputValues.value.min)
+
+// The max value from the range slider
+const maxValue = ref(inputValues.value.max)
+
+watch(minValue, (newMin) => {
+    inputValues.value.min = newMin
+    emit('update:value', inputValues.value)
 })
 
-const maxVal = computed({
-    get() {
-        return elementValue.value.max
-    },
-    set(value) {
-        elementValue.value.max = value
-    },
+watch(maxValue, (newMax) => {
+    inputValues.value.max = newMax
+    emit('update:value', inputValues.value)
 })
-
-// Bind the model to elementValue
-emit('update:value', elementValue.value)
 </script>
 
 <script lang="ts">

@@ -80,6 +80,8 @@
             name: attribute.name,
             min: 0,
             max: 50,
+            initialMin: 0,
+            initialMax: 50
         }
         return out
     })

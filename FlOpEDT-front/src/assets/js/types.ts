@@ -310,6 +310,8 @@ export interface DynamicSelectElementBooleanValue extends DynamicSelectElementVa
 }
 
 export interface DynamicSelectElementNumericValue extends DynamicSelectElementValue {
+    initialMin: number
+    initialMax: number
     min: number
     max: number
 }
