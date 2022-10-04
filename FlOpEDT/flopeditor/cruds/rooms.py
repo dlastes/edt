@@ -58,8 +58,8 @@ def set_values_for_room(room, i, new_name, entries):
             return False
         subrooms.append(subrooms_found[0])
     depts = []
-    for dept_name in entries['new_values'][i][2]:
-        depts_found = Department.objects.filter(name=dept_name)
+    for dept_abbrev in entries['new_values'][i][2]:
+        depts_found = Department.objects.filter(abbrev=dept_abbrev)
         if len(depts_found) != 1:
             entries['result'].append([
                 ERROR_RESPONSE,
@@ -106,7 +106,7 @@ def has_rights_to_update_room(user, entries, i):
     """
     if set(entries['new_values'][i][2]) == set(entries['old_values'][i][2]):
         departments = Department.objects.filter(
-            name__in=entries['new_values'][i][2])
+            abbrev__in=entries['new_values'][i][2])
         if not departments:
             return True
         for dept in departments:
@@ -119,10 +119,10 @@ def has_rights_to_update_room(user, entries, i):
         return False
 
     old_departments = Department.objects.filter(
-        name__in=entries['old_values'][i][2])
+        abbrev__in=entries['old_values'][i][2])
 
     new_departments = Department.objects.filter(
-        name__in=entries['new_values'][i][2])
+        abbrev__in=entries['new_values'][i][2])
 
     for dep in old_departments:
         if not user.has_department_perm(department=dep, admin=True) and dep not in new_departments:
@@ -171,7 +171,7 @@ def read():
     """
     # Chips options
     rooms_available = list(Room.objects.values_list('name', flat=True))
-    departments = list(Department.objects.values_list('name', flat=True))
+    departments = list(Department.objects.values_list('abbrev', flat=True))
 
     # Rows
     rooms = Room.objects.all()
@@ -182,10 +182,17 @@ def read():
             subrooms.append(subroom.name)
         room_departments = []
         for dept in room.departments.all():
-            room_departments.append(dept.name)
+            room_departments.append(dept.abbrev)
         value = [room.name, subrooms, room_departments]
         value += room_attribute_values(room)
         values.append(tuple(value))
+
+    attributes_columns = [
+                {'name': attribute.name,
+                 "type": "select" if attribute.is_boolean() else "int",
+                 "options": {"values": [True, False]} if attribute.is_boolean() else {}
+                 } for attribute in attributes_list
+             ]
 
     columns = [{
             'name': 'Nom',
@@ -199,24 +206,7 @@ def read():
             'name': 'Départements associés',
             "type": "select-chips",
             "options": {'values': departments}
-        }]
-
-    for attribute in attributes_list:
-        if attribute.is_boolean():
-            bloc_type = "select"
-            options = {
-                "values": [True, False]
-            }
-        else:
-            bloc_type = "int"
-            options = {}
-        columns.append(
-            {
-                'name': attribute.name,
-                "type": bloc_type,
-                "options": options
-            }
-        )
+        }] + attributes_columns
 
     return JsonResponse({
         "columns":  columns,
@@ -239,7 +229,6 @@ def create(request, entries):
 
     entries['result'] = []
     for i in range(len(entries['new_values'])):
-        print('aaaa', entries['new_values'][i])
         new_name = entries['new_values'][i][0]
         if not new_name:
             entries['result'].append([ERROR_RESPONSE,
