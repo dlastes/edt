@@ -86,7 +86,7 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
-    url(r'^$', views_base.LoginView.as_view()),
+    url(r'^$', views_base.LoginView.as_view(), name='api_root'),
     url(r'^logout/$', views_base.LogoutView.as_view()),
     url(r'^backoffice/$', login_required(TemplateView.as_view(template_name='logout.html'))),
     path('base/', include((routerBase.urls, 'api'), namespace='base')),
