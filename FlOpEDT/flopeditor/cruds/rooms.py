@@ -31,7 +31,7 @@ from django.http import JsonResponse
 from base.models import Room, Department, RoomAttribute, BooleanRoomAttributeValue, NumericRoomAttributeValue
 from flopeditor.validator import OK_RESPONSE, ERROR_RESPONSE
 
-attributes_list = list(RoomAttribute.objects.all())
+attributes_list = [] # list(RoomAttribute.objects.all())
 
 def set_values_for_room(room, i, new_name, entries):
     """
@@ -190,9 +190,8 @@ def read():
     attributes_columns = [
                 {'name': attribute.name,
                  "type": "select" if attribute.is_boolean() else "int",
-                 "options": {"values": [True, False]} if attribute.is_boolean() else {}
-                 } for attribute in attributes_list
-             ]
+                 "options": {"values": [True, False]} if attribute.is_boolean() else {}}
+        for attribute in attributes_list]
 
     columns = [{
             'name': 'Nom',
