@@ -9,7 +9,7 @@ from roomreservation.models import RoomReservationType
 
 
 class RoomReservationTypeAdmin(MyModelAdmin):
-    list_display = ('name', 'color_bg')
+    list_display = ('name', 'bg_color')
     ordering = ('name',)
 
 

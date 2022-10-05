@@ -10,7 +10,7 @@ from base.timing import Day
 class RoomReservation(models.Model):
     responsible = models.ForeignKey('people.User', on_delete=models.CASCADE, related_name='reservationResp')
     room = models.ForeignKey('base.Room', on_delete=models.CASCADE, related_name='reservationRoom')
-    reservation_type = models.ForeignKey('RoomReservationType', on_delete=models.CASCADE, blank=True, null=True)
+    reservation_type = models.ForeignKey('RoomReservationType', on_delete=models.SET_NULL, blank=True, null=True)
     title = models.CharField(max_length=30)
     description = models.TextField(null=True, blank=True)
     email = models.BooleanField(default=False)
