@@ -225,6 +225,9 @@ const startTime = ref(ReservationTime.fromString(props.reservation.start_time))
 const endTime = ref(ReservationTime.fromString(props.reservation.end_time))
 const date = ref(props.reservation.date)
 
+const originalDuration =
+    endTime.value.hours * 60 + endTime.value.minutes - (startTime.value.hours * 60 + startTime.value.minutes)
+
 function resetValues() {
     title.value = props.reservation.title
     description.value = props.reservation.description
@@ -289,11 +292,47 @@ function updateDate(newDate: string) {
     date.value = newDate
 }
 
+/**
+ * Sets the reservation start time. The end time is changed so that the duration stays the same if
+ * the new start time is after the end time.
+ * @param time
+ */
 function updateStartTime(time: { hours: number; minutes: number }) {
+    // Compute the new start time and the end time as number of minutes
+    const newStartTimeAbsoluteTime = time.hours * 60 + time.minutes
+    let endAbsoluteTime = endTime.value.hours * 60 + endTime.value.minutes
+
+    // Make sure the start time stays before the end time
+    if (newStartTimeAbsoluteTime >= endAbsoluteTime) {
+        // New start time is after the end time
+        // Apply the duration difference to the end time
+        endAbsoluteTime = newStartTimeAbsoluteTime + originalDuration
+        updateEndTime({ hours: Math.trunc(endAbsoluteTime / 60), minutes: endAbsoluteTime % 60 })
+    }
+
+    // Change the start time
     startTime.value = time
 }
 
+/**
+ * Sets the reservation end time. The start time is changed so that the duration stays the same if
+ * the new end time is before the end time.
+ * @param time
+ */
 function updateEndTime(time: { hours: number; minutes: number }) {
+    // Compute the new end time and the start time as number of minutes
+    const newEndTimeAbsoluteTime = time.hours * 60 + time.minutes
+    let startAbsoluteTime = startTime.value.hours * 60 + startTime.value.minutes
+
+    // Make sure the end time stays after the start time
+    if (newEndTimeAbsoluteTime <= startAbsoluteTime) {
+        // New end time is before the start time
+        // Apply the duration difference to the start time
+        startAbsoluteTime = newEndTimeAbsoluteTime - originalDuration
+        updateStartTime({ hours: Math.trunc(startAbsoluteTime / 60), minutes: startAbsoluteTime % 60 })
+    }
+
+    // Change the end time
     endTime.value = time
 }
 
