@@ -140,6 +140,7 @@ import DynamicSelectedElementBoolean from '@/components/dynamicSelect/DynamicSel
 const api = ref<FlopAPI>(requireInjection(apiKey))
 const currentWeek = ref(requireInjection(currentWeekKey))
 let currentDepartment = ''
+let currentUserId = -1
 let loadingCounter = 0
 
 interface RoomAttributeEntry {
@@ -987,7 +988,7 @@ function handleDrag(drag: CalendarDragEvent) {
         id: newReservationId--,
         periodicity: -1,
         reservation_type: -1,
-        responsible: 553,
+        responsible: currentUserId,
         room: selectedRoom.value?.id ?? -1,
         start_time: drag.startTime.text,
         title: '',
@@ -1011,7 +1012,7 @@ function handleNewSlot(date: Date, roomId: string) {
         id: newReservationId--,
         periodicity: -1,
         reservation_type: -1,
-        responsible: 553,
+        responsible: currentUserId,
         room: parseInt(roomId, 10),
         start_time: now.toTimeString(),
         title: '',
@@ -1057,8 +1058,12 @@ onMounted(() => {
     const dbDataElement = document.getElementById('json_data')
     if (dbDataElement && dbDataElement.textContent) {
         const data = JSON.parse(dbDataElement.textContent)
+
         if ('dept' in data) {
             currentDepartment = data.dept
+        }
+        if ('user_id' in data) {
+            currentUserId = data.user_id
         }
     }
     fetchDepartments().then((value) => {
