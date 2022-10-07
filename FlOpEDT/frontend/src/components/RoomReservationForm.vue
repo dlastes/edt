@@ -1,7 +1,8 @@
 <template>
     <div>
+        <!-- Periodicity deletion dialog -->
         <ModalDialog
-            :is-open="isDialogOpen"
+            :is-open="isPeriodicityDeletionDialogOpen"
             :is-locked="isDialogLocked"
             :on-cancel="onPeriodicityDeletionCancel"
             :on-confirm="onPeriodicityDeletionConfirm"
@@ -9,11 +10,27 @@
             <template #title>Periodicity deletion</template>
             <template #body>
                 <span>
-                    You are about to remove a periodicity. Doing so will cause the next reservations to be lost forever
-                    and unlink all previous reservations from this periodicity.</span
+                    You are about to remove a repetition. Doing so will cause the next reservations to be lost forever
+                    and unlink all previous reservations from this repetition.</span
                 >
                 <br />
-                <span><b>Are you sure to remove the periodicity?</b></span>
+                <span><b>Are you sure to remove the repetition?</b></span>
+            </template>
+        </ModalDialog>
+        <!-- Reservation changes periodicity dialog -->
+        <ModalDialog :is-open="isReservationEditDialogOpen" :is-locked="isDialogLocked">
+            <template #title>Reservation changes</template>
+            <template #body>
+                <span>
+                    You are about to save changes to a periodic reservation. Would you like to apply the changes to the
+                    future reservations too?</span
+                >
+                <br />
+                <span><b>Applying the changes will overwrite previous values.</b></span>
+            </template>
+            <template #buttons>
+                <button type="button" class="btn btn-secondary" @click.stop="onReservationEditRefuse">No</button>
+                <button type="button" class="btn btn-primary" @click.stop="onReservationEditConfirm">Yes</button>
             </template>
         </ModalDialog>
         <ModalForm
@@ -163,7 +180,7 @@
                 <div v-else class="mb-3 border rounded p-2">
                     <div class="mb-2 text-center">
                         <button type="button" class="btn btn-danger btn-sm" @click="removePeriodicity">
-                            Remove periodicity
+                            Remove repetition
                         </button>
                     </div>
                     <div class="row mb-2 gx-1">
@@ -254,7 +271,6 @@ import { parseReason } from '@/assets/js/helpers'
 import { apiKey, requireInjection } from '@/assets/js/keys'
 import type {
     FormInterface,
-    ReservationPeriodicity,
     ReservationPeriodicityByMonth,
     ReservationPeriodicityByWeek,
     ReservationPeriodicityData,
@@ -270,7 +286,7 @@ import type {
 import DayPicker from '@/components/DayPicker.vue'
 import ModalForm from '@/components/ModalForm.vue'
 import TimePicker from '@/components/TimePicker.vue'
-import { computed, defineProps, ref, watch } from 'vue'
+import { computed, defineProps, onUnmounted, Ref, ref, watch } from 'vue'
 import PeriodicitySelect from '@/components/roomreservation/periodicity/PeriodicitySelect.vue'
 import ModalDialog from '@/components/ModalDialog.vue'
 
@@ -293,7 +309,6 @@ interface Props {
     users: { [userId: number]: User }
     periodicityTypes: Array<ReservationPeriodicityType>
     weekdays: Array<WeekDay>
-    periodicity: ReservationPeriodicity | null
     onPeriodicityDelete: (reservation: RoomReservation) => Promise<void>
 }
 
@@ -336,7 +351,8 @@ watch(
         isFormOpen.value = newValue
     }
 )
-const isDialogOpen = ref(false)
+const isPeriodicityDeletionDialogOpen = ref(false)
+const isReservationEditDialogOpen = ref(false)
 const isDialogLocked = ref(false)
 
 const title = ref(props.reservation.title)
@@ -344,7 +360,7 @@ const description = ref(props.reservation.description)
 const selectedResponsible = ref(props.reservation.responsible)
 const selectedRoom = ref(props.reservation.room)
 const selectedType = ref(props.reservation.reservation_type)
-const isPeriodic = computed(() => props.periodicity != null || periodicityId.value != null)
+const isPeriodic = computed(() => props.reservation.periodicity != null || periodicityData.value != null)
 const email = ref(props.reservation.email)
 const startTime = ref(ReservationTime.fromString(props.reservation.start_time))
 const endTime = ref(ReservationTime.fromString(props.reservation.end_time))
@@ -353,14 +369,14 @@ const date = ref(props.reservation.date)
 const isCreatingPeriodicity = ref(false)
 
 // Get the possibly existing periodicity values
-const initPeriodicityId = computed(() => (props.periodicity ? props.periodicity.data.id : null))
-const periodicityStart = ref(props.periodicity ? props.periodicity.data.start : props.reservation.date)
+const initPeriodicity = computed(() => (props.reservation.periodicity ? props.reservation.periodicity : null))
+const periodicityStart = ref(initPeriodicity.value ? initPeriodicity.value.periodicity.start : props.reservation.date)
 const periodicityEndMinDate = computed(() => {
     const startDate = new Date(periodicityStart.value)
     return new Date(`${startDate.getFullYear()}-${startDate.getMonth() + 1}-${startDate.getDate() + 1}`)
 })
 const periodicityEnd = ref(
-    props.periodicity ? props.periodicity.data.end : periodicityEndMinDate.value.toLocaleDateString()
+    initPeriodicity.value ? initPeriodicity.value.periodicity.end : periodicityEndMinDate.value.toLocaleDateString()
 )
 
 const currentDay = new Date(props.reservation.date).getDay()
@@ -370,19 +386,23 @@ const currentWeekdayRef = computed(() => {
 })
 
 const selectedPeriodicityType = ref<ReservationPeriodicityType | undefined>(
-    props.periodicity
-        ? props.periodicityTypes.find((t) => t[0] === props.periodicity?.data.periodicity_type)
+    initPeriodicity.value
+        ? props.periodicityTypes.find((t) => t[0] === initPeriodicity.value?.periodicity.periodicity_type)
         : undefined
 )
 
 // Update the reservation periodicity form if the provided periodicity have changed
 watch(
-    () => props.periodicity,
+    () => props.reservation,
     (newValue) => {
-        if (newValue) {
-            selectedPeriodicityType.value = props.periodicityTypes.find((t) => t[0] === newValue.data.periodicity_type)
-            periodicityStart.value = newValue.data.start
-            periodicityEnd.value = newValue.data.end
+        console.log('refresh reservation periodicity')
+        const periodicity = newValue.periodicity
+        if (periodicity) {
+            selectedPeriodicityType.value = props.periodicityTypes.find(
+                (t) => t[0] === periodicity.periodicity.periodicity_type
+            )
+            periodicityStart.value = periodicity.periodicity.start
+            periodicityEnd.value = periodicity.periodicity.end
         } else {
             selectedPeriodicityType.value = undefined
             periodicityStart.value = props.reservation.date
@@ -391,7 +411,9 @@ watch(
     }
 )
 
-const periodicityId = ref<number | null>(initPeriodicityId.value)
+const periodicityData: Ref<ReservationPeriodicityData | null> = ref(
+    initPeriodicity.value ? initPeriodicity.value.periodicity : null
+)
 
 const requiredClass = 'border border-danger rounded'
 
@@ -404,13 +426,12 @@ const originalDuration =
 
 // Create an object of each type
 const periodicityByWeek = computed<ReservationPeriodicityByWeek>(() => {
+    let id = -1
+    if (selectedPeriodicityType.value && selectedPeriodicityType.value[0] === 'BW' && initPeriodicity.value) {
+        id = initPeriodicity.value.periodicity.id
+    }
     return {
-        id:
-            selectedPeriodicityType.value && selectedPeriodicityType.value[0] === 'BW'
-                ? initPeriodicityId.value
-                    ? initPeriodicityId.value
-                    : -1
-                : -1,
+        id: id,
         start: periodicityStart.value,
         end: periodicityEnd.value,
         periodicity_type: 'BW',
@@ -419,13 +440,12 @@ const periodicityByWeek = computed<ReservationPeriodicityByWeek>(() => {
     }
 })
 const periodicityByMonth = computed<ReservationPeriodicityByMonth>(() => {
+    let id = -1
+    if (selectedPeriodicityType.value && selectedPeriodicityType.value[0] === 'BM' && initPeriodicity.value) {
+        id = initPeriodicity.value.periodicity.id
+    }
     return {
-        id:
-            selectedPeriodicityType.value && selectedPeriodicityType.value[0] === 'BM'
-                ? initPeriodicityId.value
-                    ? initPeriodicityId.value
-                    : -1
-                : -1,
+        id: id,
         start: periodicityStart.value,
         end: periodicityEnd.value,
         periodicity_type: 'BM',
@@ -434,13 +454,12 @@ const periodicityByMonth = computed<ReservationPeriodicityByMonth>(() => {
     }
 })
 const periodicityEachMonthSameDate = computed<ReservationPeriodicityEachMonthSameDate>(() => {
+    let id = -1
+    if (selectedPeriodicityType.value && selectedPeriodicityType.value[0] === 'EM' && initPeriodicity.value) {
+        id = initPeriodicity.value.periodicity.id
+    }
     return {
-        id:
-            selectedPeriodicityType.value && selectedPeriodicityType.value[0] === 'EM'
-                ? initPeriodicityId.value
-                    ? initPeriodicityId.value
-                    : -1
-                : -1,
+        id: id,
         start: periodicityStart.value,
         end: periodicityEnd.value,
         periodicity_type: 'EM',
@@ -448,18 +467,18 @@ const periodicityEachMonthSameDate = computed<ReservationPeriodicityEachMonthSam
 })
 
 // Fill the values specific to the periodicity type
-if (props.periodicity) {
-    switch (props.periodicity.data.periodicity_type) {
+if (props.reservation.periodicity) {
+    switch (props.reservation.periodicity.periodicity.periodicity_type) {
         case 'BW':
             {
-                const byWeek = props.periodicity.data as ReservationPeriodicityByWeek
+                const byWeek = props.reservation.periodicity.periodicity as ReservationPeriodicityByWeek
                 periodicityByWeek.value.bw_weekdays = byWeek.bw_weekdays
                 periodicityByWeek.value.bw_weeks_interval = byWeek.bw_weeks_interval
             }
             break
         case 'BM':
             {
-                const byMonth = props.periodicity.data as ReservationPeriodicityByMonth
+                const byMonth = props.reservation.periodicity.periodicity as ReservationPeriodicityByMonth
                 periodicityByMonth.value.bm_day_choice = byMonth.bm_day_choice
                 periodicityByMonth.value.bm_x_choice = byMonth.bm_x_choice
             }
@@ -481,7 +500,7 @@ function resetValues() {
     selectedResponsible.value = props.reservation.responsible
     selectedRoom.value = props.reservation.room
     selectedType.value = props.reservation.reservation_type
-    periodicityId.value = initPeriodicityId.value
+    periodicityData.value = initPeriodicity.value ? initPeriodicity.value.periodicity : null
     email.value = props.reservation.email
     startTime.value = ReservationTime.fromString(props.reservation.start_time)
     endTime.value = ReservationTime.fromString(props.reservation.end_time)
@@ -499,88 +518,67 @@ function onFormCancel() {
 
 async function onFormSave() {
     isFormLocked.value = true
-    let continueSave = true
-    if (isPeriodic.value || isCreatingPeriodicity.value) {
-        periodicityId.value = await savePeriodicity().catch((reason) => {
-            handleReason(reason)
-            continueSave = false
-            return null
-        })
-    }
-    if (continueSave) {
-        saveReservation()
-    }
+    saveReservation()
 }
 
 function onPeriodicityDeletionCancel() {
     switchToForm()
 }
 
+function onReservationEditRefuse() {
+    switchToForm()
+}
+
 function onPeriodicityDeletionConfirm() {
     isDialogLocked.value = true
     props.onPeriodicityDelete(props.reservation).then((_) => {
-        periodicityId.value = null
+        periodicityData.value = null
         isDialogLocked.value = false
         switchToForm()
     })
 }
 
-async function savePeriodicity(): Promise<number> {
+function onReservationEditConfirm() {
+    isDialogLocked.value = true
+    isDialogLocked.value = false
+    switchToForm()
+}
+
+function extractPeriodicity(): ReservationPeriodicityData | null {
     if (!selectedPeriodicityType.value) {
-        return Promise.reject('No periodicity has been defined.')
+        return null
     }
 
-    let apiMethod: typeof api.post | typeof api.put = api.put
-    // Method is POST if the reservation has a new periodicity
-    if (!props.periodicity) {
-        apiMethod = api.post
-    }
-
-    let apiCall
     let periodicityToUpdate: ReservationPeriodicityData
-    let periodicityToUpdateActualType
 
     switch (selectedPeriodicityType.value[0]) {
         case 'BW':
-            apiCall = apiMethod.reservationPeriodicityByWeek
             periodicityToUpdate = periodicityChoice.value.BW
-            periodicityToUpdateActualType = periodicityToUpdate as ReservationPeriodicityByWeek
             break
         case 'EM':
-            apiCall = apiMethod.reservationPeriodicityEachMonthSameDate
             periodicityToUpdate = periodicityChoice.value.EM
-            periodicityToUpdateActualType = periodicityToUpdate as ReservationPeriodicityEachMonthSameDate
             break
         case 'BM':
-            apiCall = apiMethod.reservationPeriodicityByMonth
             periodicityToUpdate = periodicityChoice.value.BM
-            periodicityToUpdateActualType = periodicityToUpdate as ReservationPeriodicityByMonth
             break
     }
-    periodicityToUpdateActualType.start = periodicityToUpdateActualType.start.replaceAll('/', '-')
-    periodicityToUpdateActualType.end = periodicityToUpdateActualType.end.replaceAll('/', '-')
-    return await apiCall(periodicityToUpdateActualType)
-        .then((value) => {
-            // Give it the id given by the api
-            periodicityToUpdate.id = value.id
-            // Complete periodicity creation
-            isCreatingPeriodicity.value = false
-            return value.id
-        })
-        .catch((reason) => {
-            handleReason(reason)
-            return periodicityToUpdate.id
-        })
+    return periodicityToUpdate
 }
 
 function saveReservation() {
+    const newPeriodicityData = extractPeriodicity()
+    const newPeriodicity = newPeriodicityData
+        ? {
+              periodicity: newPeriodicityData,
+          }
+        : props.reservation.periodicity
     const obj: RoomReservation = {
-        date: date.value.replaceAll('/', '-'),
+        date: date.value,
         description: description.value,
         email: email.value,
         end_time: ReservationTime.toString(endTime.value),
         id: Math.max(0, props.reservation.id),
-        periodicity: periodicityId.value,
+        periodicity: newPeriodicity,
         responsible: selectedResponsible.value,
         room: selectedRoom.value,
         start_time: ReservationTime.toString(startTime.value),
@@ -602,7 +600,7 @@ function saveReservation() {
 
 function removePeriodicity() {
     // If a periodicity exists then ask confirmation...
-    if (periodicityId.value && periodicityId.value > 0) {
+    if (periodicityData.value && periodicityData.value.id > 0) {
         switchToPeriodicityDeletionDialog()
         return
     }
@@ -612,11 +610,11 @@ function removePeriodicity() {
 
 function switchToPeriodicityDeletionDialog() {
     isFormOpen.value = false
-    isDialogOpen.value = true
+    isPeriodicityDeletionDialogOpen.value = true
 }
 
 function switchToForm() {
-    isDialogOpen.value = false
+    isPeriodicityDeletionDialogOpen.value = false
     isFormOpen.value = true
 }
 
@@ -631,11 +629,11 @@ function onFormInterface(value: FormInterface) {
 }
 
 function updateDate(newDate: string) {
-    date.value = newDate
+    date.value = newDate.replaceAll('/', '-')
 }
 
 function updatePeriodicityStartDate(newDate: string) {
-    periodicityStart.value = newDate
+    periodicityStart.value = newDate.replaceAll('/', '-')
     const startDate = new Date(newDate)
     const endDate = new Date(periodicityEnd.value)
 
@@ -649,7 +647,7 @@ function updatePeriodicityStartDate(newDate: string) {
 }
 
 function updatePeriodicityEndDate(newDate: string) {
-    periodicityEnd.value = newDate
+    periodicityEnd.value = newDate.replaceAll('/', '-')
 }
 
 /**

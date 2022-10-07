@@ -204,10 +204,6 @@ interface CourseTypes {
 interface RoomReservations {
     list: Ref<Array<RoomReservation>>
     perDay: ComputedRef<{ [day: string]: Array<RoomReservation> }>
-    perDayFilterByDepartmentsAndRooms: ComputedRef<{ [day: string]: Array<RoomReservation> }>
-    perDayPerRoomFilterBySelectedDepartments: ComputedRef<{
-        [day: string]: { [roomId: string]: Array<RoomReservation> }
-    }>
 }
 
 interface RoomReservationTypes {
@@ -395,33 +391,6 @@ const roomReservations: RoomReservations = {
             return createDateId(date.getDate(), date.getMonth() + 1)
         })
     }),
-    perDayFilterByDepartmentsAndRooms: computed(() => {
-        const out: { [day: string]: Array<RoomReservation> } = Object.fromEntries(
-            Object.entries(roomReservations.perDay.value).map((entry) => {
-                return [
-                    entry[0], // Keep the day as id
-                    entry[1].filter((reservation) => {
-                        // Apply the filter
-                        return isRoomInSelectedDepartments(reservation.room) && isRoomSelected(reservation.room)
-                    }),
-                ]
-            })
-        )
-        return out
-    }),
-    perDayPerRoomFilterBySelectedDepartments: computed(() => {
-        const out: { [day: string]: { [roomId: string]: Array<RoomReservation> } } = {}
-        Object.entries(roomReservations.perDayFilterByDepartmentsAndRooms.value).forEach(
-            (entry: [string, RoomReservation[]]) => {
-                const day = entry[0]
-                out[day] = {}
-                entry[1].forEach((reservation) => {
-                    addTo(out[day], `${reservation.room}`, reservation)
-                })
-            }
-        )
-        return out
-    }),
 }
 
 const roomReservationTypes: RoomReservationTypes = {
@@ -434,7 +403,7 @@ const roomReservationTypes: RoomReservationTypes = {
 const reservationPeriodicities: ReservationPeriodicities = {
     list: ref([]),
     perId: computed(() => {
-        return Object.fromEntries(reservationPeriodicities.list.value.map((p) => [p.data.id, p]))
+        return Object.fromEntries(reservationPeriodicities.list.value.map((p) => [p.periodicity.id, p]))
     }),
 }
 
@@ -523,37 +492,55 @@ const roomNameFilter = ref('')
  */
 
 interface RoomReservationSlots {
-    filterBySelectedDepartments: ComputedRef<{ [day: string]: Array<CalendarSlot> }>
+    list: ComputedRef<Array<CalendarSlot>>
+    perDay: ComputedRef<{ [day: string]: Array<CalendarSlot> }>
+    perDayFilterBySelectedDepartmentsAndRooms: ComputedRef<{ [day: string]: Array<CalendarSlot> }>
     perDayPerRoomFilterBySelectedDepartments: ComputedRef<{ [day: string]: { [roomId: string]: Array<CalendarSlot> } }>
 }
 
 const roomReservationSlots: RoomReservationSlots = {
-    filterBySelectedDepartments: computed(() => {
+    list: computed(() => {
+        console.log('refresh slots')
+        return roomReservations.list.value.map(createRoomReservationSlot)
+    }),
+    perDay: computed(() => {
         const out: { [day: string]: Array<CalendarSlot> } = Object.fromEntries(
-            Object.entries(roomReservations.perDayFilterByDepartmentsAndRooms.value).map((entry) => [
-                // Keep the day as key
+            Object.entries(
+                listGroupBy(roomReservationSlots.list.value, (slot) => {
+                    const date = new Date((slot.slotData as CalendarRoomReservationSlotData).reservation.date)
+                    return createDateId(date.getDate(), date.getMonth() + 1)
+                })
+            )
+        )
+        return out
+    }),
+    perDayFilterBySelectedDepartmentsAndRooms: computed(() => {
+        const out: { [day: string]: Array<CalendarSlot> } = Object.fromEntries(
+            Object.entries(roomReservationSlots.perDay.value).map((entry) => [
                 entry[0],
-                // Create a slot for each of the reservations
-                entry[1].map(createRoomReservationSlot),
+                entry[1].filter((slot) => {
+                    const room = (slot.slotData as CalendarRoomReservationSlotData).reservation.room
+                    return isRoomSelected(room) && isRoomInSelectedDepartments(room)
+                }),
             ])
         )
         return out
     }),
     perDayPerRoomFilterBySelectedDepartments: computed(() => {
-        const out: { [day: string]: { [roomId: string]: Array<CalendarSlot> } } = {}
-        Object.entries(roomReservations.perDayPerRoomFilterBySelectedDepartments.value).forEach((entry) => {
-            const day = entry[0]
-            const reservations = entry[1]
-            if (!(day in out)) {
-                out[day] = {}
-            }
-            Object.values(reservations)
-                .flat(1)
-                .forEach((reservation) => {
-                    const slot = createRoomReservationSlot(reservation)
-                    addTo(out[day], `${reservation.room}`, slot)
-                })
-        })
+        const out: { [day: string]: { [roomId: string]: Array<CalendarSlot> } } = Object.fromEntries(
+            Object.entries(roomReservationSlots.perDay.value).map((entry) => [
+                // First value is the day
+                entry[0],
+                // Group the list by room
+                listGroupBy(
+                    // Filter the rooms not in the selected departments
+                    entry[1].filter((slot) =>
+                        isRoomInSelectedDepartments((slot.slotData as CalendarRoomReservationSlotData).reservation.room)
+                    ),
+                    (slot) => `${(slot.slotData as CalendarRoomReservationSlotData).reservation.room}`
+                ),
+            ])
+        )
         return out
     }),
 }
@@ -562,12 +549,14 @@ const roomReservationSlots: RoomReservationSlots = {
  * Computes the slots to display all the scheduled courses, grouped by day.
  */
 interface ScheduledCourseSlots {
-    perDepartmentFilterBySelectedDepartments: ComputedRef<{ [departmentId: string]: Array<CalendarSlot> }>
+    perDepartmentFilterBySelectedDepartmentsAndRooms: ComputedRef<{
+        [departmentId: string]: Array<CalendarSlot>
+    }>
     perDayPerRoomFilterBySelectedDepartments: ComputedRef<{ [day: string]: { [roomId: string]: Array<CalendarSlot> } }>
 }
 
 const scheduledCoursesSlots: ScheduledCourseSlots = {
-    perDepartmentFilterBySelectedDepartments: computed(() => {
+    perDepartmentFilterBySelectedDepartmentsAndRooms: computed(() => {
         const out: { [date: string]: Array<CalendarSlot> } = {}
         Object.entries(scheduledCourses.perDepartmentFilterByDepartmentsAndRooms.value).map((entry) => {
             const deptId = entry[0]
@@ -673,8 +662,8 @@ const hourCalendarValues = computed<HourCalendarProps>(() => {
     const slots: { [index: string]: Array<CalendarSlot> } = {}
 
     for (const obj of [
-        roomReservationSlots.filterBySelectedDepartments.value,
-        scheduledCoursesSlots.perDepartmentFilterBySelectedDepartments.value,
+        roomReservationSlots.perDayFilterBySelectedDepartmentsAndRooms.value,
+        scheduledCoursesSlots.perDepartmentFilterBySelectedDepartmentsAndRooms.value,
         temporaryCalendarSlots.perDay.value,
     ]) {
         Object.keys(obj).forEach((key) => {
@@ -822,7 +811,7 @@ function createRoomReservationSlot(reservation: RoomReservation): CalendarSlot {
         users: users.perId.value,
         reservationTypes: Object.values(roomReservationTypes.list.value),
         periodicityTypes: reservationPeriodicityTypes.value,
-        periodicity: reservation.periodicity ? reservationPeriodicities.perId.value[reservation.periodicity] : null,
+        periodicity: reservation.periodicity,
         weekdays: weekDays.list.value,
         day: reservation.date,
         startTime: startTime,
@@ -834,7 +823,7 @@ function createRoomReservationSlot(reservation: RoomReservation): CalendarSlot {
             if (!reservation.periodicity) {
                 return Promise.resolve()
             }
-            const periodicityId = reservation.periodicity
+            const periodicityId = reservation.periodicity.periodicity.id
             const reservationsRemovalPromise = reservationRemoveFutureSamePeriodicity(reservation)
             if (!reservationsRemovalPromise) {
                 return Promise.reject(`Could not remove the reservations with periodicity id ${periodicityId}`)
@@ -981,8 +970,10 @@ function updateRoomReservation(newData: CalendarRoomReservationSlotData, oldData
         // Clear the temporary slot
         temporaryReservation.value = undefined
 
-        // Update the periodicity list if needed
         if (newReservation.periodicity != oldReservation.periodicity) {
+            // The reservation has a periodicity, new reservations might have been created.
+            // Update the lists of reservations and periodicity
+            updateRoomReservations(selectedDate.value)
             updateReservationPeriodicities()
         }
         return
@@ -997,8 +988,10 @@ function updateRoomReservation(newData: CalendarRoomReservationSlotData, oldData
         return
     }
 
-    // Update the periodicity list if needed
     if (newReservation.periodicity != oldReservation.periodicity) {
+        // The reservation has a new periodicity, new reservations might have been created.
+        // Update the lists of reservations and periodicities
+        updateRoomReservations(selectedDate.value)
         updateReservationPeriodicities()
     }
 
@@ -1019,7 +1012,7 @@ function deleteRoomReservationSlot(toDelete: CalendarRoomReservationSlotData) {
         return
     }
 
-    if (reservation.periodicity && reservation.periodicity >= 0) {
+    if (reservation.periodicity && reservation.periodicity.periodicity.id >= 0) {
         // The reservation is linked to a periodicity,
         // we must ask if we remove other reservations related to this periodicity
         reservationToDelete.value = reservation
@@ -1031,10 +1024,10 @@ function deleteRoomReservationSlot(toDelete: CalendarRoomReservationSlotData) {
 }
 
 function reservationRemoveAllSamePeriodicity(reservation: RoomReservation) {
-    if (!reservation.periodicity || reservation.periodicity < 0) {
+    if (!reservation.periodicity || reservation.periodicity.periodicity.id < 0) {
         return
     }
-    const periodicityId = reservation.periodicity
+    const periodicityId = reservation.periodicity.periodicity.id
 
     // Get the list of all the reservations to delete, which are those who share the periodicity ID
     api.value.fetch.roomReservations({ periodicityId: periodicityId }).then((deletionList) => {
@@ -1050,11 +1043,11 @@ function reservationRemoveAllSamePeriodicity(reservation: RoomReservation) {
 }
 
 function reservationRemoveCurrentAndFutureSamePeriodicity(reservation: RoomReservation) {
-    if (!reservation.periodicity || reservation.periodicity < 0) {
+    if (!reservation.periodicity || reservation.periodicity.periodicity.id < 0) {
         return
     }
 
-    const periodicityId = reservation.periodicity
+    const periodicityId = reservation.periodicity.periodicity.id
     const reservationDate = new Date(reservation.date)
     // Remove all the future reservations of the same periodicity
     reservationRemoveFutureSamePeriodicity(reservation)
@@ -1065,12 +1058,11 @@ function reservationRemoveCurrentAndFutureSamePeriodicity(reservation: RoomReser
         // Reduce the periodicity end date to the day before the current reservation
         .then((_) => {
             // Get the day before the reservation
-            const dayBefore = `${reservationDate.getFullYear()}-${reservationDate.getMonth() + 1}-${
-                reservationDate.getDate() - 1
-            }`
+            const dayBefore = new Date(reservationDate)
+            dayBefore.setDate(dayBefore.getDate() - 1)
 
             // Get the periodicity data
-            const periodicity = reservationPeriodicities.perId.value[periodicityId].data
+            const periodicity = reservationPeriodicities.perId.value[periodicityId].periodicity
             if (periodicity.periodicity_type === '') {
                 // Should never arrive here as an existing periodicity always has a type. Written for the type checks.
                 return
@@ -1089,9 +1081,10 @@ function reservationRemoveCurrentAndFutureSamePeriodicity(reservation: RoomReser
                     break
             }
             // Finally apply the patch
-            return apiCall(periodicity.id, { end: dayBefore })
+            return apiCall(periodicity.id, { end: dayBefore.toLocaleDateString() })
         })
         ?.then((_) => {
+            updateRoomReservations(selectedDate.value)
             updateReservationPeriodicities()
         })
         .finally(closeReservationDeletionDialog)
@@ -1102,11 +1095,11 @@ function reservationRemoveCurrentAndFutureSamePeriodicity(reservation: RoomReser
  * @param reservation The reservation to base the periodicity removal.
  */
 function reservationRemoveFutureSamePeriodicity(reservation: RoomReservation) {
-    if (!reservation.periodicity || reservation.periodicity < 0) {
+    if (!reservation.periodicity || reservation.periodicity.periodicity.id < 0) {
         return
     }
 
-    const periodicityId = reservation.periodicity
+    const periodicityId = reservation.periodicity.periodicity.id
     const reservationDate = new Date(reservation.date)
     const reservationTime = reservationDate.getTime()
 

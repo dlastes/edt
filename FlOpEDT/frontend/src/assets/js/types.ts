@@ -79,7 +79,7 @@ export interface RoomReservation {
     reservation_type: number
     start_time: string
     title: string
-    periodicity: number | null
+    periodicity: ReservationPeriodicity | null
 }
 
 export interface RoomReservationType {
@@ -350,5 +350,5 @@ export interface ReservationPeriodicityByMonth extends ReservationPeriodicityDat
 }
 
 export interface ReservationPeriodicity {
-    data: ReservationPeriodicityData
+    periodicity: ReservationPeriodicityData
 }
