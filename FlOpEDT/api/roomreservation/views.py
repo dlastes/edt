@@ -18,6 +18,7 @@ from api.shared.params import week_param, year_param
                       ])
                   )
 class RoomReservationViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAdminOrReadOnly]
     serializer_class = serializers.RoomReservationSerializer
 
     def get_queryset(self):
@@ -42,6 +43,7 @@ class RoomReservationViewSet(viewsets.ModelViewSet):
 
 
 class RoomReservationTypeViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAdminOrReadOnly]
     serializer_class = serializers.RoomReservationTypeSerializer
     queryset = rm.RoomReservationType.objects.all()
     filterset_fields = '__all__'
@@ -61,11 +63,13 @@ class ReservationPeriodicityReadOnlyViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class ReservationPeriodicityByWeekViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAdminOrReadOnly]
     serializer_class = serializers.ReservationPeriodicityByWeekSerializer
     queryset = rm.ReservationPeriodicityByWeek.objects.all()
 
 
 class ReservationPeriodicityEachMonthSameDateViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAdminOrReadOnly]
     serializer_class = serializers.ReservationPeriodicityEachMonthSameDateSerializer
     queryset = rm.ReservationPeriodicityEachMonthSameDate.objects.all()
 
@@ -79,5 +83,6 @@ class ReservationPeriodicityByMonthXChoiceViewSet(viewsets.ViewSet):
 
 
 class ReservationPeriodicityByMonthViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAdminOrReadOnly]
     serializer_class = serializers.ReservationPeriodicityByMonthSerializer
     queryset = rm.ReservationPeriodicityByMonth.objects.all()
