@@ -79,7 +79,7 @@ export interface RoomReservation {
     reservation_type: number
     start_time: string
     title: string
-    periodicity: number
+    periodicity: number | null
 }
 
 export interface RoomReservationType {
@@ -256,6 +256,9 @@ export interface CalendarRoomReservationSlotData extends CalendarSlotData {
     rooms: { [roomId: number]: Room }
     reservationTypes: Array<RoomReservationType>
     users: { [userId: number]: User }
+    periodicityTypes: Array<ReservationPeriodicityType>
+    weekdays: Array<WeekDay>
+    periodicity: ReservationPeriodicity | null
 }
 
 export interface CalendarScheduledCourseSlotData extends CalendarSlotData {
@@ -314,4 +317,33 @@ export interface DynamicSelectElementNumericValue extends DynamicSelectElementVa
     initialMax: number
     min: number
     max: number
+}
+
+export type ReservationPeriodicityTypeName = 'BM' | 'BW' | 'EM'
+
+export type ReservationPeriodicityType = [ReservationPeriodicityTypeName, string]
+
+export interface ReservationPeriodicityData {
+    id: number
+    start: string
+    end: string
+    periodicity_type: ReservationPeriodicityTypeName | ''
+}
+
+export interface ReservationPeriodicityByWeek extends ReservationPeriodicityData {
+    bw_weekdays: Array<string>
+    bw_weeks_interval: number
+}
+
+export type ReservationPeriodicityEachMonthSameDate = ReservationPeriodicityData
+
+export type ReservationPeriodicityByMonthXChoice = [number, string]
+
+export interface ReservationPeriodicityByMonth extends ReservationPeriodicityData {
+    bm_x_choice: number
+    bm_day_choice: string
+}
+
+export interface ReservationPeriodicity {
+    data: ReservationPeriodicityData
 }

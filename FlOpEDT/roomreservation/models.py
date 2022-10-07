@@ -32,11 +32,53 @@ class RoomReservationType(models.Model):
 
 
 class ReservationPeriodicity(models.Model):
+    start = models.DateField(blank=True)
+    end = models.DateField(blank=True)
+
     class PeriodicityType(models.TextChoices):
         # EachDay = 'ED', _('Each day')
         ByWeek = 'BW', _('By week')
         EachMonthSameDate = 'EM', _('Each month at the same date')
         ByMonth = 'BM', _('By Month')
+
+    periodicity_type = models.CharField(
+        max_length=2,
+        choices=PeriodicityType.choices,
+        default=PeriodicityType.ByWeek,
+    )
+
+
+class ReservationPeriodicityByWeek(ReservationPeriodicity):
+    """
+    This reservation will be replicated each n week (with n = bw_weeks_interval)
+    """
+    periodicity = models.OneToOneField(ReservationPeriodicity, parent_link=True, on_delete=models.CASCADE,
+                                       related_name='BW')
+
+    # Weekdays which must be included in the reservation
+    bw_weekdays = ArrayField(models.CharField(max_length=2,
+                                              choices=Day.CHOICES))
+    bw_weeks_interval = models.PositiveSmallIntegerField(default=1)
+
+    def save(self, **kwargs):
+        self.periodicity_type = 'BW'
+        super(ReservationPeriodicity, self).save(**kwargs)
+
+
+class ReservationPeriodicityEachMonthSameDate(ReservationPeriodicity):
+    periodicity = models.OneToOneField(ReservationPeriodicity, parent_link=True, on_delete=models.CASCADE,
+                                       related_name='EM')
+    def save(self, **kwargs):
+        self.periodicity_type = 'EM'
+        super(ReservationPeriodicity, self).save(**kwargs)
+
+
+class ReservationPeriodicityByMonth(ReservationPeriodicity):
+    """
+    This reservation will be replicated each Xth Y of the month (with Y = bm_day_choice)
+    """
+    periodicity = models.OneToOneField(ReservationPeriodicity, parent_link=True, on_delete=models.CASCADE,
+                                       related_name='BM')
 
     class ByMonthX(models.IntegerChoices):
         First = 1, _('First')
@@ -46,22 +88,9 @@ class ReservationPeriodicity(models.Model):
         AnteLast = -2, _('Ante Last')
         Last = -1, _('Last')
 
-    periodicity_type = models.CharField(
-        max_length=2,
-        choices=PeriodicityType.choices,
-        default=PeriodicityType.ByWeek,
-    )
-    start = models.DateField(blank=True)
-    end = models.DateField(blank=True)
+    bm_x_choice = models.SmallIntegerField(choices=ByMonthX.choices)
+    bm_day_choice = models.CharField(max_length=2, choices=Day.CHOICES)
 
-    ### ByWeek Paramaters ###
-    # Jours de la semaine qui doivent être inclus dans la réservation ByWeek
-    bw_weekdays = ArrayField(models.CharField(max_length=2,
-                                              choices=Day.CHOICES), help_text="m, tu, w, th, f", blank=True, null=True)
-    # La réservation ByWeek sera reproduite toutes les n semaines (avec n = bw_weeks_interval)
-    bw_weeks_interval = models.PositiveSmallIntegerField(blank=True, null=True)
-
-    ### ByMonth Paramaters ###
-    # La réservation ByMonth est tous les Xe Y du mois
-    bm_x_choice = models.SmallIntegerField(choices=ByMonthX.choices, blank=True, null=True)
-    bm_day_choice = models.CharField(max_length=2, choices=Day.CHOICES, blank=True, null=True)
+    def save(self, **kwargs):
+        self.periodicity_type = 'BM'
+        super(ReservationPeriodicity, self).save(**kwargs)

@@ -14,6 +14,12 @@ import type {
     CourseType,
     Department,
     NumericRoomAttributeValue,
+    ReservationPeriodicity,
+    ReservationPeriodicityByMonth,
+    ReservationPeriodicityByMonthXChoice,
+    ReservationPeriodicityByWeek,
+    ReservationPeriodicityEachMonthSameDate,
+    ReservationPeriodicityType,
     Room,
     RoomAttribute,
     RoomReservation,
@@ -161,6 +167,12 @@ const urls = {
     timesettings: 'base/timesettings',
     roomreservation: 'roomreservations/reservation',
     roomreservationtype: 'roomreservations/reservationtype',
+    reservationperiodicity: 'roomreservations/reservationperiodicity',
+    reservationperiodicitytype: 'roomreservations/reservationperiodicitytype',
+    reservationperiodicitybyweek: 'roomreservations/reservationperiodicitybyweek',
+    reservationperiodicityeachmonthsamedate: 'roomreservations/reservationperiodicityeachmonthsamedate',
+    reservationperiodicitybymonth: 'roomreservations/reservationperiodicitybymonth',
+    reservationperiodicitybymonthxchoice: 'roomreservations/reservationperiodicitybymonthxchoice',
     courses: 'courses/courses',
     scheduledcourses: 'fetch/scheduledcourses',
     coursetypes: 'courses/type',
@@ -192,6 +204,9 @@ export interface FlopAPI {
             timeSettings(): Promise<Array<TimeSettings>>
             courseTypes(department: string): Promise<Array<CourseType>>
             roomReservationTypes(): Promise<Array<RoomReservationType>>
+            reservationPeriodicities(): Promise<Array<ReservationPeriodicity>>
+            reservationPeriodicityTypes(): Promise<Array<ReservationPeriodicityType>>
+            reservationPeriodicityByMonthXChoices(): Promise<Array<ReservationPeriodicityByMonthXChoice>>
             users(): Promise<Array<User>>
             booleanRoomAttributes(): Promise<Array<RoomAttribute>>
             numericRoomAttributes(): Promise<Array<RoomAttribute>>
@@ -207,6 +222,7 @@ export interface FlopAPI {
                 params: { roomId?: number },
                 additionalParams?: object
             ): Promise<Array<RoomReservation>>
+            reservationPeriodicity(reservationId: number): Promise<ReservationPeriodicity>
             courses(
                 week: number,
                 year: number,
@@ -223,9 +239,19 @@ export interface FlopAPI {
     }
     put: {
         roomReservation(value: RoomReservation): Promise<RoomReservation>
+        reservationPeriodicityByMonth(value: ReservationPeriodicityByMonth): Promise<ReservationPeriodicityByMonth>
+        reservationPeriodicityByWeek(value: ReservationPeriodicityByWeek): Promise<ReservationPeriodicityByWeek>
+        reservationPeriodicityEachMonthSameDate(
+            value: ReservationPeriodicityEachMonthSameDate
+        ): Promise<ReservationPeriodicityEachMonthSameDate>
     }
     post: {
         roomReservation(value: RoomReservation): Promise<RoomReservation>
+        reservationPeriodicityByMonth(value: ReservationPeriodicityByMonth): Promise<ReservationPeriodicityByMonth>
+        reservationPeriodicityByWeek(value: ReservationPeriodicityByWeek): Promise<ReservationPeriodicityByWeek>
+        reservationPeriodicityEachMonthSameDate(
+            value: ReservationPeriodicityEachMonthSameDate
+        ): Promise<ReservationPeriodicityEachMonthSameDate>
     }
     delete: {
         roomReservation(id: number): Promise<unknown>
@@ -249,6 +275,15 @@ const api: FlopAPI = {
             },
             roomReservationTypes() {
                 return fetcher(urls.roomreservationtype)
+            },
+            reservationPeriodicities() {
+                return fetcher(urls.reservationperiodicity)
+            },
+            reservationPeriodicityTypes() {
+                return fetcher(urls.reservationperiodicitytype)
+            },
+            reservationPeriodicityByMonthXChoices() {
+                return fetcher(urls.reservationperiodicitybymonthxchoice)
             },
             users() {
                 return fetcher(urls.users)
@@ -296,6 +331,9 @@ const api: FlopAPI = {
                     additionalParams
                 )
             },
+            reservationPeriodicity(periodicityId: number): Promise<ReservationPeriodicity> {
+                return fetcher(urls.reservationperiodicity, { id: periodicityId })
+            },
             courses(week: number, year: number, params: { department?: string }, additionalParams?: object) {
                 return fetcher(
                     urls.courses,
@@ -331,10 +369,35 @@ const api: FlopAPI = {
         roomReservation(value: RoomReservation) {
             return putData<RoomReservation>(urls.roomreservation, value.id, value)
         },
+        reservationPeriodicityByMonth(value: ReservationPeriodicityByMonth) {
+            return putData<ReservationPeriodicityByMonth>(urls.reservationperiodicitybymonth, value.id, value)
+        },
+        reservationPeriodicityByWeek(value: ReservationPeriodicityByWeek) {
+            return putData<ReservationPeriodicityByWeek>(urls.reservationperiodicitybyweek, value.id, value)
+        },
+        reservationPeriodicityEachMonthSameDate(value: ReservationPeriodicityEachMonthSameDate) {
+            return putData<ReservationPeriodicityEachMonthSameDate>(
+                urls.reservationperiodicityeachmonthsamedate,
+                value.id,
+                value
+            )
+        },
     },
     post: {
         roomReservation(value: RoomReservation) {
             return postData(urls.roomreservation, value)
+        },
+        reservationPeriodicityByMonth(value: ReservationPeriodicityByMonth) {
+            return postData<ReservationPeriodicityByMonth>(urls.reservationperiodicitybymonth, value)
+        },
+        reservationPeriodicityByWeek(value: ReservationPeriodicityByWeek) {
+            return postData<ReservationPeriodicityByWeek>(urls.reservationperiodicitybyweek, value)
+        },
+        reservationPeriodicityEachMonthSameDate(value: ReservationPeriodicityEachMonthSameDate) {
+            return postData<ReservationPeriodicityEachMonthSameDate>(
+                urls.reservationperiodicityeachmonthsamedate,
+                value
+            )
         },
     },
     delete: {

@@ -1,8 +1,10 @@
+from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets, response, status
 
 import roomreservation.models as rm
+from api.permissions import IsAdminOrReadOnly
 from api.roomreservation import serializers
 from api.shared.params import week_param, year_param
 
@@ -43,3 +45,39 @@ class RoomReservationTypeViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.RoomReservationTypeSerializer
     queryset = rm.RoomReservationType.objects.all()
     filterset_fields = '__all__'
+
+
+class ReservationPeriodicityTypeViewSet(viewsets.ViewSet):
+    permission_classes = [IsAdminOrReadOnly]
+
+    def list(self, req):
+        data = rm.ReservationPeriodicity.PeriodicityType.choices
+        return JsonResponse(data, safe=False)
+
+
+class ReservationPeriodicityReadOnlyViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = serializers.ReservationPeriodicitySerializer
+    queryset = rm.ReservationPeriodicity.objects.all()
+
+
+class ReservationPeriodicityByWeekViewSet(viewsets.ModelViewSet):
+    serializer_class = serializers.ReservationPeriodicityByWeekSerializer
+    queryset = rm.ReservationPeriodicityByWeek.objects.all()
+
+
+class ReservationPeriodicityEachMonthSameDateViewSet(viewsets.ModelViewSet):
+    serializer_class = serializers.ReservationPeriodicityEachMonthSameDateSerializer
+    queryset = rm.ReservationPeriodicityEachMonthSameDate.objects.all()
+
+
+class ReservationPeriodicityByMonthXChoiceViewSet(viewsets.ViewSet):
+    permission_classes = [IsAdminOrReadOnly]
+
+    def list(self, req):
+        data = rm.ReservationPeriodicityByMonth.ByMonthX.choices
+        return JsonResponse(data, safe=False)
+
+
+class ReservationPeriodicityByMonthViewSet(viewsets.ModelViewSet):
+    serializer_class = serializers.ReservationPeriodicityByMonthSerializer
+    queryset = rm.ReservationPeriodicityByMonth.objects.all()

@@ -139,8 +139,29 @@
                 </select>
                 <label :for="generateId('reservationType')" class="form-label">Reservation type</label>
             </div>
+            <!-- Periodicity -->
+            <div class="mb-3 border rounded p-2">
+                <div class="form-check form-switch">
+                    <input
+                        class="form-check-input"
+                        type="checkbox"
+                        v-model="isPeriodic"
+                        role="switch"
+                        :id="generateId('isPeriodic')"
+                    />
+                    <label class="form-check-label" :for="generateId('isPeriodic')">Repeat?</label>
+                </div>
+                <div v-if="isPeriodic" :class="selectPeriodicityClass">
+                    <PeriodicitySelect
+                        :types="props.periodicityTypes"
+                        :weekdays="props.weekdays"
+                        v-model:model-type="selectedPeriodicityType"
+                        v-model:modelPeriodicity="periodicityChoice"
+                    ></PeriodicitySelect>
+                </div>
+            </div>
             <!-- Send email -->
-            <div class="form-check form-switch">
+            <div class="form-check form-switch mb-3">
                 <input
                     class="form-check-input"
                     type="checkbox"
@@ -157,11 +178,26 @@
 <script setup lang="ts">
 import { parseReason } from '@/assets/js/helpers'
 import { apiKey, requireInjection } from '@/assets/js/keys'
-import type { FormInterface, Room, RoomReservation, RoomReservationType, User } from '@/assets/js/types'
+import type {
+    FormInterface,
+    ReservationPeriodicity,
+    ReservationPeriodicityByMonth,
+    ReservationPeriodicityByWeek,
+    ReservationPeriodicityData,
+    ReservationPeriodicityEachMonthSameDate,
+    ReservationPeriodicityType,
+    ReservationPeriodicityTypeName,
+    Room,
+    RoomReservation,
+    RoomReservationType,
+    User,
+    WeekDay,
+} from '@/assets/js/types'
 import DayPicker from '@/components/DayPicker.vue'
 import ModalForm from '@/components/ModalForm.vue'
 import TimePicker from '@/components/TimePicker.vue'
 import { computed, defineProps, ref } from 'vue'
+import PeriodicitySelect from '@/components/roomreservation/periodicity/PeriodicitySelect.vue'
 
 interface Emits {
     (e: 'saved', reservation: RoomReservation): void
@@ -180,6 +216,9 @@ interface Props {
     rooms: { [roomId: number]: Room }
     reservationTypes: Array<RoomReservationType>
     users: { [userId: number]: User }
+    periodicityTypes: Array<ReservationPeriodicityType>
+    weekdays: Array<WeekDay>
+    periodicity: ReservationPeriodicity | null
 }
 
 const props = defineProps<Props>()
@@ -220,13 +259,87 @@ const description = ref(props.reservation.description)
 const selectedResponsible = ref(props.reservation.responsible)
 const selectedRoom = ref(props.reservation.room)
 const selectedType = ref(props.reservation.reservation_type)
+const isPeriodic = ref(props.reservation.periodicity != null)
 const email = ref(props.reservation.email)
 const startTime = ref(ReservationTime.fromString(props.reservation.start_time))
 const endTime = ref(ReservationTime.fromString(props.reservation.end_time))
 const date = ref(props.reservation.date)
 
+// Get the possibly existing periodicity values
+const initPeriodicityId = computed(() => (props.periodicity ? props.periodicity.data.id : -1))
+const initPeriodicityStart = computed(() => (props.periodicity ? props.periodicity.data.start : props.reservation.date))
+const initPeriodicityEnd = computed(() => (props.periodicity ? props.periodicity.data.end : props.reservation.date))
+
+const currentDay = new Date(props.reservation.date).getDay()
+const currentWeekdayRef = computed(() => {
+    const weekday = props.weekdays.find((d) => d.num === currentDay - 1)
+    return weekday?.ref
+})
+
+const selectedPeriodicityType = ref<ReservationPeriodicityType | undefined>(
+    props.periodicity
+        ? props.periodicityTypes.find((t) => t[0] === props.periodicity?.data.periodicity_type)
+        : undefined
+)
+
+const periodicityID = ref(initPeriodicityId.value)
+
+const selectPeriodicityClass = computed(() => {
+    return isPeriodic.value && selectedPeriodicityType.value === undefined ? 'border border-danger' : ''
+})
+
 const originalDuration =
     endTime.value.hours * 60 + endTime.value.minutes - (startTime.value.hours * 60 + startTime.value.minutes)
+
+// Create an object of each type
+const periodicityByWeek = ref<ReservationPeriodicityByWeek>({
+    id: selectedPeriodicityType.value && selectedPeriodicityType.value[0] === 'BW' ? initPeriodicityId.value : -1,
+    start: initPeriodicityStart.value,
+    end: initPeriodicityEnd.value,
+    periodicity_type: 'BW',
+    bw_weekdays: currentWeekdayRef.value ? [currentWeekdayRef.value] : [],
+    bw_weeks_interval: 1,
+})
+const periodicityByMonth = ref<ReservationPeriodicityByMonth>({
+    id: selectedPeriodicityType.value && selectedPeriodicityType.value[0] === 'BM' ? initPeriodicityId.value : -1,
+    start: initPeriodicityStart.value,
+    end: initPeriodicityEnd.value,
+    periodicity_type: 'BM',
+    bm_x_choice: 1,
+    bm_day_choice: currentWeekdayRef.value ?? '',
+})
+const periodicityEachMonthSameDate = ref<ReservationPeriodicityEachMonthSameDate>({
+    id: selectedPeriodicityType.value && selectedPeriodicityType.value[0] === 'EM' ? initPeriodicityId.value : -1,
+    start: initPeriodicityStart.value,
+    end: initPeriodicityEnd.value,
+    periodicity_type: 'EM',
+})
+
+// Fill the values specific to the periodicity type
+if (props.periodicity) {
+    switch (props.periodicity.data.periodicity_type) {
+        case 'BW':
+            {
+                const byWeek = props.periodicity.data as ReservationPeriodicityByWeek
+                periodicityByWeek.value.bw_weekdays = byWeek.bw_weekdays
+                periodicityByWeek.value.bw_weeks_interval = byWeek.bw_weeks_interval
+            }
+            break
+        case 'BM':
+            {
+                const byMonth = props.periodicity.data as ReservationPeriodicityByMonth
+                periodicityByMonth.value.bm_day_choice = byMonth.bm_day_choice
+                periodicityByMonth.value.bm_x_choice = byMonth.bm_x_choice
+            }
+            break
+    }
+}
+
+const periodicityChoice: { [name in ReservationPeriodicityTypeName]: ReservationPeriodicityData } = {
+    BW: periodicityByWeek.value,
+    BM: periodicityByMonth.value,
+    EM: periodicityEachMonthSameDate.value,
+}
 
 function resetValues() {
     title.value = props.reservation.title
@@ -234,6 +347,8 @@ function resetValues() {
     selectedResponsible.value = props.reservation.responsible
     selectedRoom.value = props.reservation.room
     selectedType.value = props.reservation.reservation_type
+    isPeriodic.value = props.reservation.periodicity != null
+    periodicityID.value = initPeriodicityId.value
     email.value = props.reservation.email
     startTime.value = ReservationTime.fromString(props.reservation.start_time)
     endTime.value = ReservationTime.fromString(props.reservation.end_time)
@@ -249,15 +364,70 @@ function onFormCancel() {
     cancel()
 }
 
-function onFormSave() {
+async function onFormSave() {
     isFormLocked.value = true
+    if (isPeriodic.value) {
+        periodicityID.value = await savePeriodicity()
+    }
+    saveReservation()
+}
+
+async function savePeriodicity(): Promise<number> {
+    if (!selectedPeriodicityType.value) {
+        return Promise.reject('No periodicity has been defined.')
+    }
+
+    let apiMethod: typeof api.post | typeof api.put = api.put
+    // Method is POST if the reservation has a new periodicity (either new type or didn't have before)
+    if (
+        !props.reservation.periodicity ||
+        props.reservation.periodicity < 0 ||
+        (props.periodicity && props.periodicity.data.periodicity_type != selectedPeriodicityType.value[0])
+    ) {
+        apiMethod = api.post
+    }
+
+    let apiCall
+    let periodicityToUpdate: ReservationPeriodicityData
+    let periodicityToUpdateActualType
+
+    switch (selectedPeriodicityType.value[0]) {
+        case 'BW':
+            apiCall = apiMethod.reservationPeriodicityByWeek
+            periodicityToUpdate = periodicityChoice.BW
+            periodicityToUpdateActualType = periodicityToUpdate as ReservationPeriodicityByWeek
+            break
+        case 'EM':
+            apiCall = apiMethod.reservationPeriodicityEachMonthSameDate
+            periodicityToUpdate = periodicityChoice.EM
+            periodicityToUpdateActualType = periodicityToUpdate as ReservationPeriodicityEachMonthSameDate
+            break
+        case 'BM':
+            apiCall = apiMethod.reservationPeriodicityByMonth
+            periodicityToUpdate = periodicityChoice.BM
+            periodicityToUpdateActualType = periodicityToUpdate as ReservationPeriodicityByMonth
+            break
+    }
+    return await apiCall(periodicityToUpdateActualType)
+        .then((value) => {
+            // Give it the id given by the api
+            periodicityToUpdate.id = value.id
+            return value.id
+        })
+        .catch((reason) => {
+            handleReason(reason)
+            return periodicityToUpdate.id
+        })
+}
+
+function saveReservation() {
     const obj: RoomReservation = {
         date: date.value.replaceAll('/', '-'),
         description: description.value,
         email: email.value,
         end_time: ReservationTime.toString(endTime.value),
         id: Math.max(0, props.reservation.id),
-        periodicity: 1,
+        periodicity: periodicityID.value,
         responsible: selectedResponsible.value,
         room: selectedRoom.value,
         start_time: ReservationTime.toString(startTime.value),
@@ -269,8 +439,7 @@ function onFormSave() {
         .roomReservation(obj)
         .then(
             (value) => {
-                obj.id = value.id
-                emit('saved', obj)
+                emit('saved', value)
                 close()
             },
             (reason) => handleReason(reason)

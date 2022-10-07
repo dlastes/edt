@@ -88,6 +88,15 @@
                 </div>
                 <!-- Calendar -->
                 <div class="col">
+                    <!-- Caption -->
+                    <div class="row">
+                        <div class="col-auto">
+                            <div><span :style="{ color: scheduledCourseColor }">■ </span>Course</div>
+                        </div>
+                        <div v-for="type in roomReservationTypes.list.value" :key="type.id" class="col-auto">
+                            <div><span :style="{ color: type.bg_color }">■ </span>{{ type.name }}</div>
+                        </div>
+                    </div>
                     <HourCalendar v-if="selectedRoom" @drag="handleDrag" :values="hourCalendarValues"></HourCalendar>
                     <RoomCalendar
                         v-else
@@ -120,6 +129,8 @@ import type {
     FlopWeek,
     HourCalendarProps,
     NumericRoomAttributeValue,
+    ReservationPeriodicity,
+    ReservationPeriodicityType,
     Room,
     RoomAttribute,
     RoomAttributeValue,
@@ -193,6 +204,11 @@ interface RoomReservations {
 interface RoomReservationTypes {
     list: Ref<Array<RoomReservationType>>
     perId: ComputedRef<{ [typeId: string]: RoomReservationType }>
+}
+
+interface ReservationPeriodicities {
+    list: Ref<Array<ReservationPeriodicity>>
+    perId: ComputedRef<{ [periodicityId: string]: ReservationPeriodicity }>
 }
 
 interface Users {
@@ -406,6 +422,15 @@ const roomReservationTypes: RoomReservationTypes = {
     }),
 }
 
+const reservationPeriodicities: ReservationPeriodicities = {
+    list: ref([]),
+    perId: computed(() => {
+        return Object.fromEntries(reservationPeriodicities.list.value.map((p) => [p.data.id, p]))
+    }),
+}
+
+const reservationPeriodicityTypes = ref<Array<ReservationPeriodicityType>>([])
+
 const users: Users = {
     list: ref([]),
     perId: computed(() => {
@@ -432,6 +457,9 @@ const lunchBreakFinishTime = ref<Time>({ value: 0, text: '' })
 
 // Duration of new reservations by default, in minutes
 const newReservationDefaultDuration = 60
+
+// Background color of the course slots
+const scheduledCourseColor = '#3399ff'
 
 // Fill with current date, uses date picker afterwards
 const selectedDate = ref<FlopWeek>({
@@ -786,6 +814,9 @@ function createRoomReservationSlot(reservation: RoomReservation): CalendarSlot {
         rooms: rooms.perIdFilterBySelectedDepartments.value,
         users: users.perId.value,
         reservationTypes: Object.values(roomReservationTypes.list.value),
+        periodicityTypes: reservationPeriodicityTypes.value,
+        periodicity: reservation.periodicity ? reservationPeriodicities.perId.value[reservation.periodicity] : null,
+        weekdays: weekDays.list.value,
         day: reservation.date,
         startTime: startTime,
         endTime: endTime,
@@ -814,11 +845,7 @@ function createScheduledCourseSlot(course: ScheduledCourse, courseType: CourseTy
             departmentName = department.abbrev
         }
     }
-    const type = Object.values(roomReservationTypes.list.value).find((type) => type.name === 'Course')
-    let backgroundColor = '#ffffff'
-    if (type) {
-        backgroundColor = type.bg_color
-    }
+
     const slotData: CalendarScheduledCourseSlotData = {
         course: course,
         department: departmentName,
@@ -828,7 +855,7 @@ function createScheduledCourseSlot(course: ScheduledCourse, courseType: CourseTy
         endTime: endTime,
         title: course.course.module.abbrev,
         id: `scheduledcourse-${course.course.id}`,
-        displayStyle: { background: backgroundColor },
+        displayStyle: { background: scheduledCourseColor },
     }
     return {
         slotData: slotData,
@@ -919,15 +946,27 @@ function updateScheduledCourses(date: FlopWeek, departments: Array<Department>) 
     })
 }
 
+function updateReservationPeriodicities() {
+    fetchReservationPeriodicities().then((value) => {
+        reservationPeriodicities.list.value = value
+    })
+}
+
 function updateRoomReservation(newData: CalendarRoomReservationSlotData, oldData: CalendarRoomReservationSlotData) {
     const newReservation = newData.reservation
     const oldReservation = oldData.reservation
 
     if (oldReservation.id < 0) {
         // The reservation is a new one, just add it to the list
-        roomReservations.list.value.push(newData.reservation)
+        roomReservations.list.value.push(newReservation)
+
         // Clear the temporary slot
         temporaryReservation.value = undefined
+
+        // Update the periodicity list if needed
+        if (newReservation.periodicity != oldReservation.periodicity) {
+            updateReservationPeriodicities()
+        }
         return
     }
 
@@ -939,6 +978,12 @@ function updateRoomReservation(newData: CalendarRoomReservationSlotData, oldData
         console.error(`Could not find reservation with id: ${oldReservation.id}`)
         return
     }
+
+    // Update the periodicity list if needed
+    if (newReservation.periodicity != oldReservation.periodicity) {
+        updateReservationPeriodicities()
+    }
+
     // Replace the reservation at index
     roomReservations.list.value[index] = newReservation
 }
@@ -1004,7 +1049,7 @@ function handleDrag(drag: CalendarDragEvent) {
         email: true,
         end_time: drag.endTime.text,
         id: newReservationId--,
-        periodicity: -1,
+        periodicity: null,
         reservation_type: -1,
         responsible: currentUserId,
         room: selectedRoom.value?.id ?? -1,
@@ -1028,7 +1073,7 @@ function handleNewSlot(date: Date, roomId: string) {
         email: true,
         end_time: new Date(now.getTime() + newReservationDefaultDuration * 60000).toTimeString(),
         id: newReservationId--,
-        periodicity: -1,
+        periodicity: null,
         reservation_type: -1,
         responsible: currentUserId,
         room: parseInt(roomId, 10),
@@ -1127,6 +1172,12 @@ onMounted(() => {
         roomReservationTypes.list.value = value
     })
 
+    updateReservationPeriodicities()
+
+    fetchReservationPeriodicityTypes().then((value) => {
+        reservationPeriodicityTypes.value = value
+    })
+
     fetchUsers().then((value) => {
         users.list.value = value
     })
@@ -1171,6 +1222,14 @@ async function fetchRoomReservations(week: number, year: number, params: { roomI
 
 async function fetchRoomReservationTypes() {
     return await api.value.fetch.all.roomReservationTypes()
+}
+
+async function fetchReservationPeriodicities() {
+    return await api.value.fetch.all.reservationPeriodicities()
+}
+
+async function fetchReservationPeriodicityTypes() {
+    return await api.value.fetch.all.reservationPeriodicityTypes()
 }
 
 async function fetchScheduledCourses(week: number, year: number, department: string) {
