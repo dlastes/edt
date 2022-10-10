@@ -725,7 +725,7 @@ const roomCalendarValues = computed<RoomCalendarProps>(() => {
 // Update weekDays
 watchEffect(() => {
     console.log('Updating Week days')
-    fetchWeekDays(selectedDate.value.week, selectedDate.value.year).then((value) => {
+    api.value.fetch.weekdays({ week: selectedDate.value.week, year: selectedDate.value.year }).then((value) => {
         weekDays.list.value = value
     })
 })
@@ -914,7 +914,7 @@ function updateRoomReservations(date: FlopWeek) {
     const year = date.year
 
     showLoading()
-    fetchRoomReservations(week, year, {}).then((value) => {
+    api.value.fetch.roomReservations({ week: week, year: year }).then((value) => {
         roomReservations.list.value = value
         hideLoading()
     })
@@ -936,7 +936,7 @@ function updateScheduledCourses(date: FlopWeek, departments: Array<Department>) 
 
     const coursesList: { [p: string]: ScheduledCourse[] } = {}
     departments.forEach((dept) => {
-        fetchScheduledCourses(week, year, dept.abbrev).then((value) => {
+        api.value.fetch.scheduledCourses({ week: week, year: year, department: dept.abbrev }).then((value) => {
             coursesList[dept.id] = value
             if (--count === 0) {
                 scheduledCourses.perDepartment.value = coursesList
@@ -947,7 +947,7 @@ function updateScheduledCourses(date: FlopWeek, departments: Array<Department>) 
 }
 
 function updateReservationPeriodicities() {
-    fetchReservationPeriodicities().then((value) => {
+    api.value.fetch.reservationPeriodicities().then((value) => {
         reservationPeriodicities.list.value = value
     })
 }
@@ -1129,7 +1129,7 @@ onMounted(() => {
             currentUserId = data.user_id
         }
     }
-    fetchDepartments().then((value) => {
+    api.value.fetch.departments().then((value) => {
         departments.list.value = value
 
         // Select the current department by default
@@ -1145,7 +1145,7 @@ onMounted(() => {
             let typesCounter = departmentsCount
             departments.list.value.forEach((dept) => {
                 // Fetch the rooms of each selected department
-                fetchRooms(dept.abbrev).then((value) => {
+                api.value.fetch.rooms({ department: dept.abbrev }).then((value) => {
                     roomsList[dept.id] = value
                     if (--roomsCounter === 0) {
                         // Update the rooms list ref only once every department is handled
@@ -1153,7 +1153,7 @@ onMounted(() => {
                     }
                 })
 
-                fetchCourseTypes(dept.abbrev).then((value) => {
+                api.value.fetch.courseTypes({ department: dept.abbrev }).then((value) => {
                     typesList[dept.id] = value
                     if (--typesCounter === 0) {
                         // Update the course types list ref only once every department is handled
@@ -1164,101 +1164,40 @@ onMounted(() => {
         }
     })
 
-    fetchTimeSettings().then((value) => {
+    api.value.fetch.timeSettings().then((value) => {
         timeSettings.value = value
     })
 
-    fetchRoomReservationTypes().then((value) => {
+    api.value.fetch.roomReservationTypes().then((value) => {
         roomReservationTypes.list.value = value
     })
 
     updateReservationPeriodicities()
 
-    fetchReservationPeriodicityTypes().then((value) => {
+    api.value.fetch.reservationPeriodicityTypes().then((value) => {
         reservationPeriodicityTypes.value = value
     })
 
-    fetchUsers().then((value) => {
+    api.value.fetch.users().then((value) => {
         users.list.value = value
     })
 
-    fetchBooleanRoomAttributes().then((value) => {
+    api.value.fetch.booleanRoomAttributes().then((value) => {
         roomAttributes.booleanList.value = value
     })
 
-    fetchNumericRoomAttributes().then((value) => {
+    api.value.fetch.numericRoomAttributes().then((value) => {
         roomAttributes.numericList.value = value
     })
 
-    fetchBooleanRoomAttributeValues().then((value) => {
+    api.value.fetch.booleanRoomAttributeValues().then((value) => {
         roomAttributeValues.booleanList.value = value
     })
 
-    fetchNumericRoomAttributeValues().then((value) => {
+    api.value.fetch.numericRoomAttributeValues().then((value) => {
         roomAttributeValues.numericList.value = value
     })
 })
-
-// Fetch functions
-async function fetchDepartments() {
-    return await api.value.fetch.all.departments()
-}
-
-async function fetchWeekDays(week: number, year: number) {
-    return await api.value.fetch.target.weekdays(week, year)
-}
-
-async function fetchRooms(department: string) {
-    return await api.value.fetch.all.rooms(department)
-}
-
-async function fetchTimeSettings() {
-    return await api.value.fetch.all.timeSettings()
-}
-
-async function fetchRoomReservations(week: number, year: number, params: { roomId?: number }) {
-    return await api.value.fetch.target.roomReservations(week, year, params)
-}
-
-async function fetchRoomReservationTypes() {
-    return await api.value.fetch.all.roomReservationTypes()
-}
-
-async function fetchReservationPeriodicities() {
-    return await api.value.fetch.all.reservationPeriodicities()
-}
-
-async function fetchReservationPeriodicityTypes() {
-    return await api.value.fetch.all.reservationPeriodicityTypes()
-}
-
-async function fetchScheduledCourses(week: number, year: number, department: string) {
-    return await api.value.fetch.target.scheduledCourses(week, year, department)
-}
-
-async function fetchCourseTypes(department: string) {
-    return await api.value.fetch.all.courseTypes(department)
-}
-
-async function fetchUsers() {
-    return await api.value.fetch.all.users()
-}
-
-async function fetchBooleanRoomAttributes() {
-    return await api.value.fetch.all.booleanRoomAttributes()
-}
-
-async function fetchNumericRoomAttributes() {
-    return await api.value.fetch.all.numericRoomAttributes()
-}
-
-async function fetchBooleanRoomAttributeValues() {
-    return await api.value.fetch.all.booleanRoomAttributeValues()
-}
-
-async function fetchNumericRoomAttributeValues() {
-    return await api.value.fetch.all.numericRoomAttributeValues()
-}
 </script>
 
 <script lang="ts">
