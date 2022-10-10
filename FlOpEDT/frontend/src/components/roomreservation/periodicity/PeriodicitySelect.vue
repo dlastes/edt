@@ -1,20 +1,22 @@
 <template>
-    <select v-model="selectedType" class="form-select mb-2" aria-label="Select periodicity type">
-        <option :value="undefined" disabled>Select a periodicity type</option>
-        <option v-for="type in props.types" :key="type[0]" :value="type">
-            {{ type[1] }}
-        </option>
-    </select>
-    <PeriodicityByWeekEdit
-        v-if="selectedType && selectedType[0] === 'BW'"
-        :weekdays="props.weekdays"
-        v-model:model="updatedModel[selectedType[0]]"
-    ></PeriodicityByWeekEdit>
-    <PeriodicityByMonthEdit
-        v-if="selectedType && selectedType[0] === 'BM'"
-        :weekdays="props.weekdays"
-        v-model:model="updatedModel[selectedType[0]]"
-    ></PeriodicityByMonthEdit>
+    <div>
+        <select v-model="selectedType" class="form-select mb-2" aria-label="Select periodicity type">
+            <option :value="undefined" disabled>Select a periodicity type</option>
+            <option v-for="type in props.types" :key="type[0]" :value="type">
+                {{ type[1] }}
+            </option>
+        </select>
+        <PeriodicityByWeekEdit
+            v-if="selectedType && selectedType[0] === 'BW'"
+            :weekdays="props.weekdays"
+            v-model:model="updatedModel[selectedType[0]]"
+        ></PeriodicityByWeekEdit>
+        <PeriodicityByMonthEdit
+            v-if="selectedType && selectedType[0] === 'BM'"
+            :weekdays="props.weekdays"
+            v-model:model="updatedModel[selectedType[0]]"
+        ></PeriodicityByMonthEdit>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -63,7 +65,6 @@ const updatedModel = computed({
         return props.modelPeriodicity
     },
     set(value) {
-        console.log('update')
         emit('update:modelPeriodicity', value)
     },
 })

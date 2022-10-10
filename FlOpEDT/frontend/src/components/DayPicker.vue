@@ -23,7 +23,7 @@
 import { toStringAtLeastTwoDigits } from '@/assets/js/helpers'
 import Datepicker from '@vuepic/vue-datepicker'
 import type { Ref } from 'vue'
-import { defineEmits, ref, watch, watchEffect } from 'vue'
+import { computed, defineEmits, ref, watch } from 'vue'
 
 interface Emits {
     (e: 'update:date', value: string): void
@@ -46,23 +46,26 @@ interface Props {
 
 const props = defineProps<Props>()
 
-const selectDate: Ref<Date> = ref(new Date(props.startDate))
+const selectDate: Ref<Date> = computed({
+    get() {
+        return new Date(props.startDate)
+    },
+    set(value) {
+        const refDate = value
+        if (!refDate) {
+            return 1
+        }
+        const startDate = new Date(refDate.getFullYear(), 0, 1)
+        const days = Math.floor((refDate.getTime() - startDate.getTime()) / (24 * 60 * 60 * 1000))
 
-watchEffect(() => {
-    const refDate = selectDate.value
-    if (!refDate) {
-        return 1
-    }
-    const startDate = new Date(refDate.getFullYear(), 0, 1)
-    const days = Math.floor((refDate.getTime() - startDate.getTime()) / (24 * 60 * 60 * 1000))
+        const day = toStringAtLeastTwoDigits(refDate.getDate())
+        const month = toStringAtLeastTwoDigits(refDate.getMonth() + 1)
+        const year = refDate.getFullYear()
 
-    const day = toStringAtLeastTwoDigits(refDate.getDate())
-    const month = toStringAtLeastTwoDigits(refDate.getMonth() + 1)
-    const year = refDate.getFullYear()
-
-    emit('update:date', `${year}/${month}/${day}`)
-    emit('update:week', Math.ceil(days / 7))
-    emit('update:year', year)
+        emit('update:date', `${year}/${month}/${day}`)
+        emit('update:week', Math.ceil(days / 7))
+        emit('update:year', year)
+    },
 })
 
 watch(

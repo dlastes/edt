@@ -67,8 +67,8 @@
                     </template>
                 </DayPicker>
             </div>
-            <div class="row m-0">
-                <div class="col p-0 me-1" style="min-width: 100px">
+            <div class="row m-0 gx-1 mb-3">
+                <div class="col" style="min-width: 100px">
                     <!-- Start time -->
                     <TimePicker
                         :hours="startTime.hours"
@@ -78,7 +78,7 @@
                         @on-reset="shouldStartTimePickerReset = false"
                     >
                         <template #input="{ value }">
-                            <div class="form-floating mb-3">
+                            <div class="form-floating">
                                 <input
                                     :id="generateId('startTime')"
                                     type="text"
@@ -92,7 +92,7 @@
                         </template>
                     </TimePicker>
                 </div>
-                <div class="col p-0" style="min-width: 100px">
+                <div class="col" style="min-width: 100px">
                     <!-- End time -->
                     <TimePicker
                         :hours="endTime.hours"
@@ -102,7 +102,7 @@
                         @on-reset="shouldEndTimePickerReset = false"
                     >
                         <template #input="{ value }">
-                            <div class="form-floating mb-3">
+                            <div class="form-floating">
                                 <input
                                     :id="generateId('endTime')"
                                     type="text"
@@ -151,8 +151,65 @@
                     />
                     <label class="form-check-label" :for="generateId('isPeriodic')">Repeat?</label>
                 </div>
-                <div v-if="isPeriodic" :class="selectPeriodicityClass">
+                <div v-if="isPeriodic">
+                    <div class="row mb-2 gx-1">
+                        <!-- Periodicity start date -->
+                        <div class="col">
+                            <DayPicker
+                                :start-date="periodicityStart"
+                                :should-reset="shouldDayPickerReset"
+                                :on-reset="(shouldDayPickerReset = false)"
+                                @update:date="updatePeriodicityStartDate"
+                                :min-date="new Date()"
+                                :clearable="false"
+                            >
+                                <template #input="{ value }">
+                                    <div class="form-floating">
+                                        <input
+                                            :id="generateId('periodicity-start-date')"
+                                            type="text"
+                                            class="form-control"
+                                            placeholder="Date"
+                                            :value="value"
+                                            readonly
+                                        />
+                                        <label :for="generateId('periodicity-start-date')" class="form-label"
+                                            >Start date</label
+                                        >
+                                    </div>
+                                </template>
+                            </DayPicker>
+                        </div>
+                        <!-- Periodicity end date -->
+                        <div class="col">
+                            <DayPicker
+                                :start-date="periodicityEnd"
+                                :should-reset="shouldDayPickerReset"
+                                :on-reset="(shouldDayPickerReset = false)"
+                                @update:date="updatePeriodicityEndDate"
+                                :min-date="periodicityEndMinDate"
+                                :clearable="false"
+                            >
+                                <template #input="{ value }">
+                                    <div class="form-floating">
+                                        <input
+                                            :id="generateId('periodicity-end-date')"
+                                            type="text"
+                                            class="form-control"
+                                            placeholder="Date"
+                                            :value="value"
+                                            readonly
+                                        />
+                                        <label :for="generateId('periodicity-end-date')" class="form-label"
+                                            >End date</label
+                                        >
+                                    </div>
+                                </template>
+                            </DayPicker>
+                        </div>
+                    </div>
                     <PeriodicitySelect
+                        :class="selectPeriodicityClass"
                         :types="props.periodicityTypes"
                         :weekdays="props.weekdays"
                         v-model:model-type="selectedPeriodicityType"
@@ -196,7 +253,7 @@ import type {
 import DayPicker from '@/components/DayPicker.vue'
 import ModalForm from '@/components/ModalForm.vue'
 import TimePicker from '@/components/TimePicker.vue'
-import { computed, defineProps, ref } from 'vue'
+import { computed, defineProps, ref, watch } from 'vue'
 import PeriodicitySelect from '@/components/roomreservation/periodicity/PeriodicitySelect.vue'
 
 interface Emits {
@@ -267,8 +324,14 @@ const date = ref(props.reservation.date)
 
 // Get the possibly existing periodicity values
 const initPeriodicityId = computed(() => (props.periodicity ? props.periodicity.data.id : -1))
-const initPeriodicityStart = computed(() => (props.periodicity ? props.periodicity.data.start : props.reservation.date))
-const initPeriodicityEnd = computed(() => (props.periodicity ? props.periodicity.data.end : props.reservation.date))
+const periodicityStart = ref(props.periodicity ? props.periodicity.data.start : props.reservation.date)
+const periodicityEndMinDate = computed(() => {
+    const startDate = new Date(periodicityStart.value)
+    return new Date(`${startDate.getFullYear()}-${startDate.getMonth() + 1}-${startDate.getDate() + 1}`)
+})
+const periodicityEnd = ref(
+    props.periodicity ? props.periodicity.data.end : periodicityEndMinDate.value.toLocaleDateString()
+)
 
 const currentDay = new Date(props.reservation.date).getDay()
 const currentWeekdayRef = computed(() => {
@@ -282,37 +345,61 @@ const selectedPeriodicityType = ref<ReservationPeriodicityType | undefined>(
         : undefined
 )
 
+// Update the reservation periodicity form if the provided periodicity have changed
+watch(
+    () => props.periodicity,
+    (newValue) => {
+        if (newValue) {
+            selectedPeriodicityType.value = props.periodicityTypes.find((t) => t[0] === newValue.data.periodicity_type)
+            periodicityStart.value = newValue.data.start
+            periodicityEnd.value = newValue.data.end
+        } else {
+            selectedPeriodicityType.value = undefined
+            periodicityStart.value = props.reservation.date
+            periodicityEnd.value = periodicityEndMinDate.value.toLocaleDateString()
+        }
+    }
+)
+
 const periodicityID = ref(initPeriodicityId.value)
 
+const requiredClass = 'border border-danger rounded'
+
 const selectPeriodicityClass = computed(() => {
-    return isPeriodic.value && selectedPeriodicityType.value === undefined ? 'border border-danger' : ''
+    return isPeriodic.value && selectedPeriodicityType.value === undefined ? requiredClass : ''
 })
 
 const originalDuration =
     endTime.value.hours * 60 + endTime.value.minutes - (startTime.value.hours * 60 + startTime.value.minutes)
 
 // Create an object of each type
-const periodicityByWeek = ref<ReservationPeriodicityByWeek>({
-    id: selectedPeriodicityType.value && selectedPeriodicityType.value[0] === 'BW' ? initPeriodicityId.value : -1,
-    start: initPeriodicityStart.value,
-    end: initPeriodicityEnd.value,
-    periodicity_type: 'BW',
-    bw_weekdays: currentWeekdayRef.value ? [currentWeekdayRef.value] : [],
-    bw_weeks_interval: 1,
+const periodicityByWeek = computed<ReservationPeriodicityByWeek>(() => {
+    return {
+        id: selectedPeriodicityType.value && selectedPeriodicityType.value[0] === 'BW' ? initPeriodicityId.value : -1,
+        start: periodicityStart.value,
+        end: periodicityEnd.value,
+        periodicity_type: 'BW',
+        bw_weekdays: currentWeekdayRef.value ? [currentWeekdayRef.value] : [],
+        bw_weeks_interval: 1,
+    }
 })
-const periodicityByMonth = ref<ReservationPeriodicityByMonth>({
-    id: selectedPeriodicityType.value && selectedPeriodicityType.value[0] === 'BM' ? initPeriodicityId.value : -1,
-    start: initPeriodicityStart.value,
-    end: initPeriodicityEnd.value,
-    periodicity_type: 'BM',
-    bm_x_choice: 1,
-    bm_day_choice: currentWeekdayRef.value ?? '',
+const periodicityByMonth = computed<ReservationPeriodicityByMonth>(() => {
+    return {
+        id: selectedPeriodicityType.value && selectedPeriodicityType.value[0] === 'BM' ? initPeriodicityId.value : -1,
+        start: periodicityStart.value,
+        end: periodicityEnd.value,
+        periodicity_type: 'BM',
+        bm_x_choice: 1,
+        bm_day_choice: currentWeekdayRef.value ?? '',
+    }
 })
-const periodicityEachMonthSameDate = ref<ReservationPeriodicityEachMonthSameDate>({
-    id: selectedPeriodicityType.value && selectedPeriodicityType.value[0] === 'EM' ? initPeriodicityId.value : -1,
-    start: initPeriodicityStart.value,
-    end: initPeriodicityEnd.value,
-    periodicity_type: 'EM',
+const periodicityEachMonthSameDate = computed<ReservationPeriodicityEachMonthSameDate>(() => {
+    return {
+        id: selectedPeriodicityType.value && selectedPeriodicityType.value[0] === 'EM' ? initPeriodicityId.value : -1,
+        start: periodicityStart.value,
+        end: periodicityEnd.value,
+        periodicity_type: 'EM',
+    }
 })
 
 // Fill the values specific to the periodicity type
@@ -335,11 +422,13 @@ if (props.periodicity) {
     }
 }
 
-const periodicityChoice: { [name in ReservationPeriodicityTypeName]: ReservationPeriodicityData } = {
-    BW: periodicityByWeek.value,
-    BM: periodicityByMonth.value,
-    EM: periodicityEachMonthSameDate.value,
-}
+const periodicityChoice = computed<{ [name in ReservationPeriodicityTypeName]: ReservationPeriodicityData }>(() => {
+    return {
+        BW: periodicityByWeek.value,
+        BM: periodicityByMonth.value,
+        EM: periodicityEachMonthSameDate.value,
+    }
+})
 
 function resetValues() {
     title.value = props.reservation.title
@@ -394,20 +483,22 @@ async function savePeriodicity(): Promise<number> {
     switch (selectedPeriodicityType.value[0]) {
         case 'BW':
             apiCall = apiMethod.reservationPeriodicityByWeek
-            periodicityToUpdate = periodicityChoice.BW
+            periodicityToUpdate = periodicityChoice.value.BW
             periodicityToUpdateActualType = periodicityToUpdate as ReservationPeriodicityByWeek
             break
         case 'EM':
             apiCall = apiMethod.reservationPeriodicityEachMonthSameDate
-            periodicityToUpdate = periodicityChoice.EM
+            periodicityToUpdate = periodicityChoice.value.EM
             periodicityToUpdateActualType = periodicityToUpdate as ReservationPeriodicityEachMonthSameDate
             break
         case 'BM':
             apiCall = apiMethod.reservationPeriodicityByMonth
-            periodicityToUpdate = periodicityChoice.BM
+            periodicityToUpdate = periodicityChoice.value.BM
             periodicityToUpdateActualType = periodicityToUpdate as ReservationPeriodicityByMonth
             break
     }
+    periodicityToUpdateActualType.start = periodicityToUpdateActualType.start.replaceAll('/', '-')
+    periodicityToUpdateActualType.end = periodicityToUpdateActualType.end.replaceAll('/', '-')
     return await apiCall(periodicityToUpdateActualType)
         .then((value) => {
             // Give it the id given by the api
@@ -459,6 +550,24 @@ function onFormInterface(value: FormInterface) {
 
 function updateDate(newDate: string) {
     date.value = newDate
+}
+
+function updatePeriodicityStartDate(newDate: string) {
+    periodicityStart.value = newDate
+    const startDate = new Date(newDate)
+    const endDate = new Date(periodicityEnd.value)
+
+    if (
+        startDate.getFullYear() === endDate.getFullYear() &&
+        startDate.getMonth() === endDate.getMonth() &&
+        startDate.getDate() >= endDate.getDate()
+    ) {
+        updatePeriodicityEndDate(periodicityEndMinDate.value.toLocaleDateString())
+    }
+}
+
+function updatePeriodicityEndDate(newDate: string) {
+    periodicityEnd.value = newDate
 }
 
 /**
