@@ -57,9 +57,15 @@ class ReservationPeriodicityTypeViewSet(viewsets.ViewSet):
         return JsonResponse(data, safe=False)
 
 
-class ReservationPeriodicityReadOnlyViewSet(viewsets.ReadOnlyModelViewSet):
+class ReservationPeriodicityViewSet(viewsets.mixins.DestroyModelMixin, viewsets.ReadOnlyModelViewSet):
     serializer_class = serializers.ReservationPeriodicitySerializer
     queryset = rm.ReservationPeriodicity.objects.all()
+
+    def destroy(self, *args, **kwargs):
+        serializer = self.get_serializer(self.get_object())
+        data = serializer.data
+        super().destroy(*args, **kwargs)
+        return response.Response(data, status=status.HTTP_200_OK)
 
 
 class ReservationPeriodicityByWeekViewSet(viewsets.ModelViewSet):

@@ -1,3 +1,5 @@
+import { Time } from '@/assets/js/types'
+
 export function convertDecimalTimeToHuman(time: number): string {
     const hours = Math.trunc(time)
     const minutes = Math.round((time - hours) * 60)
@@ -49,4 +51,9 @@ export function listGroupBy<T>(list: Array<T>, keyPredicate: (value: T) => strin
         out[key].push(value)
     })
     return out
+}
+
+export function createTime(time: number): Time {
+    const text = convertDecimalTimeToHuman(time / 60)
+    return new Time(time, text)
 }

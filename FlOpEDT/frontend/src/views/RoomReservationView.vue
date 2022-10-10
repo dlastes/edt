@@ -1,6 +1,14 @@
 <template>
     <div>
         <div class="loader" v-if="loaderIsVisible"></div>
+        <DeletePeriodicReservationDialog
+            :is-open="isReservationDeletionDialogOpen"
+            :reservation="reservationToDelete"
+            :on-confirm-current="reservationDeletionConfirmed"
+            :on-confirm-all="reservationRemoveAllSamePeriodicity"
+            :on-confirm-future="reservationRemoveFutureSamePeriodicity"
+            :on-cancel="closeReservationDeletionDialog"
+        ></DeletePeriodicReservationDialog>
         <div class="container-fluid">
             <div class="row">
                 <!-- Week picker and filters -->
@@ -112,7 +120,7 @@
 
 <script setup lang="ts">
 import type { FlopAPI } from '@/assets/js/api'
-import { convertDecimalTimeToHuman, listGroupBy, parseReason, toStringAtLeastTwoDigits } from '@/assets/js/helpers'
+import { createTime, listGroupBy, parseReason, toStringAtLeastTwoDigits } from '@/assets/js/helpers'
 import { apiKey, currentWeekKey, requireInjection } from '@/assets/js/keys'
 import type {
     BooleanRoomAttributeValue,
@@ -155,6 +163,7 @@ import DynamicSelect from '@/components/dynamicSelect/DynamicSelect.vue'
 import DynamicSelectedElementNumeric from '@/components/dynamicSelect/DynamicSelectedElementNumeric.vue'
 import DynamicSelectedElementBoolean from '@/components/dynamicSelect/DynamicSelectedElementBoolean.vue'
 import ClearableInput from '@/components/ClearableInput.vue'
+import DeletePeriodicReservationDialog from '@/components/roomreservation/DeletePeriodicReservationDialog.vue'
 
 const api = ref<FlopAPI>(requireInjection(apiKey))
 const currentWeek = ref(requireInjection(currentWeekKey))
@@ -468,6 +477,9 @@ const selectedDate = ref<FlopWeek>({
 })
 
 const loaderIsVisible = ref(false)
+
+const reservationToDelete = ref<RoomReservation>()
+const isReservationDeletionDialogOpen = ref(false)
 
 const selectedRoom = ref<Room>()
 const selectedDepartment = ref<Department>()
@@ -790,11 +802,6 @@ function onTimeSettingsChanged(timeSettings?: Array<TimeSettings>) {
     lunchBreakFinishTime.value = createTime(maxLunchBreakFinishTime)
 }
 
-function createTime(time: number): Time {
-    const text = convertDecimalTimeToHuman(time / 60)
-    return new Time(time, text)
-}
-
 function createRoomReservationSlot(reservation: RoomReservation): CalendarSlot {
     const startTimeRaw = reservation.start_time.split(':')
     const startTimeValue = parseInt(startTimeRaw[0]) * 60 + parseInt(startTimeRaw[1])
@@ -995,13 +1002,66 @@ function handleReason(level: string, message: string) {
 function deleteRoomReservationSlot(toDelete: CalendarRoomReservationSlotData) {
     const reservation = toDelete.reservation
 
+    // Target reservation is a temporary one, just remove the slot
     if (reservation.id < 0) {
         temporaryReservation.value = undefined
         return
     }
 
-    // Target reservation is in the database, so we need to remove it first
-    api.value.delete
+    if (reservation.periodicity && reservation.periodicity >= 0) {
+        // The reservation is linked to a periodicity,
+        // we must ask if we remove other reservations related to this periodicity
+        reservationToDelete.value = reservation
+        isReservationDeletionDialogOpen.value = true
+        return
+    }
+
+    reservationDeletionConfirmed(reservation)
+}
+
+function reservationRemoveAllSamePeriodicity(reservation: RoomReservation) {
+    if (!reservation.periodicity || reservation.periodicity < 0) {
+        return
+    }
+    console.log(`Should remove all reservations of periodicity ${reservation.periodicity}`)
+    const periodicityId = reservation.periodicity
+
+    // Get the list of all the reservations to delete, which are those who share the periodicity ID
+    api.value.fetch.roomReservations({ periodicityId: periodicityId }).then((deletionList) => {
+        // Delete each reservation in the list
+        deleteRoomReservations(deletionList)
+            .then((_) => {
+                // Remove the associated periodicity
+                api.value.delete.reservationPeriodicity(periodicityId)
+            })
+            // Close the dialog when all the reservations have been deleted
+            .finally(closeReservationDeletionDialog)
+    })
+}
+
+function reservationRemoveFutureSamePeriodicity(reservation: RoomReservation) {
+    if (!reservation.periodicity || reservation.periodicity < 0) {
+        return
+    }
+    console.log(`Should remove the current reservation and the next of periodicity ${reservation.periodicity}`)
+    const reservationTime = new Date(reservation.date).getTime()
+
+    // Get the list of all the reservations to delete, which are those who share the periodicity ID and are later than
+    // the selected
+    api.value.fetch.roomReservations({ periodicityId: reservation.periodicity }).then((deletionList) => {
+        // Filter the older reservations
+        deletionList = deletionList.filter((reserv) => new Date(reserv.date).getTime() >= reservationTime)
+        deleteRoomReservations(deletionList).finally(closeReservationDeletionDialog)
+    })
+}
+
+function closeReservationDeletionDialog() {
+    reservationToDelete.value = undefined
+    isReservationDeletionDialogOpen.value = false
+}
+
+function deleteRoomReservation(reservation: RoomReservation): Promise<void> {
+    return api.value.delete
         .roomReservation(reservation.id)
         .then(
             (_) => {
@@ -1011,6 +1071,19 @@ function deleteRoomReservationSlot(toDelete: CalendarRoomReservationSlotData) {
             (reason) => parseReason(reason, handleReason)
         )
         .catch((reason) => parseReason(reason, handleReason))
+}
+
+async function deleteRoomReservations(deletionList: Array<RoomReservation>) {
+    await Promise.all(
+        deletionList.map(async (reserv) => {
+            return await deleteRoomReservation(reserv)
+        })
+    )
+}
+
+function reservationDeletionConfirmed(reservation: RoomReservation) {
+    deleteRoomReservation(reservation)
+    closeReservationDeletionDialog()
 }
 
 function hideLoading(): void {

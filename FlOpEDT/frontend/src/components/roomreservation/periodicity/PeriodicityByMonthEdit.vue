@@ -83,7 +83,7 @@ function emitUpdate() {
 const dayChoiceClass = computed(() => (selectedDay.value ? '' : 'border border-danger'))
 
 onMounted(() => {
-    api.fetch.all.reservationPeriodicityByMonthXChoices().then((value) => (byMonthXChoices.value = value))
+    api.fetch.reservationPeriodicityByMonthXChoices().then((value) => (byMonthXChoices.value = value))
 })
 </script>
 

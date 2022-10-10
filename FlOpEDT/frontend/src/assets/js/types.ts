@@ -278,6 +278,10 @@ export interface FormInterface {
     dismissAlerts: () => void
 }
 
+export interface DialogInterface {
+    close: () => void
+}
+
 export interface FormAlert {
     level: string // info | warning | danger | success
     message: string
