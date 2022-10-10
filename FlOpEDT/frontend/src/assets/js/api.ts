@@ -48,7 +48,7 @@ function getCookie(name: string) {
 
 const csrfToken = getCookie('csrftoken')
 
-async function fetchData(url: string, params: { [k: string]: never }) {
+async function fetchData(url: string, params: { [k: string]: any }) {
     const providedParams = params
 
     params = Object.assign(
@@ -184,13 +184,14 @@ const urls = {
 }
 
 /**
- * Proxy function to fetch from the api.
+ * Proxy function to fetch from the api. Provided parameters' name can be mapped to another to fit the api names.
  * @param {string} url The url to access the data
- * @param {object} params1 Manually given parameters
- * @param {object} params2 Object-format given parameters
+ * @param params The parameters
+ * @param renameList The rename
  * @returns {Promise<any>}
  */
-const fetcher = (url: string, params1?: object, params2?: object) => fetchData(url, { ...params1, ...params2 })
+const fetcher = (url: string, params?: object, renameList?: Array<[string, string]>) =>
+    fetchData(url, params ? filterObject(params, renameList) : {})
 
 function buildUrl(base: string, uri: string) {
     return `${base}/${uri}`
@@ -198,44 +199,30 @@ function buildUrl(base: string, uri: string) {
 
 export interface FlopAPI {
     fetch: {
-        all: {
-            departments(): Promise<Array<Department>>
-            rooms(department: string): Promise<Array<Room>>
-            timeSettings(): Promise<Array<TimeSettings>>
-            courseTypes(department: string): Promise<Array<CourseType>>
-            roomReservationTypes(): Promise<Array<RoomReservationType>>
-            reservationPeriodicities(): Promise<Array<ReservationPeriodicity>>
-            reservationPeriodicityTypes(): Promise<Array<ReservationPeriodicityType>>
-            reservationPeriodicityByMonthXChoices(): Promise<Array<ReservationPeriodicityByMonthXChoice>>
-            users(): Promise<Array<User>>
-            booleanRoomAttributes(): Promise<Array<RoomAttribute>>
-            numericRoomAttributes(): Promise<Array<RoomAttribute>>
-            booleanRoomAttributeValues(): Promise<Array<BooleanRoomAttributeValue>>
-            numericRoomAttributeValues(): Promise<Array<NumericRoomAttributeValue>>
-        }
-        target: {
-            room(id: number, additionalParams?: object): Promise<Room>
-            weekdays(week: number, year: number, additionalParams?: object): Promise<Array<WeekDay>>
-            roomReservations(
-                week: number,
-                year: number,
-                params: { roomId?: number },
-                additionalParams?: object
-            ): Promise<Array<RoomReservation>>
-            reservationPeriodicity(reservationId: number): Promise<ReservationPeriodicity>
-            courses(
-                week: number,
-                year: number,
-                params: { department?: string },
-                additionalParams?: object
-            ): Promise<Array<Course>>
-            scheduledCourses(
-                week: number,
-                year: number,
-                department: string,
-                additionalParams?: object
-            ): Promise<Array<ScheduledCourse>>
-        }
+        booleanRoomAttributes(): Promise<Array<RoomAttribute>>
+        booleanRoomAttributeValues(): Promise<Array<BooleanRoomAttributeValue>>
+        courses(params: { week?: number; year?: number; department?: string }): Promise<Array<Course>>
+        courseTypes(params: { department: string }): Promise<Array<CourseType>>
+        departments(): Promise<Array<Department>>
+        numericRoomAttributes(): Promise<Array<RoomAttribute>>
+        numericRoomAttributeValues(): Promise<Array<NumericRoomAttributeValue>>
+        reservationPeriodicities(): Promise<Array<ReservationPeriodicity>>
+        reservationPeriodicity(id: number): Promise<ReservationPeriodicity>
+        reservationPeriodicityByMonthXChoices(): Promise<Array<ReservationPeriodicityByMonthXChoice>>
+        reservationPeriodicityTypes(): Promise<Array<ReservationPeriodicityType>>
+        room(id: number): Promise<Room>
+        rooms(params: { department: string }): Promise<Array<Room>>
+        roomReservations(params: {
+            week?: number
+            year?: number
+            roomId?: number
+            periodicityId?: number
+        }): Promise<Array<RoomReservation>>
+        roomReservationTypes(): Promise<Array<RoomReservationType>>
+        scheduledCourses(params: { week?: number; year?: number; department?: string }): Promise<Array<ScheduledCourse>>
+        timeSettings(): Promise<Array<TimeSettings>>
+        users(): Promise<Array<User>>
+        weekdays(params: { week: number; year: number }): Promise<Array<WeekDay>>
     }
     put: {
         roomReservation(value: RoomReservation): Promise<RoomReservation>
@@ -254,115 +241,72 @@ export interface FlopAPI {
         ): Promise<ReservationPeriodicityEachMonthSameDate>
     }
     delete: {
+        reservationPeriodicity(id: number): Promise<unknown>
         roomReservation(id: number): Promise<unknown>
     }
 }
 
 const api: FlopAPI = {
     fetch: {
-        all: {
-            departments() {
-                return fetcher(urls.departments)
-            },
-            rooms(department: string) {
-                return fetcher(urls.rooms, { dept: department })
-            },
-            timeSettings() {
-                return fetcher(urls.timesettings)
-            },
-            courseTypes(department: string) {
-                return fetcher(urls.coursetypes, { dept: department })
-            },
-            roomReservationTypes() {
-                return fetcher(urls.roomreservationtype)
-            },
-            reservationPeriodicities() {
-                return fetcher(urls.reservationperiodicity)
-            },
-            reservationPeriodicityTypes() {
-                return fetcher(urls.reservationperiodicitytype)
-            },
-            reservationPeriodicityByMonthXChoices() {
-                return fetcher(urls.reservationperiodicitybymonthxchoice)
-            },
-            users() {
-                return fetcher(urls.users)
-            },
-            booleanRoomAttributes() {
-                return fetcher(urls.booleanroomattributes)
-            },
-            numericRoomAttributes() {
-                return fetcher(urls.numericroomattributes)
-            },
-            booleanRoomAttributeValues() {
-                return fetcher(urls.booleanroomattributevalues)
-            },
-            numericRoomAttributeValues() {
-                return fetcher(urls.numericroomattributevalues)
-            },
+        booleanRoomAttributes() {
+            return fetcher(urls.booleanroomattributes)
         },
-        target: {
-            room(id: number, additionalParams?: object) {
-                return fetcher(buildUrl(urls.rooms, id.toString()), additionalParams)
-            },
-            weekdays(week: number, year: number, additionalParams?: object) {
-                return fetcher(
-                    urls.weekdays,
-                    {
-                        week: week,
-                        year: year,
-                    },
-                    additionalParams
-                )
-            },
-            roomReservations(week: number, year: number, params: { roomId?: number }, additionalParams?: object) {
-                return fetcher(
-                    urls.roomreservation,
-                    {
-                        ...{
-                            week: week,
-                            year: year,
-                        },
-                        ...{
-                            ...(params.roomId && { room: params.roomId }),
-                            ...(!params.roomId && {}),
-                        },
-                    },
-                    additionalParams
-                )
-            },
-            reservationPeriodicity(periodicityId: number): Promise<ReservationPeriodicity> {
-                return fetcher(urls.reservationperiodicity, { id: periodicityId })
-            },
-            courses(week: number, year: number, params: { department?: string }, additionalParams?: object) {
-                return fetcher(
-                    urls.courses,
-                    {
-                        ...{
-                            week: week,
-                            year: year,
-                        },
-                        ...{
-                            ...(params.department && {
-                                dept: params.department,
-                            }),
-                            ...(!params.department && {}),
-                        },
-                    },
-                    additionalParams
-                )
-            },
-            scheduledCourses(week: number, year: number, department: string, additionalParams?: object) {
-                return fetcher(
-                    urls.scheduledcourses,
-                    {
-                        week: week,
-                        year: year,
-                        dept: department,
-                    },
-                    additionalParams
-                )
-            },
+        booleanRoomAttributeValues() {
+            return fetcher(urls.booleanroomattributevalues)
+        },
+        courses(params: { week?: number; year?: number; department?: string }) {
+            return fetcher(urls.courses, params, [['department', 'dept']])
+        },
+        courseTypes(params: { department: string }) {
+            return fetcher(urls.coursetypes, params, [['department', 'dept']])
+        },
+        departments() {
+            return fetcher(urls.departments)
+        },
+        numericRoomAttributes() {
+            return fetcher(urls.numericroomattributes)
+        },
+        numericRoomAttributeValues() {
+            return fetcher(urls.numericroomattributevalues)
+        },
+        reservationPeriodicities() {
+            return fetcher(urls.reservationperiodicity)
+        },
+        reservationPeriodicity(periodicityId: number): Promise<ReservationPeriodicity> {
+            return fetcher(urls.reservationperiodicity, { id: periodicityId })
+        },
+        reservationPeriodicityByMonthXChoices() {
+            return fetcher(urls.reservationperiodicitybymonthxchoice)
+        },
+        reservationPeriodicityTypes() {
+            return fetcher(urls.reservationperiodicitytype)
+        },
+        room(id: number, additionalParams?: object) {
+            return fetcher(buildUrl(urls.rooms, id.toString()), additionalParams)
+        },
+        rooms(params: { department?: string }) {
+            return fetcher(urls.rooms, params, [['department', 'dept']])
+        },
+        roomReservations(params: { week?: number; year?: number; roomId?: number; periodicityId?: number }) {
+            return fetcher(urls.roomreservation, params, [
+                ['roomId', 'room'],
+                ['periodicityId', 'periodicity'],
+            ])
+        },
+        roomReservationTypes() {
+            return fetcher(urls.roomreservationtype)
+        },
+        scheduledCourses(params: { week?: number; year?: number; department?: string }) {
+            return fetcher(urls.scheduledcourses, params, [['department', 'dept']])
+        },
+        timeSettings() {
+            return fetcher(urls.timesettings)
+        },
+        users() {
+            return fetcher(urls.users)
+        },
+        weekdays(params: { week: number; year: number }) {
+            return fetcher(urls.weekdays, params)
         },
     },
     put: {
@@ -401,9 +345,30 @@ const api: FlopAPI = {
         },
     },
     delete: {
+        reservationPeriodicity(id: number): Promise<unknown> {
+            return deleteData(urls.reservationperiodicity, id)
+        },
         roomReservation(id: number): Promise<unknown> {
             return deleteData(urls.roomreservation, id)
         },
     },
 }
 export { api }
+
+/**
+ * Accepts an object and returns a new object with undefined values removed.
+ * The object keys can be renamed using the renameList parameter.
+ * @param obj The object to filter
+ * @param renameList The rename list as an array of pair of strings as [oldName, newName]
+ */
+function filterObject(obj: { [key: string]: any }, renameList?: Array<[oldName: string, newName: string]>) {
+    let filtered = Object.entries(obj).filter((entry) => entry[1])
+    if (renameList) {
+        filtered = filtered.map((entry: [string, any]) => {
+            const toRename = renameList.find((renamePair) => renamePair[0] === entry[0])
+            const keyName = toRename ? toRename[1] : entry[0]
+            return [keyName, entry[1]]
+        })
+    }
+    return Object.fromEntries(filtered)
+}
