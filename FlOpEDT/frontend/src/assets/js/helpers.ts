@@ -31,7 +31,7 @@ export function parseReason(reason: unknown, onAlert?: (level: string, message: 
             onAlert?.('danger', `${key}: ${reasonObj[key]}`)
         })
     } else {
-        onAlert?.('danger', `${reason}. Please contact an administrator.`)
+        onAlert?.('danger', `${reason}.`)
     }
 }
 

@@ -1,230 +1,252 @@
 <template>
-    <ModalForm
-        :is-open="props.isOpen"
-        :is-locked="isFormLocked"
-        :on-cancel="onFormCancel"
-        :on-save="onFormSave"
-        @interface="onFormInterface"
-        class="text-start"
-    >
-        <template #title>Room reservation</template>
-        <template #body>
-            <!-- Title -->
-            <div class="form-floating mb-3">
-                <input
-                    :id="generateId('title')"
-                    type="text"
-                    class="form-control"
-                    placeholder="Title"
-                    maxlength="30"
-                    v-model="title"
-                />
-                <label :for="generateId('title')" class="form-label">Title</label>
-            </div>
-            <!-- Description -->
-            <div class="form-floating mb-3">
-                <textarea
-                    :id="generateId('description')"
-                    type="text"
-                    class="form-control"
-                    placeholder="Description"
-                    rows="2"
-                    v-model="description"
-                ></textarea>
-                <label :for="generateId('description')" class="form-label">Description</label>
-            </div>
-            <!-- Room -->
-            <div class="form-floating mb-3">
-                <select class="form-select" :id="generateId('room')" v-model="selectedRoom">
-                    <option value="-1" disabled>Select a room</option>
-                    <option v-for="room in props.rooms" :key="room.id" :value="room.id">
-                        {{ room.name }}
-                    </option>
-                </select>
-                <label :for="generateId('room')" class="form-label">Room</label>
-            </div>
-            <!-- Date -->
-            <div class="mb-3">
-                <DayPicker
-                    :start-date="date"
-                    :should-reset="shouldDayPickerReset"
-                    :on-reset="(shouldDayPickerReset = false)"
-                    @update:date="updateDate"
-                    :min-date="new Date()"
-                    :clearable="false"
+    <div>
+        <ModalDialog
+            :is-open="isDialogOpen"
+            :is-locked="isDialogLocked"
+            :on-cancel="onPeriodicityDeletionCancel"
+            :on-confirm="onPeriodicityDeletionConfirm"
+        >
+            <template #title>Periodicity deletion</template>
+            <template #body>
+                <span>
+                    You are about to remove a periodicity. Doing so will cause the next reservations to be lost forever
+                    and unlink all previous reservations from this periodicity.</span
                 >
-                    <template #input="{ value }">
-                        <div class="form-floating">
-                            <input
-                                :id="generateId('date')"
-                                type="text"
-                                class="form-control"
-                                placeholder="Date"
-                                :value="value"
-                            />
-                            <label :for="generateId('date')" class="form-label">Date</label>
+                <br />
+                <span><b>Are you sure to remove the periodicity?</b></span>
+            </template>
+        </ModalDialog>
+        <ModalForm
+            :is-open="isFormOpen"
+            :is-locked="isFormLocked"
+            :on-cancel="onFormCancel"
+            :on-save="onFormSave"
+            @interface="onFormInterface"
+            class="text-start"
+        >
+            <template #title>Room reservation</template>
+            <template #body>
+                <!-- Title -->
+                <div class="form-floating mb-3">
+                    <input
+                        :id="generateId('title')"
+                        type="text"
+                        class="form-control"
+                        placeholder="Title"
+                        maxlength="30"
+                        v-model="title"
+                    />
+                    <label :for="generateId('title')" class="form-label">Title</label>
+                </div>
+                <!-- Description -->
+                <div class="form-floating mb-3">
+                    <textarea
+                        :id="generateId('description')"
+                        type="text"
+                        class="form-control"
+                        placeholder="Description"
+                        rows="2"
+                        v-model="description"
+                    ></textarea>
+                    <label :for="generateId('description')" class="form-label">Description</label>
+                </div>
+                <!-- Room -->
+                <div class="form-floating mb-3">
+                    <select class="form-select" :id="generateId('room')" v-model="selectedRoom">
+                        <option value="-1" disabled>Select a room</option>
+                        <option v-for="room in props.rooms" :key="room.id" :value="room.id">
+                            {{ room.name }}
+                        </option>
+                    </select>
+                    <label :for="generateId('room')" class="form-label">Room</label>
+                </div>
+                <!-- Date -->
+                <div class="mb-3">
+                    <DayPicker
+                        :start-date="date"
+                        :should-reset="shouldDayPickerReset"
+                        :on-reset="(shouldDayPickerReset = false)"
+                        @update:date="updateDate"
+                        :min-date="new Date()"
+                        :clearable="false"
+                    >
+                        <template #input="{ value }">
+                            <div class="form-floating">
+                                <input
+                                    :id="generateId('date')"
+                                    type="text"
+                                    class="form-control"
+                                    placeholder="Date"
+                                    :value="value"
+                                />
+                                <label :for="generateId('date')" class="form-label">Date</label>
+                            </div>
+                        </template>
+                    </DayPicker>
+                </div>
+                <div class="row m-0 gx-1 mb-3">
+                    <div class="col" style="min-width: 100px">
+                        <!-- Start time -->
+                        <TimePicker
+                            :hours="startTime.hours"
+                            :minutes="startTime.minutes"
+                            @update-time="updateStartTime"
+                            :should-reset="shouldStartTimePickerReset"
+                            @on-reset="shouldStartTimePickerReset = false"
+                        >
+                            <template #input="{ value }">
+                                <div class="form-floating">
+                                    <input
+                                        :id="generateId('startTime')"
+                                        type="text"
+                                        class="form-control"
+                                        placeholder="Start time"
+                                        :value="value"
+                                        readonly
+                                    />
+                                    <label :for="generateId('startTime')" class="form-label">Start time</label>
+                                </div>
+                            </template>
+                        </TimePicker>
+                    </div>
+                    <div class="col" style="min-width: 100px">
+                        <!-- End time -->
+                        <TimePicker
+                            :hours="endTime.hours"
+                            :minutes="endTime.minutes"
+                            @update-time="updateEndTime"
+                            :should-reset="shouldEndTimePickerReset"
+                            @on-reset="shouldEndTimePickerReset = false"
+                        >
+                            <template #input="{ value }">
+                                <div class="form-floating">
+                                    <input
+                                        :id="generateId('endTime')"
+                                        type="text"
+                                        class="form-control"
+                                        placeholder="End time"
+                                        :value="value"
+                                        readonly
+                                    />
+                                    <label :for="generateId('endTime')" class="form-label">End time</label>
+                                </div>
+                            </template>
+                        </TimePicker>
+                    </div>
+                </div>
+                <!-- Responsible -->
+                <div class="form-floating mb-3">
+                    <input
+                        :id="generateId('responsible')"
+                        type="text"
+                        class="form-control"
+                        placeholder="Responsible"
+                        :value="reservationResponsibleUsername"
+                        disabled
+                    />
+                    <label :for="generateId('responsible')" class="form-label">Responsible</label>
+                </div>
+                <!-- Type -->
+                <div class="form-floating mb-3">
+                    <select class="form-select" :id="generateId('reservationType')" v-model="selectedType">
+                        <option :value="-1" disabled>Select a reservation type</option>
+                        <option v-for="type in props.reservationTypes" :key="type.id" :value="type.id">
+                            {{ type.name }}
+                        </option>
+                    </select>
+                    <label :for="generateId('reservationType')" class="form-label">Reservation type</label>
+                </div>
+                <!-- Periodicity -->
+                <div v-if="!isPeriodic && !isCreatingPeriodicity" class="mb-3">
+                    <button type="button" class="btn btn-info" @click="addPeriodicity">Repeat</button>
+                </div>
+                <div v-else class="mb-3 border rounded p-2">
+                    <div class="mb-2 text-center">
+                        <button type="button" class="btn btn-danger btn-sm" @click="removePeriodicity">
+                            Remove periodicity
+                        </button>
+                    </div>
+                    <div class="row mb-2 gx-1">
+                        <!-- Periodicity start date -->
+                        <div class="col">
+                            <DayPicker
+                                :start-date="periodicityStart"
+                                :should-reset="shouldDayPickerReset"
+                                :on-reset="(shouldDayPickerReset = false)"
+                                @update:date="updatePeriodicityStartDate"
+                                :min-date="new Date()"
+                                :clearable="false"
+                            >
+                                <template #input="{ value }">
+                                    <div class="form-floating">
+                                        <input
+                                            :id="generateId('periodicity-start-date')"
+                                            type="text"
+                                            class="form-control"
+                                            placeholder="Date"
+                                            :value="value"
+                                            readonly
+                                            :disabled="isPeriodic"
+                                        />
+                                        <label :for="generateId('periodicity-start-date')" class="form-label"
+                                            >Start date</label
+                                        >
+                                    </div>
+                                </template>
+                            </DayPicker>
                         </div>
-                    </template>
-                </DayPicker>
-            </div>
-            <div class="row m-0 gx-1 mb-3">
-                <div class="col" style="min-width: 100px">
-                    <!-- Start time -->
-                    <TimePicker
-                        :hours="startTime.hours"
-                        :minutes="startTime.minutes"
-                        @update-time="updateStartTime"
-                        :should-reset="shouldStartTimePickerReset"
-                        @on-reset="shouldStartTimePickerReset = false"
-                    >
-                        <template #input="{ value }">
-                            <div class="form-floating">
-                                <input
-                                    :id="generateId('startTime')"
-                                    type="text"
-                                    class="form-control"
-                                    placeholder="Start time"
-                                    :value="value"
-                                    readonly
-                                />
-                                <label :for="generateId('startTime')" class="form-label">Start time</label>
-                            </div>
-                        </template>
-                    </TimePicker>
-                </div>
-                <div class="col" style="min-width: 100px">
-                    <!-- End time -->
-                    <TimePicker
-                        :hours="endTime.hours"
-                        :minutes="endTime.minutes"
-                        @update-time="updateEndTime"
-                        :should-reset="shouldEndTimePickerReset"
-                        @on-reset="shouldEndTimePickerReset = false"
-                    >
-                        <template #input="{ value }">
-                            <div class="form-floating">
-                                <input
-                                    :id="generateId('endTime')"
-                                    type="text"
-                                    class="form-control"
-                                    placeholder="End time"
-                                    :value="value"
-                                    readonly
-                                />
-                                <label :for="generateId('endTime')" class="form-label">End time</label>
-                            </div>
-                        </template>
-                    </TimePicker>
-                </div>
-            </div>
-            <!-- Responsible -->
-            <div class="form-floating mb-3">
-                <input
-                    :id="generateId('responsible')"
-                    type="text"
-                    class="form-control"
-                    placeholder="Responsible"
-                    :value="reservationResponsibleUsername"
-                    disabled
-                />
-                <label :for="generateId('responsible')" class="form-label">Responsible</label>
-            </div>
-            <!-- Type -->
-            <div class="form-floating mb-3">
-                <select class="form-select" :id="generateId('reservationType')" v-model="selectedType">
-                    <option :value="-1" disabled>Select a reservation type</option>
-                    <option v-for="type in props.reservationTypes" :key="type.id" :value="type.id">
-                        {{ type.name }}
-                    </option>
-                </select>
-                <label :for="generateId('reservationType')" class="form-label">Reservation type</label>
-            </div>
-            <!-- Periodicity -->
-            <div v-if="!isPeriodic && !isCreatingPeriodicity" class="mb-3">
-                <button type="button" class="btn btn-info" @click="addPeriodicity">Repeat</button>
-            </div>
-            <div v-else class="mb-3 border rounded p-2">
-                <div class="mb-2 text-center">
-                    <button type="button" class="btn btn-danger btn-sm">Remove periodicity</button>
-                </div>
-                <div class="row mb-2 gx-1">
-                    <!-- Periodicity start date -->
-                    <div class="col">
-                        <DayPicker
-                            :start-date="periodicityStart"
-                            :should-reset="shouldDayPickerReset"
-                            :on-reset="(shouldDayPickerReset = false)"
-                            @update:date="updatePeriodicityStartDate"
-                            :min-date="new Date()"
-                            :clearable="false"
-                        >
-                            <template #input="{ value }">
-                                <div class="form-floating">
-                                    <input
-                                        :id="generateId('periodicity-start-date')"
-                                        type="text"
-                                        class="form-control"
-                                        placeholder="Date"
-                                        :value="value"
-                                        readonly
-                                        :disabled="isPeriodic"
-                                    />
-                                    <label :for="generateId('periodicity-start-date')" class="form-label"
-                                        >Start date</label
-                                    >
-                                </div>
-                            </template>
-                        </DayPicker>
+                        <!-- Periodicity end date -->
+                        <div class="col">
+                            <DayPicker
+                                :start-date="periodicityEnd"
+                                :should-reset="shouldDayPickerReset"
+                                :on-reset="(shouldDayPickerReset = false)"
+                                @update:date="updatePeriodicityEndDate"
+                                :min-date="periodicityEndMinDate"
+                                :clearable="false"
+                            >
+                                <template #input="{ value }">
+                                    <div class="form-floating">
+                                        <input
+                                            :id="generateId('periodicity-end-date')"
+                                            type="text"
+                                            class="form-control"
+                                            placeholder="Date"
+                                            :value="value"
+                                            readonly
+                                            :disabled="isPeriodic"
+                                        />
+                                        <label :for="generateId('periodicity-end-date')" class="form-label"
+                                            >End date</label
+                                        >
+                                    </div>
+                                </template>
+                            </DayPicker>
+                        </div>
                     </div>
-                    <!-- Periodicity end date -->
-                    <div class="col">
-                        <DayPicker
-                            :start-date="periodicityEnd"
-                            :should-reset="shouldDayPickerReset"
-                            :on-reset="(shouldDayPickerReset = false)"
-                            @update:date="updatePeriodicityEndDate"
-                            :min-date="periodicityEndMinDate"
-                            :clearable="false"
-                        >
-                            <template #input="{ value }">
-                                <div class="form-floating">
-                                    <input
-                                        :id="generateId('periodicity-end-date')"
-                                        type="text"
-                                        class="form-control"
-                                        placeholder="Date"
-                                        :value="value"
-                                        readonly
-                                        :disabled="isPeriodic"
-                                    />
-                                    <label :for="generateId('periodicity-end-date')" class="form-label">End date</label>
-                                </div>
-                            </template>
-                        </DayPicker>
-                    </div>
+                    <PeriodicitySelect
+                        :class="selectPeriodicityClass"
+                        :types="props.periodicityTypes"
+                        :weekdays="props.weekdays"
+                        v-model:model-type="selectedPeriodicityType"
+                        v-model:modelPeriodicity="periodicityChoice"
+                        :is-disabled="isPeriodic"
+                    ></PeriodicitySelect>
                 </div>
-                <PeriodicitySelect
-                    :class="selectPeriodicityClass"
-                    :types="props.periodicityTypes"
-                    :weekdays="props.weekdays"
-                    v-model:model-type="selectedPeriodicityType"
-                    v-model:modelPeriodicity="periodicityChoice"
-                    :is-disabled="isPeriodic"
-                ></PeriodicitySelect>
-            </div>
-            <!-- Send email -->
-            <div class="form-check form-switch mb-3">
-                <input
-                    class="form-check-input"
-                    type="checkbox"
-                    v-model="email"
-                    role="switch"
-                    :id="generateId('email')"
-                />
-                <label class="form-check-label" :for="generateId('email')">Send a confirm email?</label>
-            </div>
-        </template>
-    </ModalForm>
+                <!-- Send email -->
+                <div class="form-check form-switch mb-3">
+                    <input
+                        class="form-check-input"
+                        type="checkbox"
+                        v-model="email"
+                        role="switch"
+                        :id="generateId('email')"
+                    />
+                    <label class="form-check-label" :for="generateId('email')">Send a confirm email?</label>
+                </div>
+            </template>
+        </ModalForm>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -250,6 +272,7 @@ import ModalForm from '@/components/ModalForm.vue'
 import TimePicker from '@/components/TimePicker.vue'
 import { computed, defineProps, ref, watch } from 'vue'
 import PeriodicitySelect from '@/components/roomreservation/periodicity/PeriodicitySelect.vue'
+import ModalDialog from '@/components/ModalDialog.vue'
 
 interface Emits {
     (e: 'saved', reservation: RoomReservation): void
@@ -271,6 +294,7 @@ interface Props {
     periodicityTypes: Array<ReservationPeriodicityType>
     weekdays: Array<WeekDay>
     periodicity: ReservationPeriodicity | null
+    onPeriodicityDelete: (reservation: RoomReservation) => Promise<void>
 }
 
 const props = defineProps<Props>()
@@ -305,13 +329,22 @@ const reservationResponsibleUsername = computed(() => {
 
 const formInterface = ref<FormInterface>()
 const isFormLocked = ref(false)
+const isFormOpen = ref(props.isOpen)
+watch(
+    () => props.isOpen,
+    (newValue) => {
+        isFormOpen.value = newValue
+    }
+)
+const isDialogOpen = ref(false)
+const isDialogLocked = ref(false)
 
 const title = ref(props.reservation.title)
 const description = ref(props.reservation.description)
 const selectedResponsible = ref(props.reservation.responsible)
 const selectedRoom = ref(props.reservation.room)
 const selectedType = ref(props.reservation.reservation_type)
-const isPeriodic = ref(props.reservation.periodicity != null)
+const isPeriodic = computed(() => props.periodicity != null || periodicityId.value != null)
 const email = ref(props.reservation.email)
 const startTime = ref(ReservationTime.fromString(props.reservation.start_time))
 const endTime = ref(ReservationTime.fromString(props.reservation.end_time))
@@ -320,7 +353,7 @@ const date = ref(props.reservation.date)
 const isCreatingPeriodicity = ref(false)
 
 // Get the possibly existing periodicity values
-const initPeriodicityId = computed(() => (props.periodicity ? props.periodicity.data.id : -1))
+const initPeriodicityId = computed(() => (props.periodicity ? props.periodicity.data.id : null))
 const periodicityStart = ref(props.periodicity ? props.periodicity.data.start : props.reservation.date)
 const periodicityEndMinDate = computed(() => {
     const startDate = new Date(periodicityStart.value)
@@ -358,7 +391,7 @@ watch(
     }
 )
 
-const periodicityID = ref(initPeriodicityId.value)
+const periodicityId = ref<number | null>(initPeriodicityId.value)
 
 const requiredClass = 'border border-danger rounded'
 
@@ -372,7 +405,12 @@ const originalDuration =
 // Create an object of each type
 const periodicityByWeek = computed<ReservationPeriodicityByWeek>(() => {
     return {
-        id: selectedPeriodicityType.value && selectedPeriodicityType.value[0] === 'BW' ? initPeriodicityId.value : -1,
+        id:
+            selectedPeriodicityType.value && selectedPeriodicityType.value[0] === 'BW'
+                ? initPeriodicityId.value
+                    ? initPeriodicityId.value
+                    : -1
+                : -1,
         start: periodicityStart.value,
         end: periodicityEnd.value,
         periodicity_type: 'BW',
@@ -382,7 +420,12 @@ const periodicityByWeek = computed<ReservationPeriodicityByWeek>(() => {
 })
 const periodicityByMonth = computed<ReservationPeriodicityByMonth>(() => {
     return {
-        id: selectedPeriodicityType.value && selectedPeriodicityType.value[0] === 'BM' ? initPeriodicityId.value : -1,
+        id:
+            selectedPeriodicityType.value && selectedPeriodicityType.value[0] === 'BM'
+                ? initPeriodicityId.value
+                    ? initPeriodicityId.value
+                    : -1
+                : -1,
         start: periodicityStart.value,
         end: periodicityEnd.value,
         periodicity_type: 'BM',
@@ -392,7 +435,12 @@ const periodicityByMonth = computed<ReservationPeriodicityByMonth>(() => {
 })
 const periodicityEachMonthSameDate = computed<ReservationPeriodicityEachMonthSameDate>(() => {
     return {
-        id: selectedPeriodicityType.value && selectedPeriodicityType.value[0] === 'EM' ? initPeriodicityId.value : -1,
+        id:
+            selectedPeriodicityType.value && selectedPeriodicityType.value[0] === 'EM'
+                ? initPeriodicityId.value
+                    ? initPeriodicityId.value
+                    : -1
+                : -1,
         start: periodicityStart.value,
         end: periodicityEnd.value,
         periodicity_type: 'EM',
@@ -433,8 +481,7 @@ function resetValues() {
     selectedResponsible.value = props.reservation.responsible
     selectedRoom.value = props.reservation.room
     selectedType.value = props.reservation.reservation_type
-    isPeriodic.value = props.reservation.periodicity != null
-    periodicityID.value = initPeriodicityId.value
+    periodicityId.value = initPeriodicityId.value
     email.value = props.reservation.email
     startTime.value = ReservationTime.fromString(props.reservation.start_time)
     endTime.value = ReservationTime.fromString(props.reservation.end_time)
@@ -452,10 +499,30 @@ function onFormCancel() {
 
 async function onFormSave() {
     isFormLocked.value = true
+    let continueSave = true
     if (isPeriodic.value || isCreatingPeriodicity.value) {
-        periodicityID.value = await savePeriodicity()
+        periodicityId.value = await savePeriodicity().catch((reason) => {
+            handleReason(reason)
+            continueSave = false
+            return null
+        })
     }
-    saveReservation()
+    if (continueSave) {
+        saveReservation()
+    }
+}
+
+function onPeriodicityDeletionCancel() {
+    switchToForm()
+}
+
+function onPeriodicityDeletionConfirm() {
+    isDialogLocked.value = true
+    props.onPeriodicityDelete(props.reservation).then((_) => {
+        periodicityId.value = null
+        isDialogLocked.value = false
+        switchToForm()
+    })
 }
 
 async function savePeriodicity(): Promise<number> {
@@ -464,12 +531,8 @@ async function savePeriodicity(): Promise<number> {
     }
 
     let apiMethod: typeof api.post | typeof api.put = api.put
-    // Method is POST if the reservation has a new periodicity (either new type or didn't have before)
-    if (
-        !props.reservation.periodicity ||
-        props.reservation.periodicity < 0 ||
-        (props.periodicity && props.periodicity.data.periodicity_type != selectedPeriodicityType.value[0])
-    ) {
+    // Method is POST if the reservation has a new periodicity
+    if (!props.periodicity) {
         apiMethod = api.post
     }
 
@@ -517,7 +580,7 @@ function saveReservation() {
         email: email.value,
         end_time: ReservationTime.toString(endTime.value),
         id: Math.max(0, props.reservation.id),
-        periodicity: periodicityID.value,
+        periodicity: periodicityId.value,
         responsible: selectedResponsible.value,
         room: selectedRoom.value,
         start_time: ReservationTime.toString(startTime.value),
@@ -535,6 +598,26 @@ function saveReservation() {
             (reason) => handleReason(reason)
         )
         .catch((reason) => handleReason(reason))
+}
+
+function removePeriodicity() {
+    // If a periodicity exists then ask confirmation...
+    if (periodicityId.value && periodicityId.value > 0) {
+        switchToPeriodicityDeletionDialog()
+        return
+    }
+    // ...otherwise just cancel the creation
+    isCreatingPeriodicity.value = false
+}
+
+function switchToPeriodicityDeletionDialog() {
+    isFormOpen.value = false
+    isDialogOpen.value = true
+}
+
+function switchToForm() {
+    isDialogOpen.value = false
+    isFormOpen.value = true
 }
 
 function handleReason(reason: unknown) {

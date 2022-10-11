@@ -18,6 +18,7 @@
                 :users="props.data.users"
                 :weekdays="props.data.weekdays"
                 :periodicity="props.data.periodicity"
+                :on-periodicity-delete="props.data.onPeriodicityDelete"
                 @closed="closeEdit"
                 @saved="onSave"
                 @cancelled="onCancel"

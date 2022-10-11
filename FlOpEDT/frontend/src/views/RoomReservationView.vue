@@ -6,7 +6,7 @@
             :reservation="reservationToDelete"
             :on-confirm-current="reservationDeletionConfirmed"
             :on-confirm-all="reservationRemoveAllSamePeriodicity"
-            :on-confirm-future="reservationRemoveFutureSamePeriodicity"
+            :on-confirm-future="reservationRemoveCurrentAndFutureSamePeriodicity"
             :on-cancel="closeReservationDeletionDialog"
         ></DeletePeriodicReservationDialog>
         <div class="container-fluid">
@@ -830,6 +830,17 @@ function createRoomReservationSlot(reservation: RoomReservation): CalendarSlot {
         title: reservation.title,
         id: `roomreservation-${reservation.id}`,
         displayStyle: { background: backgroundColor },
+        onPeriodicityDelete: () => {
+            if (!reservation.periodicity) {
+                return Promise.resolve()
+            }
+            const periodicityId = reservation.periodicity
+            const reservationsRemovalPromise = reservationRemoveFutureSamePeriodicity(reservation)
+            if (!reservationsRemovalPromise) {
+                return Promise.reject(`Could not remove the reservations with periodicity id ${periodicityId}`)
+            }
+            return reservationsRemovalPromise.then((_) => deleteReservationPeriodicity(periodicityId))
+        },
     }
     return {
         slotData: slotData,
@@ -916,16 +927,16 @@ function addTo<T>(collection: { [p: string]: Array<T> }, id: string | number, el
     collection[id].push(element)
 }
 
-function updateRoomReservations(date: FlopWeek) {
+function updateRoomReservations(date: FlopWeek): Promise<void> {
     const week = date.week
     const year = date.year
 
     showLoading()
-    api.value.fetch.roomReservations({ week: week, year: year }).then((value) => {
+    return api.value.fetch.roomReservations({ week: week, year: year }).then((value) => {
         roomReservations.list.value = value
+        temporaryReservation.value = undefined
         hideLoading()
     })
-    temporaryReservation.value = undefined
 }
 
 function updateScheduledCourses(date: FlopWeek, departments: Array<Department>) {
@@ -954,7 +965,7 @@ function updateScheduledCourses(date: FlopWeek, departments: Array<Department>) 
 }
 
 function updateReservationPeriodicities() {
-    api.value.fetch.reservationPeriodicities().then((value) => {
+    return api.value.fetch.reservationPeriodicities().then((value) => {
         reservationPeriodicities.list.value = value
     })
 }
@@ -1023,7 +1034,6 @@ function reservationRemoveAllSamePeriodicity(reservation: RoomReservation) {
     if (!reservation.periodicity || reservation.periodicity < 0) {
         return
     }
-    console.log(`Should remove all reservations of periodicity ${reservation.periodicity}`)
     const periodicityId = reservation.periodicity
 
     // Get the list of all the reservations to delete, which are those who share the periodicity ID
@@ -1039,57 +1049,83 @@ function reservationRemoveAllSamePeriodicity(reservation: RoomReservation) {
     })
 }
 
+function reservationRemoveCurrentAndFutureSamePeriodicity(reservation: RoomReservation) {
+    if (!reservation.periodicity || reservation.periodicity < 0) {
+        return
+    }
+
+    const periodicityId = reservation.periodicity
+    const reservationDate = new Date(reservation.date)
+    // Remove all the future reservations of the same periodicity
+    reservationRemoveFutureSamePeriodicity(reservation)
+        // Remove the current reservation
+        ?.then((_) => {
+            deleteRoomReservation(reservation)
+        })
+        // Reduce the periodicity end date to the day before the current reservation
+        .then((_) => {
+            // Get the day before the reservation
+            const dayBefore = `${reservationDate.getFullYear()}-${reservationDate.getMonth() + 1}-${
+                reservationDate.getDate() - 1
+            }`
+
+            // Get the periodicity data
+            const periodicity = reservationPeriodicities.perId.value[periodicityId].data
+            if (periodicity.periodicity_type === '') {
+                // Should never arrive here as an existing periodicity always has a type. Written for the type checks.
+                return
+            }
+            // Match the api path with the periodicity type
+            let apiCall
+            switch (periodicity.periodicity_type) {
+                case 'BM':
+                    apiCall = api.value.patch.reservationPeriodicityByMonth
+                    break
+                case 'EM':
+                    apiCall = api.value.patch.reservationPeriodicityEachMonthSameDate
+                    break
+                case 'BW':
+                    apiCall = api.value.patch.reservationPeriodicityByWeek
+                    break
+            }
+            // Finally apply the patch
+            return apiCall(periodicity.id, { end: dayBefore })
+        })
+        ?.then((_) => {
+            updateReservationPeriodicities()
+        })
+        .finally(closeReservationDeletionDialog)
+}
+
+/**
+ * Removes all the reservations having the same periodicity as the provided reservation and happening at a later date.
+ * @param reservation The reservation to base the periodicity removal.
+ */
 function reservationRemoveFutureSamePeriodicity(reservation: RoomReservation) {
     if (!reservation.periodicity || reservation.periodicity < 0) {
         return
     }
 
     const periodicityId = reservation.periodicity
-    console.log(`Should remove the current reservation and the next of periodicity ${periodicityId}`)
     const reservationDate = new Date(reservation.date)
     const reservationTime = reservationDate.getTime()
 
     // Get the list of all the reservations to delete, which are those who share the periodicity ID and are later than
     // the selected
-    api.value.fetch.roomReservations({ periodicityId: periodicityId }).then((deletionList) => {
+    return api.value.fetch.roomReservations({ periodicityId: periodicityId }).then((deletionList) => {
         // Filter the older reservations
-        deletionList = deletionList.filter((reserv) => new Date(reserv.date).getTime() >= reservationTime)
-        deleteRoomReservations(deletionList)
-            .then((_) => {
-                // Reduce the periodicity end date to the day before the current reservation
-
-                // Get the day before the reservation
-                const dayBefore = `${reservationDate.getFullYear()}-${reservationDate.getMonth() + 1}-${
-                    reservationDate.getDate() - 1
-                }`
-
-                // Get the periodicity data
-                const periodicity = reservationPeriodicities.perId.value[periodicityId].data
-                if (periodicity.periodicity_type === '') {
-                    // Should never arrive here as an existing periodicity always has a type. Written for the type checks.
-                    return
-                }
-                // Match the api path with the periodicity type
-                let apiCall
-                switch (periodicity.periodicity_type) {
-                    case 'BM':
-                        apiCall = api.value.patch.reservationPeriodicityByMonth
-                        break
-                    case 'EM':
-                        apiCall = api.value.patch.reservationPeriodicityEachMonthSameDate
-                        break
-                    case 'BW':
-                        apiCall = api.value.patch.reservationPeriodicityByWeek
-                        break
-                }
-                // Finally apply the patch
-                return apiCall(periodicity.id, { end: dayBefore })
-            })
-            .then((_) => {
-                updateReservationPeriodicities()
-            })
-            .finally(closeReservationDeletionDialog)
+        deletionList = deletionList.filter((reserv) => new Date(reserv.date).getTime() > reservationTime)
+        return deleteRoomReservations(deletionList)
     })
+}
+
+function deleteReservationPeriodicity(periodicityId: number): Promise<void> {
+    return api.value.delete
+        .reservationPeriodicity(periodicityId)
+        .then((_) => {
+            updateReservationPeriodicities()
+        })
+        .then((_) => updateRoomReservations(selectedDate.value))
 }
 
 function closeReservationDeletionDialog() {

@@ -259,6 +259,7 @@ export interface CalendarRoomReservationSlotData extends CalendarSlotData {
     periodicityTypes: Array<ReservationPeriodicityType>
     weekdays: Array<WeekDay>
     periodicity: ReservationPeriodicity | null
+    onPeriodicityDelete: (reservation: RoomReservation) => Promise<void>
 }
 
 export interface CalendarScheduledCourseSlotData extends CalendarSlotData {
