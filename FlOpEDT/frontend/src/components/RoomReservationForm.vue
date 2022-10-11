@@ -140,82 +140,77 @@
                 <label :for="generateId('reservationType')" class="form-label">Reservation type</label>
             </div>
             <!-- Periodicity -->
-            <div class="mb-3 border rounded p-2">
-                <div class="form-check form-switch">
-                    <input
-                        class="form-check-input"
-                        type="checkbox"
-                        v-model="isPeriodic"
-                        role="switch"
-                        :id="generateId('isPeriodic')"
-                    />
-                    <label class="form-check-label" :for="generateId('isPeriodic')">Repeat?</label>
+            <div v-if="!isPeriodic && !isCreatingPeriodicity" class="mb-3">
+                <button type="button" class="btn btn-info" @click="addPeriodicity">Repeat</button>
+            </div>
+            <div v-else class="mb-3 border rounded p-2">
+                <div class="mb-2 text-center">
+                    <button type="button" class="btn btn-danger btn-sm">Remove periodicity</button>
                 </div>
-                <div v-if="isPeriodic">
-                    <div class="row mb-2 gx-1">
-                        <!-- Periodicity start date -->
-                        <div class="col">
-                            <DayPicker
-                                :start-date="periodicityStart"
-                                :should-reset="shouldDayPickerReset"
-                                :on-reset="(shouldDayPickerReset = false)"
-                                @update:date="updatePeriodicityStartDate"
-                                :min-date="new Date()"
-                                :clearable="false"
-                            >
-                                <template #input="{ value }">
-                                    <div class="form-floating">
-                                        <input
-                                            :id="generateId('periodicity-start-date')"
-                                            type="text"
-                                            class="form-control"
-                                            placeholder="Date"
-                                            :value="value"
-                                            readonly
-                                        />
-                                        <label :for="generateId('periodicity-start-date')" class="form-label"
-                                            >Start date</label
-                                        >
-                                    </div>
-                                </template>
-                            </DayPicker>
-                        </div>
-                        <!-- Periodicity end date -->
-                        <div class="col">
-                            <DayPicker
-                                :start-date="periodicityEnd"
-                                :should-reset="shouldDayPickerReset"
-                                :on-reset="(shouldDayPickerReset = false)"
-                                @update:date="updatePeriodicityEndDate"
-                                :min-date="periodicityEndMinDate"
-                                :clearable="false"
-                            >
-                                <template #input="{ value }">
-                                    <div class="form-floating">
-                                        <input
-                                            :id="generateId('periodicity-end-date')"
-                                            type="text"
-                                            class="form-control"
-                                            placeholder="Date"
-                                            :value="value"
-                                            readonly
-                                        />
-                                        <label :for="generateId('periodicity-end-date')" class="form-label"
-                                            >End date</label
-                                        >
-                                    </div>
-                                </template>
-                            </DayPicker>
-                        </div>
+                <div class="row mb-2 gx-1">
+                    <!-- Periodicity start date -->
+                    <div class="col">
+                        <DayPicker
+                            :start-date="periodicityStart"
+                            :should-reset="shouldDayPickerReset"
+                            :on-reset="(shouldDayPickerReset = false)"
+                            @update:date="updatePeriodicityStartDate"
+                            :min-date="new Date()"
+                            :clearable="false"
+                        >
+                            <template #input="{ value }">
+                                <div class="form-floating">
+                                    <input
+                                        :id="generateId('periodicity-start-date')"
+                                        type="text"
+                                        class="form-control"
+                                        placeholder="Date"
+                                        :value="value"
+                                        readonly
+                                        :disabled="isPeriodic"
+                                    />
+                                    <label :for="generateId('periodicity-start-date')" class="form-label"
+                                        >Start date</label
+                                    >
+                                </div>
+                            </template>
+                        </DayPicker>
                     </div>
-                    <PeriodicitySelect
-                        :class="selectPeriodicityClass"
-                        :types="props.periodicityTypes"
-                        :weekdays="props.weekdays"
-                        v-model:model-type="selectedPeriodicityType"
-                        v-model:modelPeriodicity="periodicityChoice"
-                    ></PeriodicitySelect>
+                    <!-- Periodicity end date -->
+                    <div class="col">
+                        <DayPicker
+                            :start-date="periodicityEnd"
+                            :should-reset="shouldDayPickerReset"
+                            :on-reset="(shouldDayPickerReset = false)"
+                            @update:date="updatePeriodicityEndDate"
+                            :min-date="periodicityEndMinDate"
+                            :clearable="false"
+                        >
+                            <template #input="{ value }">
+                                <div class="form-floating">
+                                    <input
+                                        :id="generateId('periodicity-end-date')"
+                                        type="text"
+                                        class="form-control"
+                                        placeholder="Date"
+                                        :value="value"
+                                        readonly
+                                        :disabled="isPeriodic"
+                                    />
+                                    <label :for="generateId('periodicity-end-date')" class="form-label">End date</label>
+                                </div>
+                            </template>
+                        </DayPicker>
+                    </div>
                 </div>
+                <PeriodicitySelect
+                    :class="selectPeriodicityClass"
+                    :types="props.periodicityTypes"
+                    :weekdays="props.weekdays"
+                    v-model:model-type="selectedPeriodicityType"
+                    v-model:modelPeriodicity="periodicityChoice"
+                    :is-disabled="isPeriodic"
+                ></PeriodicitySelect>
             </div>
             <!-- Send email -->
             <div class="form-check form-switch mb-3">
@@ -321,6 +316,8 @@ const email = ref(props.reservation.email)
 const startTime = ref(ReservationTime.fromString(props.reservation.start_time))
 const endTime = ref(ReservationTime.fromString(props.reservation.end_time))
 const date = ref(props.reservation.date)
+
+const isCreatingPeriodicity = ref(false)
 
 // Get the possibly existing periodicity values
 const initPeriodicityId = computed(() => (props.periodicity ? props.periodicity.data.id : -1))
@@ -455,7 +452,7 @@ function onFormCancel() {
 
 async function onFormSave() {
     isFormLocked.value = true
-    if (isPeriodic.value) {
+    if (isPeriodic.value || isCreatingPeriodicity.value) {
         periodicityID.value = await savePeriodicity()
     }
     saveReservation()
@@ -503,6 +500,8 @@ async function savePeriodicity(): Promise<number> {
         .then((value) => {
             // Give it the id given by the api
             periodicityToUpdate.id = value.id
+            // Complete periodicity creation
+            isCreatingPeriodicity.value = false
             return value.id
         })
         .catch((reason) => {
@@ -627,6 +626,10 @@ function close() {
 function cancel() {
     formInterface.value?.close()
     emit('cancelled')
+}
+
+function addPeriodicity() {
+    isCreatingPeriodicity.value = true
 }
 </script>
 

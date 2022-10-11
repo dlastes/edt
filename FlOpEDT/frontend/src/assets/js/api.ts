@@ -89,8 +89,8 @@ async function fetchData(url: string, params: { [k: string]: any }) {
 }
 
 async function sendData<T>(method: string, url: string, optional: { data?: unknown; id?: number }): Promise<T | never> {
-    if (!['PUT', 'POST', 'DELETE'].includes(method)) {
-        return Promise.reject('Method must be either PUT, POST, or DELETE')
+    if (!['PUT', 'POST', 'DELETE', 'PATCH'].includes(method)) {
+        return Promise.reject('Method must be either PUT, POST, PATCH, or DELETE')
     }
 
     // Setup headers
@@ -151,6 +151,14 @@ async function postData<T>(url: string, data: unknown): Promise<T | never> {
         data: data,
     }
     return await sendData('POST', url, optional)
+}
+
+async function patchData<T>(url: string, id: number, data: unknown): Promise<T | never> {
+    const optional: { [key: string]: unknown } = {
+        id: id,
+        data: data,
+    }
+    return await sendData('PATCH', url, optional)
 }
 
 function deleteData(url: string, id: number) {
@@ -238,6 +246,23 @@ export interface FlopAPI {
         reservationPeriodicityByWeek(value: ReservationPeriodicityByWeek): Promise<ReservationPeriodicityByWeek>
         reservationPeriodicityEachMonthSameDate(
             value: ReservationPeriodicityEachMonthSameDate
+        ): Promise<ReservationPeriodicityEachMonthSameDate>
+    }
+    patch: {
+        reservationPeriodicityByMonth(
+            id: number,
+            params: { start?: string; end?: string }
+        ): Promise<ReservationPeriodicityByMonth>
+        reservationPeriodicityByWeek(
+            id: number,
+            params: { start?: string; end?: string }
+        ): Promise<ReservationPeriodicityByWeek>
+        reservationPeriodicityEachMonthSameDate(
+            id: number,
+            params: {
+                start?: string
+                end?: string
+            }
         ): Promise<ReservationPeriodicityEachMonthSameDate>
     }
     delete: {
@@ -342,6 +367,17 @@ const api: FlopAPI = {
                 urls.reservationperiodicityeachmonthsamedate,
                 value
             )
+        },
+    },
+    patch: {
+        reservationPeriodicityByMonth(id: number, params: { start?: string; end?: string }) {
+            return patchData(urls.reservationperiodicitybymonth, id, params)
+        },
+        reservationPeriodicityByWeek(id: number, params: { start?: string; end?: string }) {
+            return patchData(urls.reservationperiodicitybyweek, id, params)
+        },
+        reservationPeriodicityEachMonthSameDate(id: number, params: { start?: string; end?: string }) {
+            return patchData(urls.reservationperiodicityeachmonthsamedate, id, params)
         },
     },
     delete: {

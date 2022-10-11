@@ -1043,15 +1043,52 @@ function reservationRemoveFutureSamePeriodicity(reservation: RoomReservation) {
     if (!reservation.periodicity || reservation.periodicity < 0) {
         return
     }
-    console.log(`Should remove the current reservation and the next of periodicity ${reservation.periodicity}`)
-    const reservationTime = new Date(reservation.date).getTime()
+
+    const periodicityId = reservation.periodicity
+    console.log(`Should remove the current reservation and the next of periodicity ${periodicityId}`)
+    const reservationDate = new Date(reservation.date)
+    const reservationTime = reservationDate.getTime()
 
     // Get the list of all the reservations to delete, which are those who share the periodicity ID and are later than
     // the selected
-    api.value.fetch.roomReservations({ periodicityId: reservation.periodicity }).then((deletionList) => {
+    api.value.fetch.roomReservations({ periodicityId: periodicityId }).then((deletionList) => {
         // Filter the older reservations
         deletionList = deletionList.filter((reserv) => new Date(reserv.date).getTime() >= reservationTime)
-        deleteRoomReservations(deletionList).finally(closeReservationDeletionDialog)
+        deleteRoomReservations(deletionList)
+            .then((_) => {
+                // Reduce the periodicity end date to the day before the current reservation
+
+                // Get the day before the reservation
+                const dayBefore = `${reservationDate.getFullYear()}-${reservationDate.getMonth() + 1}-${
+                    reservationDate.getDate() - 1
+                }`
+
+                // Get the periodicity data
+                const periodicity = reservationPeriodicities.perId.value[periodicityId].data
+                if (periodicity.periodicity_type === '') {
+                    // Should never arrive here as an existing periodicity always has a type. Written for the type checks.
+                    return
+                }
+                // Match the api path with the periodicity type
+                let apiCall
+                switch (periodicity.periodicity_type) {
+                    case 'BM':
+                        apiCall = api.value.patch.reservationPeriodicityByMonth
+                        break
+                    case 'EM':
+                        apiCall = api.value.patch.reservationPeriodicityEachMonthSameDate
+                        break
+                    case 'BW':
+                        apiCall = api.value.patch.reservationPeriodicityByWeek
+                        break
+                }
+                // Finally apply the patch
+                return apiCall(periodicity.id, { end: dayBefore })
+            })
+            .then((_) => {
+                updateReservationPeriodicities()
+            })
+            .finally(closeReservationDeletionDialog)
     })
 }
 

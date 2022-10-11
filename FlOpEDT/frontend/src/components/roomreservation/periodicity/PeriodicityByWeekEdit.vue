@@ -9,6 +9,7 @@
                         :id="`checkbox-weekday-${weekday.num}`"
                         :value="weekday.ref"
                         v-model="selectedWeekDays"
+                        :disabled="props.isDisabled"
                     />
                     <label class="form-check-label" :for="`checkbox-weekday-${weekday.num}`">{{ weekday.name }}</label>
                 </div>
@@ -16,7 +17,14 @@
             <span v-if="selectedWeekDays.length === 0" class="text-danger">* Required</span>
         </div>
         <div class="form-floating">
-            <input type="number" class="form-control" id="input-weeks-interval" v-model="weekInterval" min="1" />
+            <input
+                type="number"
+                class="form-control"
+                id="input-weeks-interval"
+                v-model="weekInterval"
+                min="1"
+                :disabled="props.isDisabled"
+            />
             <label for="input-weeks-interval" class="form-label">Week interval</label>
         </div>
     </div>
@@ -29,6 +37,7 @@ import { computed, ref } from 'vue'
 interface Props {
     weekdays: Array<WeekDay>
     model: ReservationPeriodicityByWeek
+    isDisabled: boolean
 }
 
 const props = defineProps<Props>()

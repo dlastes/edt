@@ -1,6 +1,11 @@
 <template>
     <div>
-        <select v-model="selectedType" class="form-select mb-2" aria-label="Select periodicity type">
+        <select
+            v-model="selectedType"
+            class="form-select mb-2"
+            aria-label="Select periodicity type"
+            :disabled="props.isDisabled"
+        >
             <option :value="undefined" disabled>Select a periodicity type</option>
             <option v-for="type in props.types" :key="type[0]" :value="type">
                 {{ type[1] }}
@@ -9,11 +14,13 @@
         <PeriodicityByWeekEdit
             v-if="selectedType && selectedType[0] === 'BW'"
             :weekdays="props.weekdays"
+            :is-disabled="props.isDisabled"
             v-model:model="updatedModel[selectedType[0]]"
         ></PeriodicityByWeekEdit>
         <PeriodicityByMonthEdit
             v-if="selectedType && selectedType[0] === 'BM'"
             :weekdays="props.weekdays"
+            :is-disabled="props.isDisabled"
             v-model:model="updatedModel[selectedType[0]]"
         ></PeriodicityByMonthEdit>
     </div>
@@ -39,6 +46,7 @@ interface Props {
     weekdays: Array<WeekDay>
     modelType: ReservationPeriodicityType
     modelPeriodicity: PeriodicityModel
+    isDisabled: boolean
 }
 
 const props = defineProps<Props>()

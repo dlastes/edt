@@ -7,13 +7,14 @@
                 class="form-select"
                 aria-label="Select occurrence number"
                 :class="dayChoiceClass"
+                :disabled="props.isDisabled"
             >
                 <option :value="undefined" disabled>Select an occurrence number</option>
                 <option v-for="x in byMonthXChoices" :key="x[0]" :value="x[0]">
                     {{ x[1] }}
                 </option>
             </select>
-            <select v-model="selectedDay" class="form-select" aria-label="Select a day">
+            <select v-model="selectedDay" class="form-select" aria-label="Select a day" :disabled="props.isDisabled">
                 <option value="" disabled>Select a day</option>
                 <option v-for="day in props.weekdays" :key="day.num" :value="day.ref">
                     {{ day.name }}
@@ -33,6 +34,7 @@ import { WeekDay } from '@/assets/js/types'
 interface Props {
     weekdays: Array<WeekDay>
     model: ReservationPeriodicityByMonth
+    isDisabled: boolean
 }
 
 const props = defineProps<Props>()
