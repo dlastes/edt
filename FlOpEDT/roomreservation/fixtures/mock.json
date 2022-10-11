@@ -67,8 +67,16 @@
     }
   },
   {
+    "model": "roomreservation.ReservationPeriodicity",
+    "pk": 4,
+    "fields": {
+      "periodicity_type": "BW",
+      "start": "2022-10-10",
+      "end": "2022-10-17"
+    }
+  },
+  {
     "model": "roomreservation.ReservationPeriodicityByWeek",
-    "pk": 1,
     "fields": {
       "periodicity": 1,
       "bw_weekdays": [
@@ -79,7 +87,6 @@
   },
   {
     "model": "roomreservation.ReservationPeriodicityByMonth",
-    "pk": 2,
     "fields": {
       "periodicity": 2,
       "bm_x_choice": 1,
@@ -88,9 +95,18 @@
   },
   {
     "model": "roomreservation.ReservationPeriodicityEachMonthSameDate",
-    "pk": 3,
     "fields": {
       "periodicity": 3
+    }
+  },
+  {
+    "model": "roomreservation.ReservationPeriodicityByWeek",
+    "fields": {
+      "periodicity": 4,
+      "bw_weekdays": [
+        "m", "tu", "w", "th", "f"
+      ],
+      "bw_weeks_interval": 1
     }
   },
   {
@@ -100,7 +116,7 @@
       "title": "AAA",
       "description": "aaa",
       "email": false,
-      "date": "2022-10-07",
+      "date": "2022-10-14",
       "start_time": "08:00:00",
       "end_time": "09:30:00",
       "periodicity_id": 1,
@@ -116,7 +132,7 @@
       "title": "BBB",
       "description": "bbb",
       "email": false,
-      "date": "2022-10-06",
+      "date": "2022-10-13",
       "start_time": "09:30:00",
       "end_time": "11:00:00",
       "periodicity_id": 2,
@@ -132,7 +148,7 @@
       "title": "CCC",
       "description": "ccc",
       "email": false,
-      "date": "2022-10-05",
+      "date": "2022-10-12",
       "start_time": "12:15:00",
       "end_time": "13:45:00",
       "periodicity_id": 3,
@@ -148,13 +164,157 @@
       "title": "DDD",
       "description": "ddd",
       "email": false,
-      "date": "2022-10-04",
+      "date": "2022-10-11",
       "start_time": "08:00:00",
       "end_time": "18:45:00",
       "periodicity_id": null,
       "reservation_type_id": 4,
       "responsible_id": 1,
       "room_id": 4
+    }
+  },
+  {
+    "model": "roomreservation.RoomReservation",
+    "pk": 5,
+    "fields": {
+      "title": "AAA",
+      "description": "aaa",
+      "email": false,
+      "date": "2022-10-07",
+      "start_time": "08:00:00",
+      "end_time": "09:30:00",
+      "periodicity_id": 1,
+      "reservation_type_id": 5,
+      "responsible_id": 1,
+      "room_id": 1
+    }
+  },
+  {
+    "model": "roomreservation.RoomReservation",
+    "pk": 6,
+    "fields": {
+      "title": "AAA",
+      "description": "aaa",
+      "email": false,
+      "date": "2022-10-21",
+      "start_time": "08:00:00",
+      "end_time": "09:30:00",
+      "periodicity_id": 1,
+      "reservation_type_id": 5,
+      "responsible_id": 1,
+      "room_id": 1
+    }
+  },
+  {
+    "model": "roomreservation.RoomReservation",
+    "pk": 7,
+    "fields": {
+      "title": "AAA",
+      "description": "aaa",
+      "email": false,
+      "date": "2022-10-28",
+      "start_time": "08:00:00",
+      "end_time": "09:30:00",
+      "periodicity_id": 1,
+      "reservation_type_id": 5,
+      "responsible_id": 1,
+      "room_id": 1
+    }
+  },
+  {
+    "model": "roomreservation.RoomReservation",
+    "pk": 8,
+    "fields": {
+      "title": "AAA",
+      "description": "aaa",
+      "email": false,
+      "date": "2022-11-04",
+      "start_time": "08:00:00",
+      "end_time": "09:30:00",
+      "periodicity_id": 1,
+      "reservation_type_id": 5,
+      "responsible_id": 1,
+      "room_id": 1
+    }
+  },
+  {
+    "model": "roomreservation.RoomReservation",
+    "pk": 9,
+    "fields": {
+      "title": "EEE",
+      "description": "eee",
+      "email": false,
+      "date": "2022-10-10",
+      "start_time": "10:00:00",
+      "end_time": "11:00:00",
+      "periodicity_id": 4,
+      "reservation_type_id": 5,
+      "responsible_id": 1,
+      "room_id": 1
+    }
+  },
+  {
+    "model": "roomreservation.RoomReservation",
+    "pk": 10,
+    "fields": {
+      "title": "EEE",
+      "description": "eee",
+      "email": false,
+      "date": "2022-10-11",
+      "start_time": "10:00:00",
+      "end_time": "11:00:00",
+      "periodicity_id": 4,
+      "reservation_type_id": 5,
+      "responsible_id": 1,
+      "room_id": 1
+    }
+  },
+  {
+    "model": "roomreservation.RoomReservation",
+    "pk": 11,
+    "fields": {
+      "title": "EEE",
+      "description": "eee",
+      "email": false,
+      "date": "2022-10-12",
+      "start_time": "10:00:00",
+      "end_time": "11:00:00",
+      "periodicity_id": 4,
+      "reservation_type_id": 5,
+      "responsible_id": 1,
+      "room_id": 1
+    }
+  },
+  {
+    "model": "roomreservation.RoomReservation",
+    "pk": 12,
+    "fields": {
+      "title": "EEE",
+      "description": "eee",
+      "email": false,
+      "date": "2022-10-13",
+      "start_time": "10:00:00",
+      "end_time": "11:00:00",
+      "periodicity_id": 4,
+      "reservation_type_id": 5,
+      "responsible_id": 1,
+      "room_id": 1
+    }
+  },
+  {
+    "model": "roomreservation.RoomReservation",
+    "pk": 13,
+    "fields": {
+      "title": "EEE",
+      "description": "eee",
+      "email": false,
+      "date": "2022-10-14",
+      "start_time": "10:00:00",
+      "end_time": "11:00:00",
+      "periodicity_id": 4,
+      "reservation_type_id": 5,
+      "responsible_id": 1,
+      "room_id": 1
     }
   },
   {
@@ -183,21 +343,18 @@
   },
   {
     "model": "base.BooleanRoomAttribute",
-    "pk": 1,
     "fields": {
       "attribute": 1
     }
   },
   {
     "model": "base.NumericRoomAttribute",
-    "pk": 1,
     "fields": {
       "attribute": 2
     }
   },
   {
     "model": "base.NumericRoomAttribute",
-    "pk": 2,
     "fields": {
       "attribute": 3
     }
