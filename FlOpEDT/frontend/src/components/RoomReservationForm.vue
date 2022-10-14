@@ -29,8 +29,97 @@
                 <span><b>Applying the changes will overwrite previous values.</b></span>
             </template>
             <template #buttons>
-                <button type="button" class="btn btn-secondary" @click.stop="onReservationEditRefuse">No</button>
-                <button type="button" class="btn btn-primary" @click.stop="onReservationEditConfirm">Yes</button>
+                <button type="button" class="btn btn-secondary" @click.stop="onReservationEditRefuse">
+                    Only this one
+                </button>
+                <!-- TODO: Remove the "disabled" attribute when the feature is implemented -->
+                <button type="button" class="btn btn-primary" @click.stop="onReservationEditConfirm" disabled>
+                    This one and the next
+                </button>
+            </template>
+        </ModalDialog>
+        <!-- Reservation conflict resolve dialog -->
+        <ModalDialog :is-open="isReservationConflictDialogOpen" :is-locked="isDialogLocked">
+            <template #title>Reservation conflicts</template>
+            <template #body>
+                <!-- If the reservation is periodic -->
+                <div
+                    v-if="
+                        current_conflict &&
+                        current_conflict.impossible_reservations_per_day &&
+                        current_conflict.possible_reservations.length > 0
+                    "
+                >
+                    <span>You will not be able to reserve the following dates:</span>
+                    <ul
+                        class="text-start mb-2"
+                        v-for="entry in Object.entries(current_conflict.impossible_reservations_per_day)"
+                        :key="entry[0]"
+                    >
+                        <li>
+                            {{ entry[0]
+                            }}<!--:
+                            <ul>
+                                <li v-for="course in entry[1].courses" :key="course">
+                                    {{ parseCourseConflict(course) }}
+                                </li>
+                                <li v-for="reservation in entry[1].reservations" :key="reservation">
+                                    {{ parseReservationConflict(reservation) }}
+                                </li>
+                            </ul>-->
+                        </li>
+                    </ul>
+                </div>
+                <!-- If the reservation is not periodic -->
+                <div
+                    v-if="
+                        current_conflict &&
+                        current_conflict.impossible_reservations &&
+                        current_conflict.possible_reservations.length === 0
+                    "
+                >
+                    <span>This reservation is not possible.</span>
+                    <!--                    <ul class="text-start mb-2">
+                        <li v-for="course in current_conflict.impossible_reservations.courses" :key="course">
+                            <span>{{ parseCourseConflict(course) }}</span>
+                        </li>
+                        <li
+                            v-for="reservation in current_conflict.impossible_reservations.reservations"
+                            :key="reservation"
+                        >
+                            <span>{{ parseReservationConflict(reservation) }}</span>
+                        </li>
+                    </ul>-->
+                </div>
+                <br />
+                <div v-if="current_conflict && current_conflict.possible_reservations.length > 0">
+                    <span>The following reservations can be made, <b>do you want to create them?</b></span>
+                    <ul class="text-start mb-2">
+                        <li v-for="reservation in current_conflict.possible_reservations" :key="reservation.id">
+                            {{
+                                new Date(reservation.date).toLocaleDateString()
+                                /*`The ${new Date(reservation.date).toLocaleDateString()} in room ${
+                                    reservation.room
+                                } from ${reservation.start_time} to ${reservation.end_time}`*/
+                            }}
+                        </li>
+                    </ul>
+                </div>
+            </template>
+            <template #buttons>
+                <div v-if="current_conflict && current_conflict.possible_reservations.length > 0">
+                    <button type="button" class="btn btn-secondary" @click.stop="onReservationConflictRefuseCreation">
+                        No
+                    </button>
+                    <button type="button" class="btn btn-primary" @click.stop="onReservationConflictAcceptCreation">
+                        Yes
+                    </button>
+                </div>
+                <div v-else>
+                    <button type="button" class="btn btn-secondary" @click.stop="onReservationConflictRefuseCreation">
+                        Cancel
+                    </button>
+                </div>
             </template>
         </ModalDialog>
         <ModalForm
@@ -184,34 +273,6 @@
                         </button>
                     </div>
                     <div class="row mb-2 gx-1">
-                        <!-- Periodicity start date -->
-                        <div class="col">
-                            <DayPicker
-                                :start-date="periodicityStart"
-                                :should-reset="shouldDayPickerReset"
-                                :on-reset="(shouldDayPickerReset = false)"
-                                @update:date="updatePeriodicityStartDate"
-                                :min-date="new Date()"
-                                :clearable="false"
-                            >
-                                <template #input="{ value }">
-                                    <div class="form-floating">
-                                        <input
-                                            :id="generateId('periodicity-start-date')"
-                                            type="text"
-                                            class="form-control"
-                                            placeholder="Date"
-                                            :value="value"
-                                            readonly
-                                            :disabled="isPeriodic"
-                                        />
-                                        <label :for="generateId('periodicity-start-date')" class="form-label"
-                                            >Start date</label
-                                        >
-                                    </div>
-                                </template>
-                            </DayPicker>
-                        </div>
                         <!-- Periodicity end date -->
                         <div class="col">
                             <DayPicker
@@ -234,7 +295,7 @@
                                             :disabled="isPeriodic"
                                         />
                                         <label :for="generateId('periodicity-end-date')" class="form-label"
-                                            >End date</label
+                                            >Until</label
                                         >
                                     </div>
                                 </template>
@@ -252,12 +313,14 @@
                 </div>
                 <!-- Send email -->
                 <div class="form-check form-switch mb-3">
+                    <!-- TODO: Remove the "disabled" attribute when mailing feature is implemented -->
                     <input
                         class="form-check-input"
                         type="checkbox"
                         v-model="email"
                         role="switch"
                         :id="generateId('email')"
+                        disabled
                     />
                     <label class="form-check-label" :for="generateId('email')">Send a confirm email?</label>
                 </div>
@@ -267,7 +330,7 @@
 </template>
 
 <script setup lang="ts">
-import { parseReason } from '@/assets/js/helpers'
+import { convertDecimalTimeToHuman, parseReason } from '@/assets/js/helpers'
 import { apiKey, requireInjection } from '@/assets/js/keys'
 import type {
     FormInterface,
@@ -286,7 +349,7 @@ import type {
 import DayPicker from '@/components/DayPicker.vue'
 import ModalForm from '@/components/ModalForm.vue'
 import TimePicker from '@/components/TimePicker.vue'
-import { computed, defineProps, onUnmounted, Ref, ref, watch } from 'vue'
+import { computed, defineProps, Ref, ref, watch, watchEffect } from 'vue'
 import PeriodicitySelect from '@/components/roomreservation/periodicity/PeriodicitySelect.vue'
 import ModalDialog from '@/components/ModalDialog.vue'
 
@@ -313,6 +376,22 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+
+interface Conflict {
+    possible_reservations: Array<RoomReservation>
+    impossible_reservations: {
+        courses: Array<string>
+        reservations: Array<string>
+    }
+    impossible_reservations_per_day: {
+        [date: string]: {
+            courses: Array<string>
+            reservations: Array<string>
+        }
+    }
+}
+
+const current_conflict = ref<Conflict>()
 
 const api = requireInjection(apiKey)
 
@@ -354,6 +433,7 @@ watch(
 const isPeriodicityDeletionDialogOpen = ref(false)
 const isReservationEditDialogOpen = ref(false)
 const isDialogLocked = ref(false)
+const isReservationConflictDialogOpen = ref(false)
 
 const title = ref(props.reservation.title)
 const description = ref(props.reservation.description)
@@ -395,7 +475,6 @@ const selectedPeriodicityType = ref<ReservationPeriodicityType | undefined>(
 watch(
     () => props.reservation,
     (newValue) => {
-        console.log('refresh reservation periodicity')
         const periodicity = newValue.periodicity
         if (periodicity) {
             selectedPeriodicityType.value = props.periodicityTypes.find(
@@ -425,45 +504,36 @@ const originalDuration =
     endTime.value.hours * 60 + endTime.value.minutes - (startTime.value.hours * 60 + startTime.value.minutes)
 
 // Create an object of each type
-const periodicityByWeek = computed<ReservationPeriodicityByWeek>(() => {
-    let id = -1
-    if (selectedPeriodicityType.value && selectedPeriodicityType.value[0] === 'BW' && initPeriodicity.value) {
-        id = initPeriodicity.value.periodicity.id
-    }
-    return {
-        id: id,
-        start: periodicityStart.value,
-        end: periodicityEnd.value,
-        periodicity_type: 'BW',
-        bw_weekdays: currentWeekdayRef.value ? [currentWeekdayRef.value] : [],
-        bw_weeks_interval: 1,
-    }
+const periodicityByWeek = ref<ReservationPeriodicityByWeek>({
+    id:
+        selectedPeriodicityType.value && selectedPeriodicityType.value[0] === 'BW' && initPeriodicity.value
+            ? initPeriodicity.value.periodicity.id
+            : -1,
+    start: periodicityStart.value,
+    end: periodicityEnd.value,
+    periodicity_type: 'BW',
+    bw_weekdays: currentWeekdayRef.value ? [currentWeekdayRef.value] : [],
+    bw_weeks_interval: 1,
 })
-const periodicityByMonth = computed<ReservationPeriodicityByMonth>(() => {
-    let id = -1
-    if (selectedPeriodicityType.value && selectedPeriodicityType.value[0] === 'BM' && initPeriodicity.value) {
-        id = initPeriodicity.value.periodicity.id
-    }
-    return {
-        id: id,
-        start: periodicityStart.value,
-        end: periodicityEnd.value,
-        periodicity_type: 'BM',
-        bm_x_choice: 1,
-        bm_day_choice: currentWeekdayRef.value ?? '',
-    }
+const periodicityByMonth = ref<ReservationPeriodicityByMonth>({
+    id:
+        selectedPeriodicityType.value && selectedPeriodicityType.value[0] === 'BM' && initPeriodicity.value
+            ? initPeriodicity.value.periodicity.id
+            : -1,
+    start: periodicityStart.value,
+    end: periodicityEnd.value,
+    periodicity_type: 'BM',
+    bm_x_choice: 1,
+    bm_day_choice: currentWeekdayRef.value ?? '',
 })
-const periodicityEachMonthSameDate = computed<ReservationPeriodicityEachMonthSameDate>(() => {
-    let id = -1
-    if (selectedPeriodicityType.value && selectedPeriodicityType.value[0] === 'EM' && initPeriodicity.value) {
-        id = initPeriodicity.value.periodicity.id
-    }
-    return {
-        id: id,
-        start: periodicityStart.value,
-        end: periodicityEnd.value,
-        periodicity_type: 'EM',
-    }
+const periodicityEachMonthSameDate = ref<ReservationPeriodicityEachMonthSameDate>({
+    id:
+        selectedPeriodicityType.value && selectedPeriodicityType.value[0] === 'EM' && initPeriodicity.value
+            ? initPeriodicity.value.periodicity.id
+            : -1,
+    start: periodicityStart.value,
+    end: periodicityEnd.value,
+    periodicity_type: 'EM',
 })
 
 // Fill the values specific to the periodicity type
@@ -486,8 +556,26 @@ if (props.reservation.periodicity) {
     }
 }
 
-const periodicityChoice = computed<{ [name in ReservationPeriodicityTypeName]: ReservationPeriodicityData }>(() => {
-    return {
+const periodicityChoice: Ref<{ [name in ReservationPeriodicityTypeName]: ReservationPeriodicityData }> = ref({
+    BW: periodicityByWeek.value,
+    BM: periodicityByMonth.value,
+    EM: periodicityEachMonthSameDate.value,
+})
+
+watch(periodicityStart, (newStart) => {
+    Object.values(periodicityChoice.value).forEach((periodicity) => {
+        periodicity.start = newStart
+    })
+})
+
+watch(periodicityEnd, (newEnd) => {
+    Object.values(periodicityChoice.value).forEach((periodicity) => {
+        periodicity.end = newEnd
+    })
+})
+
+watchEffect(() => {
+    periodicityChoice.value = {
         BW: periodicityByWeek.value,
         BM: periodicityByMonth.value,
         EM: periodicityEachMonthSameDate.value,
@@ -518,14 +606,14 @@ function onFormCancel() {
 
 async function onFormSave() {
     isFormLocked.value = true
-    saveReservation()
+    if (!props.isNew && selectedPeriodicityType.value) {
+        switchToEditDialog()
+    } else {
+        saveReservation()
+    }
 }
 
 function onPeriodicityDeletionCancel() {
-    switchToForm()
-}
-
-function onReservationEditRefuse() {
     switchToForm()
 }
 
@@ -538,10 +626,32 @@ function onPeriodicityDeletionConfirm() {
     })
 }
 
-function onReservationEditConfirm() {
+function onReservationEditRefuse() {
     isDialogLocked.value = true
+    saveReservation()
+    isReservationEditDialogOpen.value = false
     isDialogLocked.value = false
+}
+
+function onReservationEditConfirm() {
+    isDialogLocked.value = false
+    isFormLocked.value = false
     switchToForm()
+}
+
+function onReservationConflictRefuseCreation() {
+    isFormLocked.value = false
+    switchToForm()
+}
+
+function onReservationConflictAcceptCreation() {
+    console.log('create reservations')
+    if (!current_conflict.value) {
+        isFormLocked.value = false
+        switchToForm()
+        return
+    }
+    saveReservation(true)
 }
 
 function extractPeriodicity(): ReservationPeriodicityData | null {
@@ -565,7 +675,7 @@ function extractPeriodicity(): ReservationPeriodicityData | null {
     return periodicityToUpdate
 }
 
-function saveReservation() {
+function saveReservation(createRepetitions = false) {
     const newPeriodicityData = extractPeriodicity()
     const newPeriodicity = newPeriodicityData
         ? {
@@ -584,6 +694,7 @@ function saveReservation() {
         start_time: ReservationTime.toString(startTime.value),
         title: title.value,
         reservation_type: selectedType.value,
+        create_repetitions: createRepetitions,
     }
     const method = props.isNew ? api.post : api.put
     method
@@ -593,7 +704,45 @@ function saveReservation() {
                 emit('saved', value)
                 close()
             },
-            (reason) => handleReason(reason)
+            (reason) => {
+                if (reason instanceof Object && Object.keys(reason).includes('periodicity')) {
+                    const periodicityError = reason.periodicity
+                    console.log(periodicityError)
+                    let possible_reservations: Array<RoomReservation> = []
+                    let impossible_reservations_per_day: {
+                        [date: string]: { courses: Array<string>; reservations: Array<string> }
+                    } = {}
+                    let impossible_reservations: {
+                        courses: Array<string>
+                        reservations: Array<string>
+                    } = {
+                        courses: [],
+                        reservations: [],
+                    }
+                    let isPerDay = false
+                    if (Object.keys(periodicityError).includes('ok_reservations')) {
+                        // Multiple reservations can be created
+                        possible_reservations = periodicityError.ok_reservations
+                        isPerDay = true
+                    }
+                    if (Object.keys(periodicityError).includes('nok_reservations')) {
+                        if (isPerDay) {
+                            impossible_reservations_per_day = periodicityError.nok_reservations
+                        } else {
+                            impossible_reservations = periodicityError.nok_reservations
+                        }
+                    }
+
+                    current_conflict.value = {
+                        possible_reservations: possible_reservations,
+                        impossible_reservations: impossible_reservations,
+                        impossible_reservations_per_day: impossible_reservations_per_day,
+                    }
+                    switchToConflictDialog()
+                } else {
+                    handleReason(reason)
+                }
+            }
         )
         .catch((reason) => handleReason(reason))
 }
@@ -610,12 +759,30 @@ function removePeriodicity() {
 
 function switchToPeriodicityDeletionDialog() {
     isFormOpen.value = false
+    isReservationConflictDialogOpen.value = false
+    isReservationEditDialogOpen.value = false
     isPeriodicityDeletionDialogOpen.value = true
 }
 
 function switchToForm() {
     isPeriodicityDeletionDialogOpen.value = false
+    isReservationConflictDialogOpen.value = false
+    isReservationEditDialogOpen.value = false
     isFormOpen.value = true
+}
+
+function switchToEditDialog() {
+    isPeriodicityDeletionDialogOpen.value = false
+    isReservationConflictDialogOpen.value = false
+    isFormOpen.value = false
+    isReservationEditDialogOpen.value = true
+}
+
+function switchToConflictDialog() {
+    isFormOpen.value = false
+    isPeriodicityDeletionDialogOpen.value = false
+    isReservationEditDialogOpen.value = false
+    isReservationConflictDialogOpen.value = true
 }
 
 function handleReason(reason: unknown) {
@@ -630,19 +797,8 @@ function onFormInterface(value: FormInterface) {
 
 function updateDate(newDate: string) {
     date.value = newDate.replaceAll('/', '-')
-}
-
-function updatePeriodicityStartDate(newDate: string) {
-    periodicityStart.value = newDate.replaceAll('/', '-')
-    const startDate = new Date(newDate)
-    const endDate = new Date(periodicityEnd.value)
-
-    if (
-        startDate.getFullYear() === endDate.getFullYear() &&
-        startDate.getMonth() === endDate.getMonth() &&
-        startDate.getDate() >= endDate.getDate()
-    ) {
-        updatePeriodicityEndDate(periodicityEndMinDate.value.toLocaleDateString())
+    if (props.isNew) {
+        periodicityStart.value = date.value
     }
 }
 
@@ -692,6 +848,21 @@ function updateEndTime(time: { hours: number; minutes: number }) {
 
     // Change the end time
     endTime.value = time
+}
+
+function parseCourseConflict(course: string) {
+    const array = course.split('_')
+    return `${array[0]} in room ${array[1]} by ${array[2]} from ${convertDecimalTimeToHuman(
+        parseInt(array[4]) / 60
+    )} to ${convertDecimalTimeToHuman(parseInt(array[5]) / 60)}`
+}
+
+function parseReservationConflict(reservation: string) {
+    const array = reservation.split('_')
+    return `${array[1]} in room ${array[2]} by ${array[3]} from ${array[4].substring(
+        0,
+        array[4].lastIndexOf(':')
+    )} to ${array[5].substring(0, array[5].lastIndexOf(':'))}`
 }
 
 function generateId(element: string) {

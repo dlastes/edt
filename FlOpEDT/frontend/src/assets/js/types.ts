@@ -80,6 +80,7 @@ export interface RoomReservation {
     start_time: string
     title: string
     periodicity: ReservationPeriodicity | null
+    create_repetitions?: boolean
 }
 
 export interface RoomReservationType {

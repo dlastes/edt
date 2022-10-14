@@ -500,7 +500,6 @@ interface RoomReservationSlots {
 
 const roomReservationSlots: RoomReservationSlots = {
     list: computed(() => {
-        console.log('refresh slots')
         return roomReservations.list.value.map(createRoomReservationSlot)
     }),
     perDay: computed(() => {
@@ -1185,7 +1184,7 @@ function handleDrag(drag: CalendarDragEvent) {
     temporaryReservation.value = {
         date: date,
         description: '',
-        email: true,
+        email: false,
         end_time: drag.endTime.text,
         id: newReservationId--,
         periodicity: null,
@@ -1209,7 +1208,7 @@ function handleNewSlot(date: Date, roomId: string) {
     temporaryReservation.value = {
         date: reservDate,
         description: '',
-        email: true,
+        email: false,
         end_time: new Date(now.getTime() + newReservationDefaultDuration * 60000).toTimeString(),
         id: newReservationId--,
         periodicity: null,

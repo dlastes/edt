@@ -80,7 +80,7 @@ class ConflictError(ValidationError):
     status_code = status.HTTP_409_CONFLICT
 
 
-def create_reservations_if_possible(periodicity, original_reservation):
+def create_reservations_if_possible(periodicity, original_reservation, create_repetitions: bool = False):
     # Run the verification
     check = check_periodicity(periodicity, original_reservation)
     # Get the reservations which do not conflict
@@ -90,16 +90,18 @@ def create_reservations_if_possible(periodicity, original_reservation):
     # Get the verification status
     are_reservations_all_possible = check['status'] == 'OK'
     if not are_reservations_all_possible:
-        # There are conflicts, inform the client
-        raise ConflictError(
-            {
-                "periodicity": {
-                    "ok_reservations": ok_reservations,
-                    "nok_reservations": nok_reservations,
+        # There are conflicts
+        if not create_repetitions:
+            # Do not create possible reservations, inform the client instead
+            raise ConflictError(
+                {
+                    "periodicity": {
+                        "ok_reservations": ok_reservations,
+                        "nok_reservations": nok_reservations,
+                    }
                 }
-            }
-        )
-    # No conflict, proceed to the registration
+            )
+    # No conflict or must create the possible reservations, proceed to the registration
     # Get the corresponding periodicity model
     model = ReservationPeriodicitySerializer.get_model(periodicity)
     # Create a new periodicity instance
@@ -107,10 +109,11 @@ def create_reservations_if_possible(periodicity, original_reservation):
     # Create the future reservations
     for reservation in ok_reservations:
         # Ignore the current reservation in the list
-        if reservation['date'].date().isoformat() != original_reservation['date'].isoformat():
+        if reservation['date'] != original_reservation['date'].isoformat():
             reservation['periodicity'] = periodicity_instance
             rm.RoomReservation.objects.create(**reservation)
     return periodicity_instance
+
 
 def check_reservation_possible(reservation):
     check = check_reservation(reservation)
@@ -122,22 +125,27 @@ def check_reservation_possible(reservation):
             }
         })
 
+
 class RoomReservationSerializer(serializers.ModelSerializer):
     periodicity = ReservationPeriodicitySerializer(allow_null=True)
+    create_repetitions = serializers.BooleanField(write_only=True, default=False)
 
     def create(self, validated_data):
+        check_reservation_possible(validated_data)
         periodicity = validated_data.pop('periodicity')
         if periodicity:
             # Multiple reservations, try to create them
-            # Get the internal data
+            # Get the internal periodicity data
             periodicity = periodicity['periodicity']
-            # Get the periodicity if it succeeds
-            periodicity_instance = create_reservations_if_possible(periodicity, validated_data)
+            # Check if we should create the possible reservations
+            create_repetitions = False
+            if 'create_repetitions' in validated_data:
+                create_repetitions = validated_data.pop('create_repetitions')
+
+            # Create the reservations or inform the client
+            periodicity_instance = create_reservations_if_possible(periodicity, validated_data, create_repetitions)
             # Store the instance to the reservation
             validated_data['periodicity'] = periodicity_instance
-        else:
-            # One reservation, check if it conflicts with other reservations or courses
-            check_reservation_possible(validated_data)
         return rm.RoomReservation.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
@@ -165,13 +173,17 @@ class RoomReservationSerializer(serializers.ModelSerializer):
             # Has a periodicity
             # Get its data
             periodicity = periodicity['periodicity']
-            # If 'id' is not in the periodicity that means a new periodicity for the reservation
-            if not 'id' in periodicity:
+            if 'id' in periodicity:
+                # The changes do not concern the periodicity, check if they can be applied
+                check_reservation_possible(reservation_data)
+            else:
+                # If 'id' is not in the periodicity that means a new periodicity for the reservation
                 periodicity_instance = create_reservations_if_possible(periodicity, reservation_data)
                 instance.periodicity = periodicity_instance
         else:
             # Does not have a periodicity, check if the reservation is possible
             check_reservation_possible(reservation_data)
+            instance.periodicity = None
         instance.save()
         return instance
 
@@ -187,18 +199,24 @@ class RoomReservationTypeSerializer(serializers.ModelSerializer):
 
 
 class ReservationPeriodicityByWeekSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(read_only=False)
+
     class Meta:
         model = rm.ReservationPeriodicityByWeek
         fields = '__all__'
 
 
 class ReservationPeriodicityEachMonthSameDateSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(read_only=False)
+
     class Meta:
         model = rm.ReservationPeriodicityEachMonthSameDate
         fields = '__all__'
 
 
 class ReservationPeriodicityByMonthSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(read_only=False)
+
     class Meta:
         model = rm.ReservationPeriodicityByMonth
         fields = '__all__'

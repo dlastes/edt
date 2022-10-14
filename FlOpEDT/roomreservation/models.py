@@ -22,6 +22,9 @@ class RoomReservation(models.Model):
     def __str__(self):
         return f"{self.room}-{self.date}  {self.start_time}/{self.end_time}"
 
+    def unique_name(self):
+        return f"{self.date}_{self.reservation_type.name}_{self.room}_{self.responsible.username}_{self.start_time}_{self.end_time}"
+
 
 class RoomReservationType(models.Model):
     name = models.CharField(max_length=30)

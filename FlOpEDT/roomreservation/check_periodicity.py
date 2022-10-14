@@ -42,9 +42,9 @@ def check_reservation(reservation_data):
 
     simultaneous_slots = {'courses': [], 'reservations': []}
     if simultaneous_room_scheduled_courses.exists():
-        simultaneous_slots['courses'] = [course.verbose_name() for course in simultaneous_room_scheduled_courses]
+        simultaneous_slots['courses'] = [course.unique_name() for course in simultaneous_room_scheduled_courses]
     if simultaneous_reservations.exists():
-        simultaneous_slots['reservations'] = [reservation.id for reservation in simultaneous_reservations]
+        simultaneous_slots['reservations'] = [reservation.unique_name() for reservation in simultaneous_reservations]
 
     is_conflicting = len(simultaneous_slots['courses']) + len(simultaneous_slots['reservations']) > 0
     return {'status': 'NOK' if is_conflicting else 'OK', 'more': simultaneous_slots}
@@ -83,6 +83,8 @@ def check_periodicity(periodicity_data, reservation_data):
         considered_reservation = reservation_data.copy()
         considered_reservation['date'] = date
         check = check_reservation(considered_reservation)
+        # Format the date into a string
+        considered_reservation['date'] = considered_reservation['date'].date().isoformat()
         if 'id' in considered_reservation:
             # Given reservation already exists, remove its id for the copies
             considered_reservation.pop('id')
@@ -90,5 +92,5 @@ def check_periodicity(periodicity_data, reservation_data):
             result['ok_reservations'].append(considered_reservation)
         else:
             result['status'] = 'NOK'
-            result['nok_reservations'][considered_reservation['date'].date().isoformat()] = check['more']
+            result['nok_reservations'][considered_reservation['date']] = check['more']
     return result

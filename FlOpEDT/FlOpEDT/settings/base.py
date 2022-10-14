@@ -192,7 +192,7 @@ LOCALE_PATHS = (
 # Url used by static files in templates
 STATIC_URL = '/static/'
 
-# Folder used when collecting static files
+# Folder used to store collected static files
 STATIC_ROOT = os.path.join(BASE_DIR, "var/static")
 
 # Folders used to find some additional static files

@@ -624,8 +624,8 @@ class ScheduledCourse(models.Model):
     def __str__(self):
         return f"{self.course}{self.no}:{self.day}-t{self.start_time}-{self.room}"
 
-    def verbose_name(self):
-        return f"{self.course.type}-{self.room}-{self.tutor.username}-{self.day}-{self.start_time}-{self.end_time}"
+    def unique_name(self):
+        return f"{self.course.type}_{self.room}_{self.tutor.username}_{self.day}_{self.start_time}_{self.end_time}"
 
     @property
     def end_time(self):
