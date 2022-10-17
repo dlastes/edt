@@ -67,7 +67,7 @@
 </template>
 
 <script setup lang="ts">
-import { convertDecimalTimeToHuman } from '@/assets/js/helpers'
+import { convertDecimalTimeToHuman } from '@/helpers'
 import type {
     CalendarDragEvent,
     CalendarSlot,
@@ -76,9 +76,9 @@ import type {
     HourCalendarProps,
     Time,
 } from '@/assets/js/types'
-import type { StyleValue, VueElementConstructor } from 'vue'
+import type { StyleValue } from 'vue'
 import { computed, defineProps, ref } from 'vue'
-import BaseCalendar from '@/components/calendar/BaseCalendar.vue'
+import BaseCalendar from '@/components/BaseCalendar.vue'
 
 interface Emits {
     (e: 'drag', event: CalendarDragEvent): void

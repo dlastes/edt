@@ -120,7 +120,7 @@
 
 <script setup lang="ts">
 import type { FlopAPI } from '@/assets/js/api'
-import { createTime, listGroupBy, parseReason, toStringAtLeastTwoDigits } from '@/assets/js/helpers'
+import { createTime, listGroupBy, parseReason, toStringAtLeastTwoDigits } from '@/helpers'
 import { apiKey, currentWeekKey, requireInjection } from '@/assets/js/keys'
 import type {
     BooleanRoomAttributeValue,
@@ -150,20 +150,20 @@ import type {
     WeekDay,
 } from '@/assets/js/types'
 import { ScheduledCourse, Time } from '@/assets/js/types'
-import HourCalendar from '@/components/calendar/HourCalendar.vue'
+import HourCalendar from '@/components/HourCalendar.vue'
 import WeekPicker from '@/components/WeekPicker.vue'
 import type { ComputedRef, Ref } from 'vue'
 import { computed, markRaw, onMounted, ref, shallowRef, watchEffect } from 'vue'
-import RoomCalendar from '@/components/calendar/RoomCalendar.vue'
-import HourCalendarRoomReservationSlot from '@/components/calendar/HourCalendarRoomReservationSlot.vue'
-import RoomCalendarRoomReservationSlot from '@/components/calendar/RoomCalendarRoomReservationSlot.vue'
-import HourCalendarScheduledCourseSlot from '@/components/calendar/HourCalendarScheduledCourseSlot.vue'
-import RoomCalendarScheduledCourseSlot from '@/components/calendar/RoomCalendarScheduledCourseSlot.vue'
-import DynamicSelect from '@/components/dynamicSelect/DynamicSelect.vue'
-import DynamicSelectedElementNumeric from '@/components/dynamicSelect/DynamicSelectedElementNumeric.vue'
-import DynamicSelectedElementBoolean from '@/components/dynamicSelect/DynamicSelectedElementBoolean.vue'
+import RoomCalendar from '@/components/RoomCalendar.vue'
+import HourCalendarRoomReservationSlot from '@/components/HourCalendarRoomReservationSlot.vue'
+import RoomCalendarRoomReservationSlot from '@/components/RoomCalendarRoomReservationSlot.vue'
+import HourCalendarScheduledCourseSlot from '@/components/HourCalendarScheduledCourseSlot.vue'
+import RoomCalendarScheduledCourseSlot from '@/components/RoomCalendarScheduledCourseSlot.vue'
+import DynamicSelect from '@/components/DynamicSelect.vue'
+import DynamicSelectedElementNumeric from '@/components/DynamicSelectedElementNumeric.vue'
+import DynamicSelectedElementBoolean from '@/components/DynamicSelectedElementBoolean.vue'
 import ClearableInput from '@/components/ClearableInput.vue'
-import DeletePeriodicReservationDialog from '@/components/roomreservation/DeletePeriodicReservationDialog.vue'
+import DeletePeriodicReservationDialog from '@/components/DeletePeriodicReservationDialog.vue'
 
 const api = ref<FlopAPI>(requireInjection(apiKey))
 const currentWeek = ref(requireInjection(currentWeekKey))

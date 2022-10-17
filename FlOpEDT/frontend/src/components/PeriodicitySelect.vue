@@ -36,8 +36,8 @@ import type {
     WeekDay,
 } from '@/assets/js/types'
 import { computed, ref, watch } from 'vue'
-import PeriodicityByWeekEdit from '@/components/roomreservation/periodicity/PeriodicityByWeekEdit.vue'
-import PeriodicityByMonthEdit from '@/components/roomreservation/periodicity/PeriodicityByMonthEdit.vue'
+import PeriodicityByWeekEdit from '@/components/PeriodicityByWeekEdit.vue'
+import PeriodicityByMonthEdit from '@/components/PeriodicityByMonthEdit.vue'
 
 type PeriodicityModel = {
     [periodicityTypeName in ReservationPeriodicityTypeName]: ReservationPeriodicityData

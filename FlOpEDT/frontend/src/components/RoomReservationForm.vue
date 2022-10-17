@@ -330,7 +330,7 @@
 </template>
 
 <script setup lang="ts">
-import { convertDecimalTimeToHuman, parseReason } from '@/assets/js/helpers'
+import { convertDecimalTimeToHuman, parseReason } from '@/helpers'
 import { apiKey, requireInjection } from '@/assets/js/keys'
 import type {
     FormInterface,
@@ -350,7 +350,7 @@ import DayPicker from '@/components/DayPicker.vue'
 import ModalForm from '@/components/ModalForm.vue'
 import TimePicker from '@/components/TimePicker.vue'
 import { computed, defineProps, Ref, ref, watch, watchEffect } from 'vue'
-import PeriodicitySelect from '@/components/roomreservation/periodicity/PeriodicitySelect.vue'
+import PeriodicitySelect from '@/components/PeriodicitySelect.vue'
 import ModalDialog from '@/components/ModalDialog.vue'
 
 interface Emits {

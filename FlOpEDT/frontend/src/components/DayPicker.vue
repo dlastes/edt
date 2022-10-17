@@ -20,7 +20,7 @@
 </template>
 
 <script setup lang="ts">
-import { toStringAtLeastTwoDigits } from '@/assets/js/helpers'
+import { toStringAtLeastTwoDigits } from '@/helpers'
 import Datepicker from '@vuepic/vue-datepicker'
 import type { Ref } from 'vue'
 import { computed, defineEmits, ref, watch } from 'vue'

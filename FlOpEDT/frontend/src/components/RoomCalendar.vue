@@ -47,7 +47,7 @@
 
 <script setup lang="ts">
 import type { CalendarSlotInterface, RoomCalendarProps } from '@/assets/js/types'
-import BaseCalendar from '@/components/calendar/BaseCalendar.vue'
+import BaseCalendar from '@/components/BaseCalendar.vue'
 import { ref } from 'vue'
 
 interface Props {
