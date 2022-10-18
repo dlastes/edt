@@ -57,3 +57,11 @@ export function createTime(time: number): Time {
     const text = convertDecimalTimeToHuman(time / 60)
     return new Time(time, text)
 }
+
+/**
+ * Accepts an array of objects having an id and returns an array containing only those ids.
+ * @param list
+ */
+export function mapListId(list: Array<{ id: number }>): Array<number> {
+    return list.map((element) => element.id)
+}

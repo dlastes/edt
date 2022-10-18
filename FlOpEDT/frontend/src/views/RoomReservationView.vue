@@ -65,7 +65,11 @@
                                         aria-label="Select department"
                                     >
                                         <option :value="undefined">All departments</option>
-                                        <option v-for="dept in departments.list.value" :key="dept.id" :value="dept">
+                                        <option
+                                            v-for="dept in departmentStore.departments"
+                                            :key="dept.id"
+                                            :value="dept"
+                                        >
                                             {{ dept.abbrev }}
                                         </option>
                                     </select>
@@ -130,7 +134,6 @@ import type {
     CalendarScheduledCourseSlotData,
     CalendarSlot,
     CourseType,
-    Department,
     DynamicSelectElementBooleanValue,
     DynamicSelectElementNumericValue,
     DynamicSelectElementValue,
@@ -139,7 +142,6 @@ import type {
     NumericRoomAttributeValue,
     ReservationPeriodicity,
     ReservationPeriodicityType,
-    Room,
     RoomAttribute,
     RoomAttributeValue,
     RoomCalendarProps,
@@ -164,6 +166,9 @@ import DynamicSelectedElementNumeric from '@/components/DynamicSelectedElementNu
 import DynamicSelectedElementBoolean from '@/components/DynamicSelectedElementBoolean.vue'
 import ClearableInput from '@/components/ClearableInput.vue'
 import DeletePeriodicReservationDialog from '@/components/DeletePeriodicReservationDialog.vue'
+import type { Department } from '@/stores/department'
+import { useDepartmentStore } from '@/stores/department'
+import { Room, useRoomStore } from '@/stores/room'
 
 const api = ref<FlopAPI>(requireInjection(apiKey))
 const currentWeek = ref(requireInjection(currentWeekKey))
@@ -177,12 +182,9 @@ interface RoomAttributeEntry {
 }
 
 interface Rooms {
-    list: ComputedRef<Array<Room>>
-    perDepartment: Ref<{ [departmentId: string]: Array<Room> }>
     perDepartmentFilterBySelectedDepartments: ComputedRef<{ [departmentId: string]: Array<Room> }>
     listFilterBySelectedDepartments: ComputedRef<Array<Room>>
     perIdFilterBySelectedDepartments: ComputedRef<{ [roomId: string]: Room }>
-    perId: ComputedRef<{ [roomId: string]: Room }>
     listFilterBySelectedDepartmentsAndFilters: ComputedRef<Array<Room>>
 }
 
@@ -231,26 +233,16 @@ interface RoomAttributeValues {
     numericList: Ref<Array<NumericRoomAttributeValue>>
 }
 
-// API data
-const departments = {
-    list: ref<Array<Department>>([]),
-}
+const departmentStore = useDepartmentStore()
+const roomStore = useRoomStore()
 
 const weekDays = {
     list: ref<Array<WeekDay>>([]),
 }
 
 const rooms: Rooms = {
-    list: computed(() => {
-        const out: Array<Room> = []
-        Object.values(rooms.perDepartment.value).forEach((rooms) => {
-            out.push(...rooms.filter((room) => !out.includes(room)))
-        })
-        return out
-    }),
-    perDepartment: ref({}),
     perDepartmentFilterBySelectedDepartments: computed(() => {
-        return filterBySelectedDepartments(rooms.perDepartment.value)
+        return filterBySelectedDepartments(roomStore.perDepartment)
     }),
     listFilterBySelectedDepartments: computed(() => {
         const out: Array<Room> = []
@@ -268,9 +260,6 @@ const rooms: Rooms = {
                 })
                 .map((r) => [r.id, r])
         )
-    }),
-    perId: computed(() => {
-        return Object.fromEntries(rooms.list.value.map((r) => [r.id, r]))
     }),
     listFilterBySelectedDepartmentsAndFilters: computed(() => {
         const attributeFilters: Array<
@@ -457,11 +446,11 @@ const selectedDepartments = computed(() => {
 
     if (!selectedDepartment.value) {
         // All departments
-        if (!departments.list.value) {
+        if (!departmentStore.departments) {
             // No department fetched, cannot continue
             return []
         }
-        selected = departments.list.value
+        selected = departmentStore.departments
     } else {
         // Department selected, get its name
         selected.push(selectedDepartment.value)
@@ -742,10 +731,10 @@ watchEffect(() => {
     console.log('Updating Scheduled courses')
     const date = selectedDate.value
 
-    if (!departments.list.value) {
+    if (!departmentStore.departments) {
         return
     }
-    updateScheduledCourses(date, departments.list.value)
+    updateScheduledCourses(date, departmentStore.departments)
 })
 
 // Time settings watcher
@@ -845,8 +834,8 @@ function createScheduledCourseSlot(course: ScheduledCourse, courseType: CourseTy
     const endTime = createTime(course.start_time + courseType.duration)
 
     let departmentName = ''
-    if (departments.list.value) {
-        const department = departments.list.value.find((dept) => `${dept.id}` === deptId)
+    if (departmentStore.departments) {
+        const department = departmentStore.departments.find((dept) => `${dept.id}` === deptId)
         if (department) {
             departmentName = department.abbrev
         }
@@ -1163,11 +1152,11 @@ function showLoading(): void {
 }
 
 function handleRoomNameClick(roomId: number) {
-    selectedRoom.value = rooms.list.value.find((r) => r.id === roomId)
+    selectedRoom.value = roomStore.rooms.find((r) => r.id === roomId)
 }
 
 function handleDepartmentNameClick(deptId: number) {
-    selectedDepartment.value = departments.list.value.find((dept) => dept.id === deptId)
+    selectedDepartment.value = departmentStore.departments.find((dept) => dept.id === deptId)
 }
 
 let newReservationId = -1
@@ -1231,13 +1220,13 @@ function createDateId(day: string | number, month: string | number): string {
  */
 function isRoomInSelectedDepartments(roomId: number): boolean {
     const room = rooms.listFilterBySelectedDepartments.value.find((r) => r.id === roomId)
-    return !(!room || !room.basic_rooms.find((r) => r.id === roomId))
+    return !(!room || !room.basic_rooms.find((r: { id: number }) => r.id === roomId))
 }
 
 function isRoomSelected(roomId: number): boolean {
     if (selectedRoom.value) {
         // Return false if the course's sub rooms are not selected
-        if (!rooms.perId.value[roomId]?.basic_rooms.find((val) => val.id === selectedRoom.value.id)) {
+        if (!roomStore.perId[roomId]?.basic_rooms.find((val) => val.id === selectedRoom.value.id)) {
             return false
         }
     }
@@ -1250,7 +1239,7 @@ function getScheduledCourseDepartment(course: ScheduledCourse): Department | und
     })
     if (departmentEntry) {
         const deptId = departmentEntry[0]
-        return departments.list.value.find((dept) => `${dept.id}` === deptId)
+        return departmentStore.departments.find((dept) => `${dept.id}` === deptId)
     }
     return undefined
 }
@@ -1267,30 +1256,15 @@ onMounted(() => {
             currentUserId = data.user_id
         }
     }
-    api.value.fetch.departments().then((value) => {
-        departments.list.value = value
-
+    departmentStore.remote.fetch().then((value) => {
         // Select the current department by default
-        if (departments.list.value) {
-            selectedDepartment.value = departments.list.value.find((dept) => dept.abbrev === currentDepartment)
+        if (value) {
+            selectedDepartment.value = value.find((dept) => dept.abbrev === currentDepartment)
 
-            rooms.perDepartment.value = {}
             courseTypes.perDepartment.value = {}
-            const roomsList: { [key: string]: Array<Room> } = {}
             const typesList: { [key: string]: Array<CourseType> } = {}
-            const departmentsCount = departments.list.value.length
-            let roomsCounter = departmentsCount
-            let typesCounter = departmentsCount
-            departments.list.value.forEach((dept) => {
-                // Fetch the rooms of each selected department
-                api.value.fetch.rooms({ department: dept.abbrev }).then((value) => {
-                    roomsList[dept.id] = value
-                    if (--roomsCounter === 0) {
-                        // Update the rooms list ref only once every department is handled
-                        rooms.perDepartment.value = roomsList
-                    }
-                })
-
+            let typesCounter = departmentStore.departments.length
+            value.forEach((dept) => {
                 api.value.fetch.courseTypes({ department: dept.abbrev }).then((value) => {
                     typesList[dept.id] = value
                     if (--typesCounter === 0) {
@@ -1301,6 +1275,8 @@ onMounted(() => {
             })
         }
     })
+
+    roomStore.remote.fetch()
 
     api.value.fetch.timeSettings().then((value) => {
         timeSettings.value = value

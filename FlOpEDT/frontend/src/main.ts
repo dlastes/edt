@@ -9,8 +9,9 @@ import { createApp, readonly, ref } from 'vue'
 import Popper from 'vue3-popper'
 
 import RoomReservation from '@/views/RoomReservationView.vue'
+import { createPinia } from 'pinia'
 
-const roomreservation = createApp(RoomReservation)
+const roomreservation = createApp(RoomReservation).use(createPinia())
 
 // Provide the current week and year
 const now = new Date()
@@ -25,11 +26,15 @@ const currentWeek: Ref<FlopWeek> = ref({
 
 const apps = [{ appName: 'roomreservation', app: roomreservation }]
 
+const pinia = createPinia()
+
 apps.forEach(({ appName, app }) => {
     // Provide the api access
     app.provide(apiKey, readonly(api))
 
     app.provide(currentWeekKey, readonly(currentWeek.value))
+
+    app.use(pinia)
 
     app.component('PopperComponent', Popper)
     app.mount(`#${appName}-app`)

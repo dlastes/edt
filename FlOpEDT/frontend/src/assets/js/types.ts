@@ -1,4 +1,6 @@
 import type { ShallowRef } from 'vue'
+import type { Department } from '@/stores/department'
+import type { Room } from '@/stores/room'
 
 export interface FlopWeek {
     week: number
@@ -33,11 +35,6 @@ export interface WeekDay {
     ref: string
 }
 
-export interface Department {
-    id: number
-    abbrev: string
-}
-
 export interface User {
     id: number
     password: string
@@ -56,16 +53,6 @@ export interface User {
     groups: []
     user_permissions: []
     departments: Array<Department>
-}
-
-export interface Room {
-    departments: Array<number>
-    id: number
-    name: string
-    subroom_of: Array<Room>
-    types: Array<number>
-    is_basic: boolean
-    basic_rooms: Array<{ id: number; name: string }>
 }
 
 export interface RoomReservation {

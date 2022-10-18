@@ -1,22 +1,21 @@
 {
   "name": "flopedt-front",
   "version": "1.0.0",
-  "main": "src/main.ts",
-  "repository": "https://framagit.org/flopedt/FlOpEDT",
-  "author": "FlOpEDT",
-  "license": "AGPL-3.0-or-later",
   "private": false,
+  "author": "FlOpEDT",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
+  "main": "src/main.ts",
   "dependencies": {
     "@popperjs/core": "^2.11.6",
     "@vuepic/vue-datepicker": "^3.4.7",
     "bootstrap": "^5.2.1",
     "core-js": "^3.8.3",
     "multi-range-slider-vue": "^1.1.4",
+    "pinia": "^2.0.23",
     "vue": "^3.2.13",
     "vue3-popper": "^1.5.0"
   },
@@ -42,6 +41,7 @@
     "sass": "^1.55.0",
     "sass-loader": "^13.0.2",
     "typescript": "^4.8.3",
+    "vue-cli-plugin-pinia": "~0.1.6",
     "vue-eslint-parser": "^9.1.0",
     "vue-tsc": "^0.40.13"
   },
@@ -50,5 +50,7 @@
     "last 2 versions",
     "not dead",
     "not ie 11"
-  ]
+  ],
+  "license": "AGPL-3.0-or-later",
+  "repository": "https://framagit.org/flopedt/FlOpEDT"
 }

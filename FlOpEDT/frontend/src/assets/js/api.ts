@@ -1,3 +1,25 @@
+import type {
+    BooleanRoomAttributeValue,
+    Course,
+    CourseType,
+    NumericRoomAttributeValue,
+    ReservationPeriodicity,
+    ReservationPeriodicityByMonth,
+    ReservationPeriodicityByMonthXChoice,
+    ReservationPeriodicityByWeek,
+    ReservationPeriodicityEachMonthSameDate,
+    ReservationPeriodicityType,
+    RoomAttribute,
+    RoomReservation,
+    RoomReservationType,
+    ScheduledCourse,
+    TimeSettings,
+    User,
+    WeekDay,
+} from '@/assets/js/types'
+import type { Department } from '@/stores/department'
+import type { Room } from '@/stores/room'
+
 let API_ENDPOINT = ''
 
 const dbDataElement = document.getElementById('json_data')
@@ -7,28 +29,6 @@ if (dbDataElement && dbDataElement.textContent) {
         API_ENDPOINT = data.api
     }
 }
-
-import type {
-    BooleanRoomAttributeValue,
-    Course,
-    CourseType,
-    Department,
-    NumericRoomAttributeValue,
-    ReservationPeriodicity,
-    ReservationPeriodicityByMonth,
-    ReservationPeriodicityByMonthXChoice,
-    ReservationPeriodicityByWeek,
-    ReservationPeriodicityEachMonthSameDate,
-    ReservationPeriodicityType,
-    Room,
-    RoomAttribute,
-    RoomReservation,
-    RoomReservationType,
-    ScheduledCourse,
-    TimeSettings,
-    User,
-    WeekDay,
-} from '@/assets/js/types'
 
 function getCookie(name: string) {
     if (!document.cookie) {

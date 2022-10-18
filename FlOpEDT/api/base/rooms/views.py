@@ -50,7 +50,7 @@ class RoomTypesViewSet(viewsets.ModelViewSet):
 class RoomFilterSet(filters.FilterSet):
     permission_classes = [IsAdminOrReadOnly]
 
-    dept = filters.CharFilter(field_name='departments__abbrev', required=True)
+    dept = filters.CharFilter(field_name='departments__abbrev', required=False)
 
     class Meta:
         model = bm.Room
