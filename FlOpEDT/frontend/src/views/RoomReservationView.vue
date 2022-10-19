@@ -881,15 +881,20 @@ function createFiltersValues(): Array<RoomAttributeEntry> {
     )
     out.push(
         ...roomAttributes.numericList.value.map((attribute) => {
+            const values = roomAttributeValues.numericList.value
+                .filter((att) => att.attribute === attribute.id)
+                .map((att) => att.value)
+            const min = Math.min(...values)
+            const max = Math.max(...values)
             return {
                 component: markRaw(DynamicSelectedElementNumeric),
                 value: {
                     id: attribute.id,
                     name: attribute.name,
-                    min: 0,
-                    max: 50,
-                    initialMin: 0,
-                    initialMax: 50,
+                    min: min,
+                    max: max,
+                    initialMin: min,
+                    initialMax: max,
                 },
             }
         })
