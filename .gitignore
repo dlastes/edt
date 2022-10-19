@@ -18,5 +18,4 @@ FlOpEDT/media/configuration*
 !FlOpEDT/media/configuration/empty_database_file.xlsx
 !FlOpEDT/media/configuration/empty_planif_file.xlsx
 FlOpEDT/misc/logs
-/FlOpEDT/static/
 /FlOpEDT/var/static/
