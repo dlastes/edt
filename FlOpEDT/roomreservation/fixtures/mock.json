@@ -360,7 +360,7 @@
     }
   },
   {
-    "model": "base.BooleanRoomAttributeValues",
+    "model": "base.BooleanRoomAttributeValue",
     "pk": 1,
     "fields": {
       "value": true,
@@ -369,7 +369,7 @@
     }
   },
   {
-    "model": "base.BooleanRoomAttributeValues",
+    "model": "base.BooleanRoomAttributeValue",
     "pk": 2,
     "fields": {
       "value": false,
@@ -378,7 +378,7 @@
     }
   },
   {
-    "model": "base.NumericRoomAttributeValues",
+    "model": "base.NumericRoomAttributeValue",
     "pk": 1,
     "fields": {
       "value": "35.00",
@@ -387,7 +387,7 @@
     }
   },
   {
-    "model": "base.NumericRoomAttributeValues",
+    "model": "base.NumericRoomAttributeValue",
     "pk": 2,
     "fields": {
       "value": "30.00",
@@ -396,7 +396,7 @@
     }
   },
   {
-    "model": "base.NumericRoomAttributeValues",
+    "model": "base.NumericRoomAttributeValue",
     "pk": 3,
     "fields": {
       "value": "30.00",
@@ -405,7 +405,7 @@
     }
   },
   {
-    "model": "base.NumericRoomAttributeValues",
+    "model": "base.NumericRoomAttributeValue",
     "pk": 4,
     "fields": {
       "value": "20.00",
@@ -414,7 +414,7 @@
     }
   },
   {
-    "model": "base.NumericRoomAttributeValues",
+    "model": "base.NumericRoomAttributeValue",
     "pk": 5,
     "fields": {
       "value": "0.00",
@@ -423,7 +423,7 @@
     }
   },
   {
-    "model": "base.NumericRoomAttributeValues",
+    "model": "base.NumericRoomAttributeValue",
     "pk": 6,
     "fields": {
       "value": "1.00",
@@ -432,7 +432,7 @@
     }
   },
   {
-    "model": "base.NumericRoomAttributeValues",
+    "model": "base.NumericRoomAttributeValue",
     "pk": 7,
     "fields": {
       "value": "1.00",
@@ -441,7 +441,7 @@
     }
   },
   {
-    "model": "base.NumericRoomAttributeValues",
+    "model": "base.NumericRoomAttributeValue",
     "pk": 8,
     "fields": {
       "value": "0.00",
