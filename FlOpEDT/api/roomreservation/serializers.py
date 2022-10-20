@@ -137,7 +137,7 @@ class RoomReservationSerializer(serializers.ModelSerializer):
         create_repetitions = False
         if 'create_repetitions' in validated_data:
             create_repetitions = validated_data.pop('create_repetitions')
-            
+
         if periodicity:
             # Multiple reservations, try to create them
             # Get the internal periodicity data
