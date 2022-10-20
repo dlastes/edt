@@ -19,6 +19,8 @@
                 :weekdays="props.data.weekdays"
                 :periodicity="props.data.periodicity"
                 :on-periodicity-delete="props.data.onPeriodicityDelete"
+                :day-start="props.data.dayStart"
+                :day-end="props.data.dayEnd"
                 @closed="closeEdit"
                 @saved="onSave"
                 @cancelled="onCancel"

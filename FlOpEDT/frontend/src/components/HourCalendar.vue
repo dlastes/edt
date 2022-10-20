@@ -1,7 +1,7 @@
 <template>
     <BaseCalendar ref="calendar">
         <template #table>
-            <table class="w-100">
+            <table class="w-100" @mouseleave="onMouseLeaveCalendar">
                 <tr class="p-0 flex-nowrap">
                     <th class="p-0 me-3"></th>
                     <th
@@ -138,6 +138,8 @@ const dragEvent: CalendarDragEvent = {
     endTime: { text: '', value: 0 },
 }
 
+let isDragging = false
+
 /**
  * Takes a click position in the Y-axis relative to the concerned column.
  * Returns the time in minutes from midnight corresponding to this position and taking the starting time offset into account.
@@ -157,22 +159,45 @@ function dayColumnMouseDown(day: string, event: MouseEvent): void {
         text: convertDecimalTimeToHuman(time / 60),
         value: time,
     }
+    isDragging = true
 }
 
 function dayColumnMouseUp(day: string, event: MouseEvent): void {
+    if (!isDragging) {
+        return
+    }
+    isDragging = false
     const dayArray = day.split('/')
     dragEvent.endDate = new Date(`${props.values.year}-${dayArray[1]}-${dayArray[0]}`)
     const startTime = dragEvent.startTime.value
     let time = clickHeightToTime(event.offsetY, snapStep)
-    if (time - startTime < 5) {
+    const shouldReverse = time - startTime < 0
+
+    if (!shouldReverse && time - startTime < 5) {
         time = startTime + 60
     }
-    time = startTime + Math.round((time - startTime) / snapStep) * snapStep
+    time = Math.min(startTime + Math.round((time - startTime) / snapStep) * snapStep, props.values.endTime)
     dragEvent.endTime = {
         text: convertDecimalTimeToHuman(time / 60),
         value: time,
     }
+    if (shouldReverse) {
+        // Dragged upward, reverse start and end
+        const endDate = dragEvent.endDate
+        const endTime = dragEvent.endTime
+        dragEvent.endDate = dragEvent.startDate
+        dragEvent.endTime = dragEvent.startTime
+        dragEvent.startTime = endTime
+        dragEvent.startDate = endDate
+    }
     emit('drag', dragEvent)
+}
+
+function onMouseLeaveCalendar(event: MouseEvent): void {
+    if (!isDragging) {
+        return
+    }
+    dayColumnMouseUp(`${dragEvent.startDate.getDate()}/${dragEvent.startDate.getMonth() + 1}`, event)
 }
 
 // Positioning and sizing

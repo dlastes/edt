@@ -191,53 +191,67 @@
                     </DayPicker>
                 </div>
                 <div class="row m-0 gx-1 mb-3">
-                    <div class="col" style="min-width: 100px">
-                        <!-- Start time -->
-                        <TimePicker
-                            :hours="startTime.hours"
-                            :minutes="startTime.minutes"
-                            @update-time="updateStartTime"
-                            :should-reset="shouldStartTimePickerReset"
-                            @on-reset="shouldStartTimePickerReset = false"
-                        >
-                            <template #input="{ value }">
-                                <div class="form-floating">
-                                    <input
-                                        :id="generateId('startTime')"
-                                        type="text"
-                                        class="form-control"
-                                        placeholder="Start time"
-                                        :value="value"
-                                        readonly
-                                    />
-                                    <label :for="generateId('startTime')" class="form-label">Start time</label>
-                                </div>
-                            </template>
-                        </TimePicker>
+                    <div class="row m-0 gx-1 mb-2">
+                        <div class="form-check form-switch">
+                            <input
+                                class="form-check-input"
+                                type="checkbox"
+                                v-model="isWholeDay"
+                                role="switch"
+                                :id="generateId('wholeDay')"
+                            />
+                            <label class="form-check-label" :for="generateId('wholeDay')">Whole day</label>
+                        </div>
                     </div>
-                    <div class="col" style="min-width: 100px">
-                        <!-- End time -->
-                        <TimePicker
-                            :hours="endTime.hours"
-                            :minutes="endTime.minutes"
-                            @update-time="updateEndTime"
-                            :should-reset="shouldEndTimePickerReset"
-                            @on-reset="shouldEndTimePickerReset = false"
-                        >
-                            <template #input="{ value }">
-                                <div class="form-floating">
-                                    <input
-                                        :id="generateId('endTime')"
-                                        type="text"
-                                        class="form-control"
-                                        placeholder="End time"
-                                        :value="value"
-                                        readonly
-                                    />
-                                    <label :for="generateId('endTime')" class="form-label">End time</label>
-                                </div>
-                            </template>
-                        </TimePicker>
+                    <div v-if="!isWholeDay" class="row m-0 gx-1">
+                        <div class="col" style="min-width: 100px">
+                            <!-- Start time -->
+                            <TimePicker
+                                :hours="startTime.hours"
+                                :minutes="startTime.minutes"
+                                @update-time="updateStartTime"
+                                :should-reset="shouldStartTimePickerReset"
+                                @on-reset="shouldStartTimePickerReset = false"
+                            >
+                                <template #input="{ value }">
+                                    <div class="form-floating">
+                                        <input
+                                            :id="generateId('startTime')"
+                                            type="text"
+                                            class="form-control"
+                                            placeholder="Start time"
+                                            :value="value"
+                                            readonly
+                                        />
+                                        <label :for="generateId('startTime')" class="form-label">Start time</label>
+                                    </div>
+                                </template>
+                            </TimePicker>
+                        </div>
+                        <div class="col" style="min-width: 100px">
+                            <!-- End time -->
+                            <TimePicker
+                                :hours="endTime.hours"
+                                :minutes="endTime.minutes"
+                                @update-time="updateEndTime"
+                                :should-reset="shouldEndTimePickerReset"
+                                @on-reset="shouldEndTimePickerReset = false"
+                            >
+                                <template #input="{ value }">
+                                    <div class="form-floating">
+                                        <input
+                                            :id="generateId('endTime')"
+                                            type="text"
+                                            class="form-control"
+                                            placeholder="End time"
+                                            :value="value"
+                                            readonly
+                                        />
+                                        <label :for="generateId('endTime')" class="form-label">End time</label>
+                                    </div>
+                                </template>
+                            </TimePicker>
+                        </div>
                     </div>
                 </div>
                 <!-- Responsible -->
@@ -340,18 +354,19 @@ import type {
     ReservationPeriodicityEachMonthSameDate,
     ReservationPeriodicityType,
     ReservationPeriodicityTypeName,
-    Room,
     RoomReservation,
     RoomReservationType,
     User,
     WeekDay,
 } from '@/assets/js/types'
+import { Time } from '@/assets/js/types'
 import DayPicker from '@/components/DayPicker.vue'
 import ModalForm from '@/components/ModalForm.vue'
 import TimePicker from '@/components/TimePicker.vue'
 import { computed, defineProps, Ref, ref, watch, watchEffect } from 'vue'
 import PeriodicitySelect from '@/components/PeriodicitySelect.vue'
 import ModalDialog from '@/components/ModalDialog.vue'
+import type { Room } from '@/stores/room'
 
 interface Emits {
     (e: 'saved', reservation: RoomReservation): void
@@ -373,6 +388,8 @@ interface Props {
     periodicityTypes: Array<ReservationPeriodicityType>
     weekdays: Array<WeekDay>
     onPeriodicityDelete: (reservation: RoomReservation) => Promise<void>
+    dayStart: Time
+    dayEnd: Time
 }
 
 const props = defineProps<Props>()
@@ -410,11 +427,19 @@ class ReservationTime {
         out.minutes = parseInt(array[1])
         return out
     }
+
+    public static fromTime(time: Time): ReservationTime {
+        const out = new ReservationTime()
+        out.hours = Math.trunc(time.value / 60)
+        out.minutes = time.value - 60 * out.hours
+        return out
+    }
 }
 
 const shouldDayPickerReset = ref(false)
 const shouldStartTimePickerReset = ref(false)
 const shouldEndTimePickerReset = ref(false)
+const isWholeDay = ref(false)
 
 const reservationResponsibleUsername = computed(() => {
     const user = props.users[props.reservation.responsible]
@@ -489,6 +514,13 @@ watch(
         }
     }
 )
+
+watch(isWholeDay, (wholeDay) => {
+    if (wholeDay) {
+        startTime.value = ReservationTime.fromTime(props.dayStart)
+        endTime.value = ReservationTime.fromTime(props.dayEnd)
+    }
+})
 
 const periodicityData: Ref<ReservationPeriodicityData | null> = ref(
     initPeriodicity.value ? initPeriodicity.value.periodicity : null

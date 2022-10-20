@@ -671,8 +671,8 @@ const hourCalendarValues = computed<HourCalendarProps>(() => {
     return Object.assign(
         {
             slots: slots,
-            startTime: dayStartTime.value.value - (60 + (dayStartTime.value.value % 60)),
-            endTime: dayFinishTime.value.value + (60 - (dayFinishTime.value.value % 60)),
+            startTime: dayStartTime.value.value,
+            endTime: dayFinishTime.value.value,
         },
         calendarValues.value
     )
@@ -809,6 +809,8 @@ function createRoomReservationSlot(reservation: RoomReservation): CalendarSlot {
         day: reservation.date,
         startTime: startTime,
         endTime: endTime,
+        dayStart: dayStartTime.value,
+        dayEnd: dayFinishTime.value,
         title: reservation.title,
         id: `roomreservation-${reservation.id}`,
         displayStyle: { background: backgroundColor },
