@@ -343,7 +343,9 @@ const scheduledCourses: ScheduledCourses = {
         return Object.fromEntries(
             Object.entries(scheduledCourses.perDepartment.value).map((entry) => [
                 entry[0],
-                entry[1].filter((course) => isRoomSelected(course.room) && isRoomInSelectedDepartments(course.room)),
+                entry[1].filter(
+                    (course) => isRoomSelected(course.room.id) && isRoomInSelectedDepartments(course.room.id)
+                ),
             ])
         )
     }),
@@ -364,7 +366,7 @@ const scheduledCourses: ScheduledCourses = {
                 const dept = getScheduledCourseDepartment(course)
                 return dept && selectedDepartments.value.includes(dept)
             })
-            out[day] = listGroupBy(courses, (course) => `${course.room}`)
+            out[day] = listGroupBy(courses, (course) => `${course.room.id}`)
         })
         return out
     }),
@@ -583,7 +585,7 @@ const scheduledCoursesSlots: ScheduledCourseSlots = {
                     const slots: Array<CalendarSlot> = []
                     e[1].forEach((course) => {
                         // Make sure the course's room is in the selected departments
-                        if (!isRoomInSelectedDepartments(course.room)) {
+                        if (!isRoomInSelectedDepartments(course.room.id)) {
                             return
                         }
 
@@ -855,7 +857,7 @@ function createScheduledCourseSlot(course: ScheduledCourse, courseType: CourseTy
         day: course.day,
         startTime: startTime,
         endTime: endTime,
-        title: course.course.module.abbrev,
+        title: course.course.module.abbrev + 'AAA',
         id: `scheduledcourse-${course.course.id}`,
         displayStyle: { background: scheduledCourseColor },
     }

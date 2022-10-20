@@ -108,7 +108,7 @@ export class Course {
 
 export class ScheduledCourse {
     id: number
-    room: number
+    room?: { id: number; name: string }
     start_time: number
     day: string
     course: {
@@ -142,7 +142,10 @@ export class ScheduledCourse {
 
     constructor() {
         this.id = 0
-        this.room = 0
+        this.room = {
+            id: 0,
+            name: '',
+        }
         this.start_time = 0
         this.day = ''
         this.course = {
