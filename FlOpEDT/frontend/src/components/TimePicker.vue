@@ -1,12 +1,5 @@
 <template>
-    <Datepicker
-        v-model="time"
-        time-picker
-        :transitions="false"
-        :clearable="false"
-        hours-increment="-1"
-        minutes-increment="-1"
-    >
+    <Datepicker v-model="time" time-picker :transitions="false" :clearable="false">
         <template #dp-input="{ value }">
             <slot name="input" :value="value"></slot>
         </template>
