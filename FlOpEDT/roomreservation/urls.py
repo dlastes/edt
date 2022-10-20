@@ -28,5 +28,5 @@ from roomreservation import views
 app_name="roomreservation"
 
 urlpatterns = [
-    path('', views.vue, name="roomreservation"),
+    path('', views.RoomReservationsView, name="roomreservation"),
 ]
