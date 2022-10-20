@@ -33,3 +33,16 @@ services:
     depends_on:
       - db
       - redis
+      - vue
+  vue:
+    build:
+      dockerfile: ./Dockerfile-Vue
+      args:
+        USER_ID: $(id -u)
+        GROUP_ID: $(id -g)
+    environment:
+      - YARN=serve
+    volumes:
+      - .:/code
+    ports:
+      - "8080:8000"

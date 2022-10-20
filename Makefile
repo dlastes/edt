@@ -12,7 +12,7 @@ secret_seed = abcdefghijklmnopqrstuvwxyz0123456789!@\#$$%^&*(-_=+)
 HOSTS := $(shell [ ! -z "$(HOST)" ] && echo $(default_hosts),$(HOST) || echo $(default_hosts))
 SECRET_KEY := $(shell python -c 'import random; result = "".join([random.choice("$(secret_seed)") for i in range(50)]); print(result)')
 BRANCH := $(shell git branch 2>/dev/null | grep '^*' | colrm 1 2)
-COMPOSE_PROJECT_NAME := edt_$(current_project_dir)_$(shell echo $(CONFIG) | head -c 1)_$(PORT)
+COMPOSE_PROJECT_NAME := edt_$(current_project_dir | tr '[:upper:]' '[:lower:]')_$(shell echo $(CONFIG) | head -c 1)_$(PORT)
 export
 
 .PHONY: config install init build start stop start-db stop-db push deploy rm debug
@@ -50,8 +50,8 @@ start: stop
 
 # starts edt's docker services in terminal
 start_verbose: stop
-	docker-compose -f docker-compose.$(CONFIG).yml up --build 
-	
+	docker-compose -f docker-compose.$(CONFIG).yml up --build
+
 # stops edt's docker services
 stop:
 	docker-compose -f docker-compose.$(CONFIG).yml stop

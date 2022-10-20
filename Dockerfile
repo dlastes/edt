@@ -1,4 +1,4 @@
-FROM python:3.7-slim
+FROM python:3.7
 
 # see output in our console 
 ENV PYTHONUNBUFFERED 1

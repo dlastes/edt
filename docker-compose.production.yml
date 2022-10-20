@@ -1,4 +1,4 @@
-version: '3'
+version: '3.8'
 
 services:
 
@@ -25,8 +25,10 @@ services:
     ports:
       - "${PORT-80}:80"
     volumes:
-      - ./docker/nginx/conf.d:/etc/nginx/conf.d
+      - ./docker/nginx/templates:/etc/nginx/templates
       - static-volume:/static
+    environment:
+      - NGINX_PORT=80
     depends_on:
       - web
 
@@ -39,7 +41,9 @@ services:
     build: 
       context: .
       args:
-        CONFIG: production    
+        CONFIG: production
+        USER_ID: $(id -u)
+        GROUP_ID: $(id -g)
     env_file:
       - ./docker/env/db.env
       - ./docker/env/db.prod.env      
@@ -51,13 +55,25 @@ services:
       - DJANGO_LOADDATA
       - CONFIG=production
     volumes:
-      - static-volume:/code/FlOpEDT/static
+      - static-volume:/code/FlOpEDT/var/static
       - media-volume:/code/FlOpEDT/media
     depends_on:
-      - db
-      - redis      
-      - memcached
-    entrypoint: /code/docker/script/init.sh  
+      db:
+        condition: service_started
+      redis:
+        condition: service_started
+      memcached:
+        condition: service_started
+      vue:
+        condition: service_completed_successfully
+    entrypoint: /code/docker/script/init.sh
+  vue:
+    build:
+      dockerfile: ./Dockerfile-Vue
+    environment:
+      - YARN=build
+    volumes:
+      - .:/code
 
 volumes:
   media-volume:
