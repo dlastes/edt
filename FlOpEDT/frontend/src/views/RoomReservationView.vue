@@ -249,6 +249,11 @@ const rooms: Rooms = {
         Object.values(rooms.perDepartmentFilterBySelectedDepartments.value).forEach((rooms) => {
             out.push(...rooms.filter((room) => !out.find((r) => r.id === room.id)))
         })
+        roomStore.rooms.forEach((room) => {
+            if (room.departments.length === 0 && out.findIndex((r) => r.id === room.id) < 0) {
+                out.push(room)
+            }
+        })
         return out
     }),
     perIdFilterBySelectedDepartments: computed(() => {
