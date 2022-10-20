@@ -133,14 +133,15 @@ class RoomReservationSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         check_reservation_possible(validated_data)
         periodicity = validated_data.pop('periodicity')
+        # Check if we should create repeated reservations
+        create_repetitions = False
+        if 'create_repetitions' in validated_data:
+            create_repetitions = validated_data.pop('create_repetitions')
+            
         if periodicity:
             # Multiple reservations, try to create them
             # Get the internal periodicity data
             periodicity = periodicity['periodicity']
-            # Check if we should create the possible reservations
-            create_repetitions = False
-            if 'create_repetitions' in validated_data:
-                create_repetitions = validated_data.pop('create_repetitions')
 
             # Create the reservations or inform the client
             periodicity_instance = create_reservations_if_possible(periodicity, validated_data, create_repetitions)
