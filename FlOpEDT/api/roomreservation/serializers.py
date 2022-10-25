@@ -14,7 +14,7 @@ class PeriodicityField(serializers.Field):
         serialized = ReservationPeriodicitySerializer.get_serializer(periodicity)(data=periodicity)
         if serialized.is_valid():
             return serialized.validated_data
-        raise ValidationError(serialized.errors())
+        raise ValidationError(serialized.errors)
 
     def get_attribute(self, instance):
         return instance
