@@ -34,6 +34,8 @@ if [ "$DJANGO_MIGRATE" = 'on' ]; then
 fi
 
 if [ "$DJANGO_LOADDATA" = 'on' ]; then
+  echo "manage.py flush old database..."
+  /code/FlOpEDT/manage.py flush --noinput
   echo "manage.py loaddata..."
   /code/FlOpEDT/manage.py loaddata dump.json
 fi
