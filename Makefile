@@ -8,6 +8,9 @@ current_project_dir := $(shell basename ${CURDIR} | head -c 3)
 default_hosts := 127.0.0.1,localhost
 secret_seed = abcdefghijklmnopqrstuvwxyz0123456789!@\#$$%^&*(-_=+)
 
+UID=$(shell id -u)
+GID=$(shell id -g)
+
 # get the current git branch name
 HOSTS := $(shell [ ! -z "$(HOST)" ] && echo $(default_hosts),$(HOST) || echo $(default_hosts))
 SECRET_KEY := $(shell python -c 'import random; result = "".join([random.choice("$(secret_seed)") for i in range(50)]); print(result)')
@@ -46,11 +49,11 @@ build:
 
 # starts edt's docker services
 start: stop
-	docker-compose -f docker-compose.$(CONFIG).yml up --build -d
+	 UID=${UID} GID=${GID} docker-compose -f docker-compose.$(CONFIG).yml up --build -d
 
 # starts edt's docker services in terminal
 start_verbose: stop
-	docker-compose -f docker-compose.$(CONFIG).yml up --build
+	 UID=${UID} GID=${GID} docker-compose -f docker-compose.$(CONFIG).yml up --build
 
 # stops edt's docker services
 stop:
