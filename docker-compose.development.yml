@@ -8,10 +8,12 @@ services:
       POSTGRES_HOST_AUTH_METHOD: trust
     ports:
       - "5445:5432"
+
   redis:
     image: redis:latest
     ports:
       - "${REDIS_PORT-6379}:6379"
+
   web:
     build:
       context: .
@@ -34,12 +36,13 @@ services:
       - db
       - redis
       - vue
+
   vue:
     build:
       dockerfile: ./Dockerfile-Vue
       args:
-        USER_ID: $(id -u)
-        GROUP_ID: $(id -g)
+        USER_ID: $$(id -u)
+        GROUP_ID: $$(id -g)
     environment:
       - YARN=serve
     volumes:

@@ -2,18 +2,8 @@ FROM node:18-alpine
 
 ARG YARN=serve
 
-ARG USER_ID
-ARG GROUP_ID
-
-RUN addgroup --gid $GROUP_ID user
-RUN adduser --disabled-password --gecos '' --uid $USER_ID --gid $GROUP_ID user
-
-USER user
-
 WORKDIR /code/FlOpEDT/frontend
 
 RUN yarn global add @vue/cli
 
-RUN yarn install
-
-CMD yarn $YARN
+CMD yarn install && yarn ${YARN}

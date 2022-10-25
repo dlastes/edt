@@ -42,8 +42,6 @@ services:
       context: .
       args:
         CONFIG: production
-        USER_ID: $(id -u)
-        GROUP_ID: $(id -g)
     env_file:
       - ./docker/env/db.env
       - ./docker/env/db.prod.env      
@@ -67,13 +65,15 @@ services:
       vue:
         condition: service_completed_successfully
     entrypoint: /code/docker/script/init.sh
+
   vue:
     build:
       dockerfile: ./Dockerfile-Vue
+    user: "${UID}:${GID}"
     environment:
       - YARN=build
     volumes:
-      - .:/code
+      - ./FlOpEDT:/code/FlOpEDT/
 
 volumes:
   media-volume:
