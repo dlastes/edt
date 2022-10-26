@@ -1083,7 +1083,7 @@ function reservationRemoveCurrentAndFutureSamePeriodicity(reservation: RoomReser
                     break
             }
             // Finally apply the patch
-            return apiCall(periodicity.id, { end: dayBefore.toLocaleDateString() })
+            return apiCall(periodicity.id, { end: dayBefore.toISOString().split('T')[0] })
         })
         ?.then((_) => {
             updateRoomReservations(selectedDate.value)
