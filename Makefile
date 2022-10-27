@@ -3,7 +3,7 @@ GLOBAL_ENV=./docker/env/global.env
 -include $(GLOBAL_ENV)
 
 CONFIG ?= development
-PORT ?= 80
+PORT ?= 443
 DNS1 ?= 1.1.1.1
 DNS2 ?= 8.8.8.8
 
