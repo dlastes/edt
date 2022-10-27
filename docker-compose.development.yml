@@ -1,4 +1,4 @@
-version: '3'
+version: '3.8'
 
 services:
   db:
@@ -40,12 +40,10 @@ services:
   vue:
     build:
       dockerfile: ./Dockerfile-Vue
-      args:
-        USER_ID: $$(id -u)
-        GROUP_ID: $$(id -g)
+    user: "${UID}:${GID}"
     environment:
       - YARN=serve
     volumes:
-      - .:/code
+      - ./FlOpEDT:/code/FlOpEDT/
     ports:
       - "8080:8000"

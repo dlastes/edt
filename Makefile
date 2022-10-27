@@ -1,8 +1,11 @@
 #!/usr/bin/make -f
--include global.env
+GLOBAL_ENV=./docker/env/global.env
+-include $(GLOBAL_ENV)
 
 CONFIG ?= development
-PORT ?= 8000
+PORT ?= 80
+DNS1 ?= 1.1.1.1
+DNS2 ?= 8.8.8.8
 
 current_project_dir := $(shell basename ${CURDIR} | head -c 3)
 default_hosts := 127.0.0.1,localhost
@@ -24,9 +27,11 @@ export
 #	Create config files
 #
 config:
-	printf "PORT=${PORT}\n" > global.env
-	printf "HOST=${HOST}\n" >> global.env
-	printf "CONFIG=${CONFIG}" >> global.env
+	printf "PORT=${PORT}\n" > $(GLOBAL_ENV)
+	printf "CONFIG=${CONFIG}\n" >> $(GLOBAL_ENV)
+	printf "FLOP_HOST=${FLOP_HOST}\n" >> $(GLOBAL_ENV)
+	printf "DNS1=${DNS1}\n" >> $(GLOBAL_ENV)
+	printf "DNS2=${DNS2}\n" >> $(GLOBAL_ENV)
 
 install:
  	ifeq ($(CONFIG), production)
@@ -37,7 +42,7 @@ install:
 # Initialize database with basic datas contained 
 # in dump.json for tests purposes
 init:
-	docker-compose -f docker-compose.$(CONFIG).yml \
+	UID=${UID} GID=${GID} docker-compose -f docker-compose.$(CONFIG).yml \
 		run --rm \
 		-e BRANCH \
 		-e DJANGO_LOADDATA=on \
@@ -47,13 +52,15 @@ init:
 build:
 	docker-compose -f docker-compose.$(CONFIG).yml build
 
+base_start: stop config
+
 # starts edt's docker services
-start: stop
-	 UID=${UID} GID=${GID} docker-compose -f docker-compose.$(CONFIG).yml up --build -d
+start: base_start
+	UID=${UID} GID=${GID} docker-compose -f docker-compose.$(CONFIG).yml up --build -d
 
 # starts edt's docker services in terminal
-start_verbose: stop
-	 UID=${UID} GID=${GID} docker-compose -f docker-compose.$(CONFIG).yml up --build
+start_verbose: base_start
+	UID=${UID} GID=${GID} docker-compose -f docker-compose.$(CONFIG).yml up --build
 
 # stops edt's docker services
 stop:
@@ -65,6 +72,10 @@ start-db:
 
 stop-db:
 	docker-compose -f docker-compose.$(CONFIG).yml stop db
+
+# creates the SSL certificate
+create-certif:
+	mkdir -p ./FlOpEDT/acme_challenge/token && UID=${UID} GID=${GID} docker-compose -f docker-compose.production.yml run certif-create
 
 #
 #	Docker stack helpers
@@ -82,7 +93,9 @@ rm:
 #	Show config infos
 debug:
 	@echo PORT: $(PORT)
-	@echo HOST: $(HOST)
 	@echo HOSTS: $(HOSTS)
 	@echo CONFIG: $(CONFIG)
 	@echo COMPOSE_PROJECT_NAME: $(COMPOSE_PROJECT_NAME)
+	@echo FLOP_HOST: $(FLOP_HOST)
+	@echo DNS1: $(DNS1)
+	@echo DNS2: $(DNS2)

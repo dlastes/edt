@@ -16,8 +16,3 @@ RUN apt-get update \
     && pip install --no-cache-dir -r /requirements.txt \
     && pip install --no-cache-dir -r /requirements.$CONFIG.txt \
     && apt-get purge -y --auto-remove gcc python3-dev apt-utils
-
-RUN mkdir /code
-WORKDIR /code
-
-COPY . /code/

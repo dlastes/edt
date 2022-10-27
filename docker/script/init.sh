@@ -37,7 +37,7 @@ if [ "$DJANGO_LOADDATA" = 'on' ]; then
   echo "manage.py flush old database..."
   /code/FlOpEDT/manage.py flush --noinput
   echo "manage.py loaddata..."
-  /code/FlOpEDT/manage.py loaddata dump.json
+  /code/FlOpEDT/manage.py loaddata /code/dump.json
 fi
 
 if [ "$DJANGO_COLLECTSTATIC" = 'on' ]; then
