@@ -496,7 +496,7 @@ const currentWeekdayRef = computed(() => {
 const selectedPeriodicityType = ref<ReservationPeriodicityType | undefined>(
     initPeriodicity.value
         ? props.periodicityTypes.find((t) => t[0] === initPeriodicity.value?.periodicity.periodicity_type)
-        : undefined
+        : props.periodicityTypes[0]
 )
 
 // Update the reservation periodicity form if the provided periodicity have changed
@@ -686,6 +686,7 @@ function onReservationConflictAcceptCreation() {
         switchToForm()
         return
     }
+    isReservationConflictDialogOpen.value = false
     saveReservation(true)
 }
 
@@ -791,6 +792,7 @@ function removePeriodicity() {
     }
     // ...otherwise just cancel the creation
     isCreatingPeriodicity.value = false
+    selectedPeriodicityType.value = undefined
 }
 
 function switchToPeriodicityDeletionDialog() {
