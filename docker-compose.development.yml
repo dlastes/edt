@@ -3,6 +3,8 @@ version: '3.8'
 services:
   db:
     image: postgres
+    profiles:
+      - full
     environment:
       PGDATA: /var/lib/postgresql/data/flopedt-${BRANCH:-master}
       POSTGRES_HOST_AUTH_METHOD: trust
@@ -11,6 +13,8 @@ services:
 
   redis:
     image: redis:latest
+    profiles:
+      - full
     ports:
       - "${REDIS_PORT-6379}:6379"
 
@@ -19,6 +23,8 @@ services:
       context: .
       args:
         CONFIG: development
+    profiles:
+      - full
     env_file: 
       - ./docker/env/db.env
       - ./docker/env/web.env
@@ -40,6 +46,8 @@ services:
   vue:
     build:
       dockerfile: ./Dockerfile-Vue
+    profiles:
+      - full
     user: "${UID}:${GID}"
     environment:
       - YARN=serve

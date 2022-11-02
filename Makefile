@@ -7,7 +7,7 @@ PORT ?= 443
 DNS1 ?= 1.1.1.1
 DNS2 ?= 8.8.8.8
 
-current_project_dir := $(shell basename ${CURDIR} | head -c 3)
+current_project_dir := $(shell basename ${CURDIR})
 default_hosts := 127.0.0.1,localhost
 secret_seed = abcdefghijklmnopqrstuvwxyz0123456789!@\#$$%^&*(-_=+)
 
@@ -15,10 +15,10 @@ UID=$(shell id -u)
 GID=$(shell id -g)
 
 # get the current git branch name
-HOSTS := $(shell [ ! -z "$(HOST)" ] && echo $(default_hosts),$(HOST) || echo $(default_hosts))
+HOSTS := $(shell [ ! -z "$(FLOP_HOST)" ] && echo $(default_hosts),$(FLOP_HOST) || echo $(default_hosts))
 SECRET_KEY := $(shell python -c 'import random; result = "".join([random.choice("$(secret_seed)") for i in range(50)]); print(result)')
 BRANCH := $(shell git branch 2>/dev/null | grep '^*' | colrm 1 2)
-COMPOSE_PROJECT_NAME := edt_$(current_project_dir | tr '[:upper:]' '[:lower:]')_$(shell echo $(CONFIG) | head -c 1)_$(PORT)
+COMPOSE_PROJECT_NAME := $(shell echo $(current_project_dir) | tr '[:upper:]' '[:lower:]')_$(shell echo $(CONFIG) | head -c 1)
 export
 
 .PHONY: config install init build start stop start-db stop-db push deploy rm debug
@@ -28,7 +28,6 @@ export
 #
 config:
 	printf "PORT=${PORT}\n" > $(GLOBAL_ENV)
-	printf "CONFIG=${CONFIG}\n" >> $(GLOBAL_ENV)
 	printf "FLOP_HOST=${FLOP_HOST}\n" >> $(GLOBAL_ENV)
 	printf "DNS1=${DNS1}\n" >> $(GLOBAL_ENV)
 	printf "DNS2=${DNS2}\n" >> $(GLOBAL_ENV)
@@ -39,10 +38,10 @@ install:
 		printf "POSTGRES_PASSWORD=$(shell dd if=/dev/urandom bs=1 count=32 2>/dev/null | base64 -w 0 | rev | cut -b 2- | rev)" > docker/env/db.prod.env
   endif
 
-# Initialize database with basic datas contained 
+# Initialize database with basic datas contained
 # in dump.json for tests purposes
 init:
-	UID=${UID} GID=${GID} docker-compose -f docker-compose.$(CONFIG).yml \
+	docker-compose -f docker-compose.$(CONFIG).yml \
 		run --rm \
 		-e BRANCH \
 		-e DJANGO_LOADDATA=on \
@@ -50,17 +49,15 @@ init:
 		web
 
 build:
-	docker-compose -f docker-compose.$(CONFIG).yml build
-
-base_start: stop config
+	docker-compose -f docker-compose.$(CONFIG).yml --profile full --profile vue build
 
 # starts edt's docker services
-start: base_start
-	UID=${UID} GID=${GID} docker-compose -f docker-compose.$(CONFIG).yml up --build -d
+start: stop
+	docker-compose -f docker-compose.$(CONFIG).yml --profile full up -d
 
 # starts edt's docker services in terminal
-start_verbose: base_start
-	UID=${UID} GID=${GID} docker-compose -f docker-compose.$(CONFIG).yml up --build
+start_verbose: stop
+	docker-compose -f docker-compose.$(CONFIG).yml --profile full up
 
 # stops edt's docker services
 stop:
@@ -75,7 +72,7 @@ stop-db:
 
 # creates the SSL certificate
 create-certif:
-	mkdir -p ./FlOpEDT/acme_challenge/token && UID=${UID} GID=${GID} docker-compose -f docker-compose.production.yml run certif-create
+	mkdir -p -m a=rwx ./FlOpEDT/acme_challenge/token && docker-compose -f docker-compose.production.yml --profile ssl up
 
 #
 #	Docker stack helpers

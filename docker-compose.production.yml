@@ -4,10 +4,14 @@ services:
 
   memcached:
     image: memcached
+    profiles:
+      - full
 
   db:
     restart: always
     image: postgres
+    profiles:
+      - full
     env_file:
       - ./docker/env/db.env
       - ./docker/env/db.prod.env
@@ -22,8 +26,10 @@ services:
   nginx:
     restart: always
     image: "nginx"
+    profiles:
+      - full
     ports:
-      - "${PORT-80}:80"
+      - "${PORT}:${PORT}"
     volumes:
       - ./docker/nginx/templates:/etc/nginx/templates
       - static-volume:/static
@@ -31,12 +37,14 @@ services:
     env_file:
       - ./docker/env/global.env
     environment:
-      - NGINX_PORT=80
+      - NGINX_PORT=${PORT}
     depends_on:
       - web
 
   redis:
     image: redis:latest
+    profiles:
+      - full
  
   web:
     restart: always
@@ -45,6 +53,8 @@ services:
       context: .
       args:
         CONFIG: production
+    profiles:
+      - full
     env_file:
       - ./docker/env/db.env
       - ./docker/env/db.prod.env      
@@ -66,26 +76,27 @@ services:
         condition: service_started
       memcached:
         condition: service_started
-      vue:
-        condition: service_completed_successfully
     entrypoint: /code/docker/script/init.sh
 
   vue:
     build:
       dockerfile: ./Dockerfile-Vue
+      args:
+        - YARN=build
     user: "${UID}:${GID}"
-    environment:
-      - YARN=build
+    profiles:
+      - vue
     volumes:
       - ./FlOpEDT:/code/FlOpEDT/
 
   certif-create:
     image: zerossl/client
-    user: "${UID}:${GID}"
+    profiles: # Use a profile to not run it with other services, as this service should run alone
+      - ssl
     volumes:
       - certificates:/data
       - ./FlOpEDT/acme_challenge/token:/webroot
-    command: --key account.key --csr ${FLOP_HOST}.csr --csr-key ${FLOP_HOST}.key --crt ${FLOP_HOST}.crt --domains "${FLOP_HOST}" --generate-missing --path /webroot --unlink
+    command: --key account.key --csr ${FLOP_HOST}.csr --csr-key ${FLOP_HOST}.key --crt ${FLOP_HOST}.crt --domains "${FLOP_HOST}" --generate-missing --path /webroot --unlink --live
 
 volumes:
   media-volume:
