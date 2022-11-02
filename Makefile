@@ -74,6 +74,9 @@ stop-db:
 create-certif:
 	mkdir -p -m a=rwx ./FlOpEDT/acme_challenge/token && docker-compose -f docker-compose.production.yml --profile ssl up
 
+renew-certif:
+	mkdir -p -m a=rwx ./FlOpEDT/acme_challenge/token && RENEW="--renew 90" docker-compose -f docker-compose.production.yml --profile ssl up
+
 #
 #	Docker stack helpers
 #

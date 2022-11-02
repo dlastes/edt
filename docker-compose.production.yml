@@ -96,7 +96,7 @@ services:
     volumes:
       - certificates:/data
       - ./FlOpEDT/acme_challenge/token:/webroot
-    command: --key account.key --csr ${FLOP_HOST}.csr --csr-key ${FLOP_HOST}.key --crt ${FLOP_HOST}.crt --domains "${FLOP_HOST}" --generate-missing --path /webroot --unlink --live
+    command: --key account.key --csr ${FLOP_HOST}.csr --csr-key ${FLOP_HOST}.key --crt ${FLOP_HOST}.crt --domains "${FLOP_HOST}" --generate-missing --path /webroot --unlink --live ${RENEW}
 
 volumes:
   media-volume:
