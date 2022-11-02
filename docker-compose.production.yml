@@ -82,12 +82,13 @@ services:
     build:
       dockerfile: ./Dockerfile-Vue
       args:
-        - YARN=build
+        CONFIG: production
     user: "${UID}:${GID}"
     profiles:
       - vue
     volumes:
       - ./FlOpEDT:/code/FlOpEDT/
+      - ./docker:/code/docker
 
   certif-create:
     image: zerossl/client

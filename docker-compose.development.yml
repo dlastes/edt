@@ -50,7 +50,7 @@ services:
       - full
     user: "${UID}:${GID}"
     environment:
-      - YARN=serve
+      - CONFIG=development
     volumes:
       - ./FlOpEDT:/code/FlOpEDT/
     ports:
