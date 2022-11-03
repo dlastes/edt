@@ -108,7 +108,8 @@ def create_reservations_if_possible(periodicity, original_reservation, create_re
     # Create a new periodicity instance
     if periodicity['id'] < 0:
         # Generate a new ID if negative
-        periodicity['id'] = rm.ReservationPeriodicity.objects.aggregate(max_id=Max('pk')).get('max_id') + 1
+        max_periodicity_id = rm.ReservationPeriodicity.objects.aggregate(max_id=Max('pk')).get('max_id')
+        periodicity['id'] = 1 if max_periodicity_id is None else max_periodicity_id
     periodicity_instance = model.objects.create(**periodicity)
     # Create the future reservations
     for reservation in ok_reservations:
