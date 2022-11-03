@@ -1,13 +1,14 @@
 server {
     listen 80;
+    listen 8000;
     server_name ${FLOP_HOST};
     return 301 ${FLOP_HOST}$request_uri;
 }
 
 
 server {
-    listen 443 ssl;
-    server_name ${FLOP_HOST};
+	listen 443 ssl;
+	server_name ${FLOP_HOST};
 
 	ssl_certificate /etc/ssl/fedt/${FLOP_HOST}.crt;
 	ssl_certificate_key /etc/ssl/fedt/${FLOP_HOST}.key;

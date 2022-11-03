@@ -3,9 +3,3 @@ FROM node:18-alpine
 WORKDIR /code/FlOpEDT/frontend
 
 RUN yarn global add @vue/cli && yarn install
-
-# Build Vue files on production. True is used to return 0 instead of an error.
-RUN [ "$CONFIG" = "production" ] && NODE_ENV=production yarn build || true
-
-# Serve on development
-CMD [ "$CONFIG" = "development" ] && NODE_ENV=development yarn serve || true

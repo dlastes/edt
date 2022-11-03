@@ -37,7 +37,7 @@ services:
     volumes:
       - .:/code
     ports:
-      - "${PORT-80}:8000"
+      - "${PORT}:8000"
     depends_on:
       - db
       - redis
@@ -53,5 +53,7 @@ services:
       - CONFIG=development
     volumes:
       - ./FlOpEDT:/code/FlOpEDT/
+      - ./docker:/code/docker
     ports:
       - "8080:8000"
+    entrypoint: /code/docker/script/init-vue.sh

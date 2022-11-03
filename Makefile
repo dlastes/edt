@@ -7,6 +7,9 @@ PORT ?= 443
 DNS1 ?= 1.1.1.1
 DNS2 ?= 8.8.8.8
 
+# Clear the certification renew variable
+CERTIF_RENEW=
+
 current_project_dir := $(shell basename ${CURDIR})
 default_hosts := 127.0.0.1,localhost
 secret_seed = abcdefghijklmnopqrstuvwxyz0123456789!@\#$$%^&*(-_=+)
@@ -48,8 +51,11 @@ init:
 		-e START_SERVER=off \
 		web
 
-build:
-	docker-compose -f docker-compose.$(CONFIG).yml --profile full --profile vue build
+build-vue:
+	docker-compose -f docker-compose.production.yml --profile vue up
+
+build: build-vue
+	docker-compose -f docker-compose.$(CONFIG).yml --profile full build
 
 # starts edt's docker services
 start: stop
@@ -75,7 +81,7 @@ create-certif:
 	mkdir -p -m a=rwx ./FlOpEDT/acme_challenge/token && docker-compose -f docker-compose.production.yml --profile ssl up
 
 renew-certif:
-	mkdir -p -m a=rwx ./FlOpEDT/acme_challenge/token && RENEW="--renew 90" docker-compose -f docker-compose.production.yml --profile ssl up
+	mkdir -p -m a=rwx ./FlOpEDT/acme_challenge/token && CERTIF_RENEW="--renew 90" docker-compose -f docker-compose.production.yml --profile ssl up
 
 #
 #	Docker stack helpers

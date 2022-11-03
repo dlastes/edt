@@ -36,8 +36,6 @@ services:
       - certificates:/etc/ssl/fedt
     env_file:
       - ./docker/env/global.env
-    environment:
-      - NGINX_PORT=${PORT}
     depends_on:
       - web
 
@@ -81,14 +79,15 @@ services:
   vue:
     build:
       dockerfile: ./Dockerfile-Vue
-      args:
-        CONFIG: production
     user: "${UID}:${GID}"
+    environment:
+      - CONFIG=production
     profiles:
       - vue
     volumes:
       - ./FlOpEDT:/code/FlOpEDT/
       - ./docker:/code/docker
+    entrypoint: /code/docker/script/init-vue.sh
 
   certif-create:
     image: zerossl/client
@@ -97,7 +96,7 @@ services:
     volumes:
       - certificates:/data
       - ./FlOpEDT/acme_challenge/token:/webroot
-    command: --key account.key --csr ${FLOP_HOST}.csr --csr-key ${FLOP_HOST}.key --crt ${FLOP_HOST}.crt --domains "${FLOP_HOST}" --generate-missing --path /webroot --unlink --live ${RENEW}
+    command: --key account.key --csr ${FLOP_HOST}.csr --csr-key ${FLOP_HOST}.key --crt ${FLOP_HOST}.crt --domains "${FLOP_HOST}" --generate-missing --path /webroot --unlink --live ${CERTIF_RENEW}
 
 volumes:
   media-volume:
