@@ -105,3 +105,9 @@ debug:
 	@echo FLOP_HOST: $(FLOP_HOST)
 	@echo DNS1: $(DNS1)
 	@echo DNS2: $(DNS2)
+
+switch-http:
+	make PORT=80 config && cp -v docker/nginx/templates/http docker/nginx/templates/default.conf.template
+
+switch-https:
+	make PORT=443 config && cp -v docker/nginx/templates/https docker/nginx/templates/default.conf.template
