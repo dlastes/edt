@@ -6,6 +6,11 @@ CONFIG ?= development
 PORT ?= 443
 DNS1 ?= 1.1.1.1
 DNS2 ?= 8.8.8.8
+USE_GUROBI ?=
+
+WEB_IMG := $(if $(USE_GUROBI),gurobi/optimizer:9.5.2,)
+
+GUROBI_IMG=gurobi/optimizer:9.5.2
 
 # Clear the certification renew variable
 CERTIF_RENEW=
@@ -34,6 +39,7 @@ config:
 	printf "FLOP_HOST=${FLOP_HOST}\n" >> $(GLOBAL_ENV)
 	printf "DNS1=${DNS1}\n" >> $(GLOBAL_ENV)
 	printf "DNS2=${DNS2}\n" >> $(GLOBAL_ENV)
+	printf "USE_GUROBI=${USE_GUROBI}\n" >> $(GLOBAL_ENV)
 
 install:
  	ifeq ($(CONFIG), production)

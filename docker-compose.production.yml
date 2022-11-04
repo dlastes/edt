@@ -51,6 +51,7 @@ services:
       context: .
       args:
         CONFIG: production
+        BASE_IMG: ${WEB_IMG:-python:3.7}
     profiles:
       - full
     env_file:
@@ -58,15 +59,21 @@ services:
       - ./docker/env/db.prod.env      
       - ./docker/env/web.env
       - ./docker/env/web.prod.env
+      - ./docker/env/global.env
     environment:
       - DJANGO_SETTINGS_MODULE=FlOpEDT.settings.production
       - START_SERVER=${START_SERVER:-on}
       - DJANGO_LOADDATA
       - CONFIG=production
+      - GRB_LICENSE_FILE=/opt/gurobi/gurobi.lic:ro
     volumes:
       - static-volume:/code/FlOpEDT/var/static
       - media-volume:/code/FlOpEDT/media
       - .:/code
+      - type: bind
+        source: ./gurobi.lic
+        target: /opt/gurobi/gurobi.lic:ro
+        read_only: true
     depends_on:
       db:
         condition: service_started
