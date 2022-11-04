@@ -96,7 +96,3 @@ DEBUG = False
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS','localhost').split(',')
 
 SECRET_KEY = os.environ['SECRET_KEY']
-
-# Use the host domain and port instead of Django's
-USE_X_FORWARDED_HOST = True
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
