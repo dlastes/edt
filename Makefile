@@ -67,7 +67,7 @@ start_verbose: stop
 
 # stops edt's docker services
 stop:
-	docker-compose -f docker-compose.$(CONFIG).yml stop
+	docker-compose -f docker-compose.$(CONFIG).yml --profile full --profile vue stop
 
 # starts edt's docker database service
 start-db:
