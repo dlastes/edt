@@ -7,7 +7,6 @@ from django.http import Http404
 
 class ACMEChallengeView(View):
     def get(self, request, **kwargs):
-        print(kwargs)
         if 'acme_challenge' in kwargs:
             filename = kwargs['acme_challenge']
             return serve(request, f'token/{filename}', os.path.join(os.path.abspath('.'), os.path.dirname(__file__)))
