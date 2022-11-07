@@ -3,7 +3,8 @@ GLOBAL_ENV=./docker/env/global.env
 -include $(GLOBAL_ENV)
 
 CONFIG ?= development
-PORT ?= 443
+PORT ?= 80
+FLOP_HOST ?= localhost
 DNS1 ?= 1.1.1.1
 DNS2 ?= 8.8.8.8
 USE_GUROBI ?=
