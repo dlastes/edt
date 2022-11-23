@@ -1349,7 +1349,8 @@ let createSelectedParameterPopup = (constraint, parameter) => {
         values.append(form);
     };
 
-    if (param_obj.multiple) {
+    // if param_obj is multiple or this condition should be satisfied!
+    if (database.acceptable_values[parameter].acceptable.length>0) {
         let acceptable_values = database.acceptable_values[parameter].acceptable;
 
         let create_and_fill_selected = () => {
@@ -1523,7 +1524,7 @@ let buttonWithDropBuilder = (constraint, parameter) => {
             'class': 'form-check-label',
             'for': checkID,
         });
-        label.innerText = parameter.name;
+        label.innerText = gettext(parameter.name);
         button.append(check, label, badge);
     } else {
         let color = '';
@@ -1538,7 +1539,7 @@ let buttonWithDropBuilder = (constraint, parameter) => {
             'aria-expanded': 'false',
             'aria-controls': collapseID,
         });
-        button.innerText = parameter.name;
+        button.innerText = gettext(parameter.name);
         button.append(badge);
 
         let elements;
@@ -1657,7 +1658,7 @@ let buildSection = (name, list) => {
     let title = divBuilder({'class': 'constraints-section-title'});
     let cards = divBuilder({'class': 'constraints-section ', 'id': 'section-' + name});
     let map = list.map(id => constraintCardBuilder(constraints[id]));
-    title.innerText = name;
+    title.innerText = gettext(name);
     cards.append(...map)
     ret.append(title, cards);
     return ret;

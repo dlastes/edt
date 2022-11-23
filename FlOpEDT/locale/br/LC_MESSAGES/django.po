@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-22 14:18+0000\n"
+"POT-Creation-Date: 2022-11-23 12:07+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -284,6 +284,10 @@ msgstr ""
 msgid "Minimize groups non-preferred slots"
 msgstr ""
 
+#: TTapp/TTConstraints/limit_time_constraints.py:51
+msgid "fhd_period"
+msgstr ""
+
 #: TTapp/TTConstraints/limit_time_constraints.py:121
 msgid "Limit groups busy time per period"
 msgstr ""
@@ -302,6 +306,10 @@ msgstr ""
 
 #: TTapp/TTConstraints/modules_constraints.py:42
 msgid "Minimize used half-days for modules"
+msgstr ""
+
+#: TTapp/TTConstraints/no_course_constraints.py:45
+msgid "fampm_period"
 msgstr ""
 
 #: TTapp/TTConstraints/no_course_constraints.py:72
@@ -339,7 +347,7 @@ msgid "guide tutors"
 msgstr ""
 
 #: TTapp/TTConstraints/simultaneity_constraints.py:51
-msgid "Not alone for those course types"
+msgid "Not alone for these course types"
 msgstr ""
 
 #: TTapp/TTConstraints/slots_constraints.py:113
@@ -498,12 +506,12 @@ msgstr ""
 msgid "Impossible to assign rooms"
 msgstr ""
 
-#: TTapp/TTUtils.py:413
+#: TTapp/TTUtils.py:417
 #, python-format
 msgid "%s, "
 msgstr ""
 
-#: base/admin.py:614 base/admin.py:640 base/admin.py:653
+#: base/admin.py:615 base/admin.py:641 base/admin.py:654
 msgid "Week"
 msgstr ""
 
@@ -700,7 +708,7 @@ msgid ""
 "for that week, the typical week defines the availability."
 msgstr ""
 
-#: base/templates/base/help.html:59
+#: base/templates/base/help.html:60
 msgid "Some Tutorial Videos"
 msgstr ""
 
@@ -768,32 +776,40 @@ msgstr ""
 msgid " How ?"
 msgstr ""
 
-#: base/templates/base/show-edt.html:49
+#: base/templates/base/show-edt.html:50
 msgid "Check election"
 msgstr ""
 
-#: base/templates/base/show-edt.html:53
+#: base/templates/base/show-edt.html:54
 msgid "Elect this copy"
 msgstr ""
 
-#: base/templates/base/show-edt.html:57
+#: base/templates/base/show-edt.html:58
 msgid "Duplicate this copy"
 msgstr ""
 
-#: base/templates/base/show-edt.html:61
+#: base/templates/base/show-edt.html:62
 msgid "Delete this copy"
 msgstr ""
 
-#: base/templates/base/show-edt.html:65
+#: base/templates/base/show-edt.html:66
 msgid "Delete all copies except the 0"
 msgstr ""
 
-#: base/templates/base/show-edt.html:69
+#: base/templates/base/show-edt.html:70
 msgid "Reassign rooms"
 msgstr ""
 
-#: base/templates/base/show-edt.html:73
+#: base/templates/base/show-edt.html:74
 msgid "Duplicate (what can be) in other weeks"
+msgstr ""
+
+#: base/templates/base/show-edt.html:78
+msgid "Check avail on GRR"
+msgstr ""
+
+#: base/templates/base/show-edt.html:80
+msgid "Save on GRR"
 msgstr ""
 
 #: base/templates/base/show-stype.html:95
@@ -876,21 +892,21 @@ msgstr ""
 msgid "Select my favorite rooms"
 msgstr ""
 
-#: base/templates/base/show-stype.html:171
+#: base/templates/base/show-stype.html:172
 msgid "Teachers"
 msgstr ""
 
-#: base/templates/base/show-stype.html:172
-#: base/templates/base/show-stype.html:192
+#: base/templates/base/show-stype.html:173
+#: base/templates/base/show-stype.html:193
 msgid "Transformation in : "
 msgstr ""
 
-#: base/templates/base/show-stype.html:178
-#: base/templates/base/show-stype.html:184
+#: base/templates/base/show-stype.html:179
+#: base/templates/base/show-stype.html:185
 msgid "Types of classes"
 msgstr ""
 
-#: base/templates/base/show-stype.html:191 ics/templates/ics/index.html:82
+#: base/templates/base/show-stype.html:192 ics/templates/ics/index.html:82
 msgid "Rooms"
 msgstr ""
 
@@ -910,23 +926,23 @@ msgstr ""
 msgid "Create or modify a link"
 msgstr ""
 
-#: base/views.py:1574
+#: base/views.py:1575
 msgid "Not authorized. New link then."
 msgstr ""
 
-#: base/views.py:1577
+#: base/views.py:1578
 msgid "Unknown link. New link then."
 msgstr ""
 
-#: base/views.py:1589 notifications/notifications.py:129
+#: base/views.py:1590 notifications/notifications.py:129
 msgid "Created"
 msgstr ""
 
-#: base/views.py:1589
+#: base/views.py:1590
 msgid "Modified"
 msgstr ""
 
-#: base/views.py:1592
+#: base/views.py:1593
 msgid "Tutor does not exist"
 msgstr ""
 
@@ -1268,39 +1284,47 @@ msgstr ""
 msgid "Planned generations"
 msgstr ""
 
-#: notifications/notifications.py:125
-msgid "Deleted"
+#: notifications/discord/discord_notifications.py:127
+#: notifications/notifications.py:151 notifications/notifications.py:165
+msgid "Module"
 msgstr ""
 
-#: notifications/notifications.py:147 notifications/notifications.py:161
-msgid "Mode"
+#: notifications/discord/discord_notifications.py:127
+#: notifications/notifications.py:152
+msgid "Tutor"
 msgstr ""
 
+#: notifications/discord/discord_notifications.py:128
+#: notifications/discord/discord_notifications.py:164
 #: notifications/notifications.py:148 notifications/notifications.py:162
 #: notifications/notifications.py:184 notifications/notifications.py:232
 #: notifications/notifications.py:267
 msgid "Date"
 msgstr ""
 
+#: notifications/discord/discord_notifications.py:128
+#: notifications/discord/discord_notifications.py:164
 #: notifications/notifications.py:149 notifications/notifications.py:163
 #: notifications/notifications.py:232 notifications/notifications.py:267
 msgid "Start time"
 msgstr ""
 
-#: notifications/notifications.py:150 notifications/notifications.py:164
-msgid "Course Type"
+#: notifications/discord/discord_notifications.py:130
+#: notifications/notifications.py:147 notifications/notifications.py:161
+msgid "Mode"
 msgstr ""
 
-#: notifications/notifications.py:151 notifications/notifications.py:165
-msgid "Module"
-msgstr ""
-
-#: notifications/notifications.py:152
-msgid "Tutor"
-msgstr ""
-
+#: notifications/discord/discord_notifications.py:133
 #: notifications/notifications.py:153 notifications/notifications.py:168
 msgid "Room"
+msgstr ""
+
+#: notifications/notifications.py:125
+msgid "Deleted"
+msgstr ""
+
+#: notifications/notifications.py:150 notifications/notifications.py:164
+msgid "Course Type"
 msgstr ""
 
 #: notifications/notifications.py:166
