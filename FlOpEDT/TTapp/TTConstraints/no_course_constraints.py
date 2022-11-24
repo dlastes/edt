@@ -41,7 +41,7 @@ class NoCourseOnDay(TTConstraint):
     FULL_DAY = 'fd'
     AM = 'AM'
     PM = 'PM'
-    PERIOD_CHOICES = ((FULL_DAY, 'Full day'), (AM, 'AM'), (PM, 'PM'))
+    PERIOD_CHOICES = ((FULL_DAY, _('Full day')), (AM, _('AM')), (PM, _('PM')))
     fampm_period = models.CharField(max_length=2, choices=PERIOD_CHOICES, verbose_name=_("fampm_period"))
     weekday = models.CharField(max_length=2, choices=Day.CHOICES)
 

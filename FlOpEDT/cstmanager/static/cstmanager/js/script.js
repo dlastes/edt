@@ -4,6 +4,22 @@ popoverAllowList['*'].push('onclick');
 
 const list_close = new Event('list-close');
 
+// usefull_translations
+let paramaters_translation=[gettext("time2"), gettext("nb_max"), gettext("weekdays"), gettext("nb_min"),
+    gettext("join2courses"), gettext("slot_start_time"), gettext("curfew_time"), gettext("weeks"),
+    gettext("slot_end_time"), gettext("max_number"), gettext("max_holes_per_day"), gettext("train_progs"),
+    gettext("max_holes_per_week"), gettext("limit"), gettext("min_time_per_period"), gettext("max_time_per_period"),
+    gettext("course_type"), gettext("max_hours"), gettext("fhd_period"), gettext("tolerated_margin"),
+    gettext("number_of_weeks"), gettext("guide_tutors"), gettext("min_days_nb"), gettext("lower_bound_hours"),
+    gettext("work_copy"), gettext("fixed_days"), gettext("module"), gettext("tutor"), gettext("group"),
+    gettext("possible_rooms"), gettext("start_lunch_time"), gettext("end_lunch_time"), gettext("fampm_period"),
+    gettext("weekday"), gettext("lunch_length"), gettext("min_break_length"), gettext("tutor_status"),
+    gettext("course_types"), gettext("possible_week_days"), gettext("groups"), gettext("tutors"),
+    gettext("modules"), gettext("possible_start_times"), gettext("forbidden_week_days"),
+    gettext("forbidden_start_times"), gettext("pre_assigned_only"), gettext("percentage"), gettext("time1")]
+
+
+
 // helper function to extract a parameter object from a given constraint
 let get_parameter_from_constraint = (cst, name) => {
     let ret = {};
@@ -1350,7 +1366,7 @@ let createSelectedParameterPopup = (constraint, parameter) => {
     };
 
     // if param_obj is multiple or this condition should be satisfied!
-    if (database.acceptable_values[parameter].acceptable.length>0) {
+    if (param_obj.multiple) {
         let acceptable_values = database.acceptable_values[parameter].acceptable;
 
         let create_and_fill_selected = () => {
@@ -1408,7 +1424,7 @@ let createSelectedParameterPopup = (constraint, parameter) => {
 
         buttons.append(select_all_button, remove_all_button, cancel_button);
         divs.append(values, buttons);
-    } else if (param_obj.type.includes('.')) {
+    } else if (param_obj.type.includes('.') || database.acceptable_values[parameter].acceptable.length>0) {
         let temp_id = parameter + '-value';
 
         let form = divBuilder({
@@ -1524,7 +1540,7 @@ let buttonWithDropBuilder = (constraint, parameter) => {
             'class': 'form-check-label',
             'for': checkID,
         });
-        label.innerText = gettext(parameter.name);
+        label.innerText = parameter.name;
         button.append(check, label, badge);
     } else {
         let color = '';
@@ -1539,7 +1555,9 @@ let buttonWithDropBuilder = (constraint, parameter) => {
             'aria-expanded': 'false',
             'aria-controls': collapseID,
         });
+        console.log(parameter.name);
         button.innerText = gettext(parameter.name);
+        console.log(gettext(parameter.name));
         button.append(badge);
 
         let elements;
@@ -1919,7 +1937,7 @@ let constraintCardBuilder = (constraint) => {
             return
         }
         if (param.id_list.length > 0) {
-            popover_content += gettext(param.name) + ' : '
+            popover_content += param.name + ' : '
             param.id_list.forEach((id) =>
                 popover_content += getCorrespondingInfo(id, param.name) + ', '
             )
