@@ -443,9 +443,9 @@ class FlopConstraintFieldViewSet(viewsets.ViewSet):
                     elif choices is not None:
                         if "day" in field.name:
                             acceptable_days = department.timegeneralsettings.days
-                            acceptable = [choice[1] for choice in Day.CHOICES if choice[0] in acceptable_days]
+                            acceptable = [choice[0] for choice in Day.CHOICES if choice[0] in acceptable_days]
                         else:
-                            acceptable = [c[1] for c in choices]
+                            acceptable = [c[0] for c in choices]
 
                 elif type(field) is ArrayField:
                     typename = type(field.base_field).__name__
@@ -455,9 +455,9 @@ class FlopConstraintFieldViewSet(viewsets.ViewSet):
                         acceptable = all_possible_start_times(department)
                     elif "day" in field.name:
                         acceptable_days = department.timegeneralsettings.days
-                        acceptable = [choice[1] for choice in Day.CHOICES if choice[0] in acceptable_days]
+                        acceptable = [choice[0] for choice in Day.CHOICES if choice[0] in acceptable_days]
                     elif choices is not None:
-                        acceptable = [c[1] for c in choices]
+                        acceptable = [c[0] for c in choices]
 
 
             else:

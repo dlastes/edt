@@ -18,6 +18,20 @@ let paramaters_translation=[gettext("time2"), gettext("nb_max"), gettext("weekda
     gettext("modules"), gettext("possible_start_times"), gettext("forbidden_week_days"),
     gettext("forbidden_start_times"), gettext("pre_assigned_only"), gettext("percentage"), gettext("time1")]
 
+//should/could be replaced by django-js-choices
+let choices = {
+    'AM': gettext('AM'),
+    'PM': gettext('PM'),
+    'fd': gettext('fd'),
+    'hd': gettext('hd'),
+    'm': gettext('m'),
+    'tu': gettext('tu'),
+    'w': gettext('w'),
+    'th': gettext('th'),
+    'f': gettext('f'),
+    'sa': gettext('sa'),
+    'su': gettext('su'),
+}
 
 
 // helper function to extract a parameter object from a given constraint
@@ -338,6 +352,7 @@ let changeEvents = {
                 message += `\n${key}: ${reason[key]}`;
             });
             console.error(message);
+            alertMessage.error(message);
             alertMessage.error(message);
             success = false;
         };
@@ -1285,6 +1300,13 @@ let getCorrespondingInfo = (id, param) => {
         case 'possible_start_times':
         case 'allowed_start_times':
             return floptime_to_str_time(id);
+        case 'fampm_period':
+        case 'fhd_period':
+        case 'weekday':
+        case 'weekdays':
+        case 'forbidden_week_days':
+        case 'possible_week_days':
+            return choices[id];
         default:
             return id;
     }
