@@ -822,7 +822,8 @@ function course_pl_canevas_json_to_obj(d) {
     graded: d.course.is_graded,
     color_bg: d.color_bg,
     color_txt: d.color_txt,
-    tutors: d.tutors
+    tutors: d.tutors,
+    number: d.number
   };
 }
 
