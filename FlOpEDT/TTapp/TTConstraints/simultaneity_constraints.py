@@ -90,7 +90,7 @@ class NotAloneForTheseCouseTypes(TTConstraint):
         considered_course_types = ttmodel.wdb.course_types
         if self.course_types.exists():
             considered_course_types &= set(self.course_types.all())
-        considered_modules = ttmodel.wdb.modules
+        considered_modules = set(ttmodel.wdb.modules)
         if self.modules.exists():
             considered_modules &= set(self.modules.all())
         tutors_to_consider = considered_tutors(self, ttmodel)
@@ -114,7 +114,6 @@ class NotAloneForTheseCouseTypes(TTConstraint):
                                                        for c in courses & ttmodel.wdb.compatible_courses[sl]
                                                        & ttmodel.wdb.possible_courses[g]
                                                        )
-                        print(sl, tutor_sum, guide_tutors_sum)
                         if self.weight is None:
                             ttmodel.add_constraint(tutor_sum - guide_tutors_sum, '<=', 0,
                                                    Constraint(constraint_type=ConstraintType.NOT_ALONE,
