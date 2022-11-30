@@ -442,23 +442,15 @@ class CourseType_ESC_Serializer(serializers.Serializer):
         fields = ['duration', 'department']
 
 
-class Course_ESC_Serializer(serializers.Serializer):
-    tutor = serializers.CharField()
-    type = CourseType_ESC_Serializer()
-
-    class Meta:
-        model = bm.Course
-        fields = ['tutor', 'type']
-
-
 class ExtraScheduledCoursesSerializer(serializers.Serializer):
     day = serializers.CharField()
     start_time = serializers.IntegerField()
-    course = Course_ESC_Serializer()
+    tutor = serializers.CharField(source='tutor.username', allow_null=True)
+    duration = serializers.IntegerField(source='course.type.duration')
 
     class Meta:
         model = bm.ScheduledCourse
-        fields = ['day', 'start_time', 'course']
+        fields = ['day', 'start_time', 'tutor', 'duration']
 
 
 #                                  --------------------                                 #
