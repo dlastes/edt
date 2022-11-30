@@ -803,7 +803,6 @@ function translate_cours_pl_from_json(d, result) {
 
 function course_pl_canevas_json_to_obj(d) {
   var p_m = null;
-  console.log(d.course);
   if (d.course.pay_module!=null) {
     p_m = d.course.pay_module.abbrev;
   }
