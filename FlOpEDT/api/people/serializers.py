@@ -23,6 +23,7 @@
 
 from rest_framework import serializers
 import people.models as pm
+import base.models as bm
 
 
 class UsersSerializer(serializers.ModelSerializer):
@@ -37,10 +38,18 @@ class UserDepartmentSettingsSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class DepartmentAbbrevSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = bm.Department
+        fields = ['abbrev']
+
+
 class TutorSerializer(serializers.ModelSerializer):
+    departments = DepartmentAbbrevSerializer(many=True)
     class Meta:
         model = pm.Tutor
-        fields = ['username', 'first_name', 'last_name', 'email']
+        fields = ['username', 'first_name', 'last_name', 'email',
+                  'departments']
 
 
 class TutorUsernameSerializer(serializers.ModelSerializer):
