@@ -247,24 +247,24 @@ function are_rooms_free(candidates,
 
 // return: true iff a change is needed (i.e. unassigned room or already occupied) (or level>0)
 function select_room_change() {
-  var level = room_cm_level;
+  let level = room_cm_level;
   room_tutor_change.cm_settings = room_cm_settings[level];
 
-  var c = pending.wanted_course;
+  let c = pending.wanted_course;
   room_tutor_change.old_value = c.room;
   room_tutor_change.cur_value = c.room;
 
-  var busy_rooms, cur_roomgroup, cur_room, is_occupied, is_available, proposed_rg, initial_rg;
-  var j, i_unav;
+  let busy_rooms, cur_roomgroup, cur_room, is_occupied, is_available, proposed_rg, initial_rg;
+  let j, i_unav;
+  const occupied_rooms = [];
 
   proposed_rg = [];
 
   if (level < room_cm_settings.length - 1) {
 
     // find rooms where a course take place
-    var concurrent_courses = simultaneous_courses(c);
+    const concurrent_courses = simultaneous_courses(c);
 
-    var occupied_rooms = [];
     for (let i = 0; i < concurrent_courses.length; i++) {
       // for real rooms
       if (concurrent_courses[i].room != null) {
@@ -320,7 +320,7 @@ function select_room_change() {
   }
 
   update_change_cm_nlin() ;
-  
+
   if (level > 0 || c.room == "" ||
     occupied_rooms.indexOf(c.room) != -1) {
     return true;
