@@ -34,6 +34,12 @@ class UsersSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class ShortUsersSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = pm.User
+        fields = ('username', 'first_name', 'last_name', 'email')
+
+
 class UserDepartmentSettingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = pm.UserDepartmentSettings
