@@ -178,6 +178,72 @@ function week_right() {
   ------- ROOMS ------
   --------------------*/
 
+// Filters the candidates and keep only the rooms that, during slot
+//   -     are not used in the current department
+//   -and- are not unavailable (due to room preferences or room bookings)
+//   -and- are not used in another department
+// Returns a list of the selected rooms
+function are_rooms_free(candidates,
+                        slot,
+                        occupied_rooms) {
+  // slot: {'day': day_ref, 'start': min_from_midnight, 'duration': in_min}
+  // candidates: list of room names
+
+  if (typeof slot.id_course === "undefined") {
+    slot.id_course = -2 ;
+  }
+  const free_rooms = [] ;
+
+  if (typeof occupied_rooms === "undefined") {
+    // find rooms where a course take place
+    const concurrent_courses = simultaneous_courses(slot);
+
+    occupied_rooms = [];
+    for (let i = 0; i < concurrent_courses.length; i++) {
+    // for real rooms
+      if (concurrent_courses[i].room != null) {
+      busy_rooms = rooms.roomgroups[concurrent_courses[i].room];
+        for (j = 0; j < busy_rooms.length; j++) {
+          if (occupied_rooms.indexOf(busy_rooms[j]) == -1) {
+            occupied_rooms.push(busy_rooms[j]);
+          }
+        }
+      }
+    }
+  }
+
+  for (let i = 0; i < candidates.length; i++) {
+    cur_roomgroup = candidates[i];
+
+    // is a room in the roomgroup occupied?
+    is_occupied = false;
+    is_available = true;
+    j = 0;
+    while (!is_occupied && is_available
+           && j < rooms.roomgroups[cur_roomgroup].length) {
+      cur_room = rooms.roomgroups[cur_roomgroup][j];
+      is_occupied = (occupied_rooms.indexOf(cur_room) != -1);
+      is_available = (Object.keys(unavailable_rooms).indexOf(cur_room) == -1
+                      || no_overlap(unavailable_rooms[cur_room][slot.day],
+                                    slot.start, slot.duration));
+      j++;
+    }
+
+    if (!is_occupied && is_available) {
+      // other depts
+      if (!Object.keys(extra_pref.rooms).includes(cur_roomgroup)
+          || !Object.keys(extra_pref.rooms[cur_roomgroup]).includes(slot.day)
+          || get_preference(extra_pref.rooms[cur_roomgroup][slot.day],
+                            slot.start, slot.duration) != 0) {
+        free_rooms.push(candidates[i]);
+      }
+    }
+  }
+
+  return free_rooms ;
+}
+
+
 
 // return: true iff a change is needed (i.e. unassigned room or already occupied) (or level>0)
 function select_room_change() {
