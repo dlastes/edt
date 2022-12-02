@@ -287,34 +287,11 @@ function select_room_change() {
       initial_rg = [];
     }
 
-    for (let i = 0; i < initial_rg.length; i++) {
-      cur_roomgroup = initial_rg[i];
-      if (!is_garbage({ day: c.day, start_time: c.start })) {
-
-        // is a room in the roomgroup occupied?
-        is_occupied = false;
-        is_available = true;
-        j = 0;
-        while (!is_occupied && is_available
-          && j < rooms.roomgroups[cur_roomgroup].length) {
-          cur_room = rooms.roomgroups[cur_roomgroup][j];
-          is_occupied = (occupied_rooms.indexOf(cur_room) != -1);
-          is_available = (Object.keys(unavailable_rooms).indexOf(cur_room) == -1
-            || no_overlap(unavailable_rooms[cur_room][c.day],
-              c.start, c.duration));
-          j++;
-        }
-
-        if (!is_occupied && is_available) {
-          // other depts
-          if (!Object.keys(extra_pref.rooms).includes(cur_roomgroup)
-            || !Object.keys(extra_pref.rooms[cur_roomgroup]).includes(c.day)
-            || get_preference(extra_pref.rooms[cur_roomgroup][c.day], c.start, c.duration) != 0) {
-            proposed_rg.push(initial_rg[i]);
-          }
-        }
-      }
+    if (!is_garbage({ day: c.day, start_time: c.start })) {
+      proposed_rg.push.apply(proposed_rg,
+                             are_rooms_free(initial_rg, c, occupied_rooms)) ;
     }
+
   } else {
     proposed_rg = Object.keys(rooms.roomgroups);
   }
