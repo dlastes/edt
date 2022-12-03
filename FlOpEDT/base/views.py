@@ -1402,6 +1402,9 @@ def decale_changes(req, **kwargs):
                     week=old_week, department=req.department)
                 ev.version += 1
                 ev.save()
+                number_courses(req.department,
+                               modules=scheduled_course.course.module,
+                               course_types=scheduled_course.course.type)
             else:
                 cache.delete(get_key_course_pp(req.department.abbrev,
                                                old_week,
