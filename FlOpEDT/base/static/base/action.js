@@ -2167,7 +2167,8 @@ function show_detailed_courses(cours) {
       'url': modinfo.url
     },
     room_info,
-    {'txt': (cours.number?cours.c_type +' N°' + cours.number + " ":"") + (cours.comment?cours.comment:"")},
+    {'txt': (cours.number?cours.c_type +' n°' + cours.number + " ":"")
+     + (cours.comment?cours.comment:"")},
     {'txt': tutinfo.name},
     {
       'txt': tutinfo.mail,
