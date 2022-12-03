@@ -34,7 +34,7 @@ from TTapp.models import MinNonPreferedTrainProgsSlot, MinNonPreferedTutorsSlot
 from TTapp.FlopConstraint import max_weight
 from TTapp.slots import slot_pause
 from TTapp.RoomModel import RoomModel
-from base.views import get_key_course_pl, get_key_course_pp
+import base.views as base_views
 from django.core.cache import cache
 from people.models import Tutor
 import json
@@ -48,7 +48,7 @@ def basic_reassign_rooms(department, week, work_copy, create_new_work_copy):
         if create_new_work_copy:
             msg['more'] = _(f'Saved in copy {result_work_copy}')
         else:
-            cache.delete(get_key_course_pl(department.abbrev,
+            cache.delete(base_views.get_key_course_pl(department.abbrev,
                                            week,
                                            work_copy))
     else:
@@ -252,16 +252,16 @@ def basic_swap_version(department, week, copy_a, copy_b=0):
         version_copy.version += 1
         version_copy.save()
 
-    cache.delete(get_key_course_pl(department.abbrev,
+    cache.delete(base_views.get_key_course_pl(department.abbrev,
                                    week,
                                    copy_a))
-    cache.delete(get_key_course_pl(department.abbrev,
+    cache.delete(base_views.get_key_course_pl(department.abbrev,
                                    week,
                                    copy_b))
-    cache.delete(get_key_course_pp(department.abbrev,
+    cache.delete(base_views.get_key_course_pp(department.abbrev,
                                    week,
                                    copy_a))
-    cache.delete(get_key_course_pp(department.abbrev,
+    cache.delete(base_views.get_key_course_pp(department.abbrev,
                                    week,
                                    copy_b))
 
@@ -287,7 +287,7 @@ def basic_delete_work_copy(department, week, work_copy):
 
     sc_to_delete.delete()
 
-    cache.delete(get_key_course_pl(department.abbrev,
+    cache.delete(base_views.get_key_course_pl(department.abbrev,
                                    week,
                                    work_copy))
     return result
