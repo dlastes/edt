@@ -648,7 +648,8 @@ const scheduledCoursesSlots: ScheduledCourseSlots = {
                 for (const subroomsData of list_subrooms) {
                     let index = (subroomsData.slotData as CalendarScheduledCourseSlotData).course.room?.id
                     if (!index) index = -1
-                    out2[dayDate][index] = [subroomsData]
+                    if (!out2[dayDate][index]) out2[dayDate][index] = []
+                    out2[dayDate][index].push(subroomsData)
                 }
             }
         }
