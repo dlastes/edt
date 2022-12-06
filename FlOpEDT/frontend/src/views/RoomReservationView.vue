@@ -196,6 +196,9 @@ interface ScheduledCourses {
     perDayPerRoomFilterBySelectedDepartments: ComputedRef<{
         [day: string]: { [roomId: string]: Array<ScheduledCourse> }
     }>
+    perDayPerRoom: ComputedRef<{
+        [day: string]: { [roomId: string]: Array<ScheduledCourse> }
+    }>
 }
 
 interface CourseTypes {
@@ -366,7 +369,16 @@ const scheduledCourses: ScheduledCourses = {
                 const dept = getScheduledCourseDepartment(course)
                 return dept && selectedDepartments.value.includes(dept)
             })
-            out[day] = listGroupBy(courses, (course) => `${course.room.id}`)
+            out[day] = listGroupBy(courses, (course) => `${course.room?.id}`)
+        })
+        return out
+    }),
+    perDayPerRoom: computed(() => {
+        const out: { [day: string]: { [roomId: string]: Array<ScheduledCourse> } } = {}
+        Object.entries(scheduledCourses.perDay.value).forEach((entry) => {
+            const day = entry[0]
+            const courses = entry[1]
+            out[day] = listGroupBy(courses, (course) => `${course.room?.id}`)
         })
         return out
     }),
@@ -579,25 +591,33 @@ const scheduledCoursesSlots: ScheduledCourseSlots = {
     }),
     perDayPerRoomFilterBySelectedDepartments: computed(() => {
         const out: { [day: string]: { [roomId: string]: Array<CalendarSlot> } } = {}
-        Object.entries(scheduledCourses.perDayPerRoomFilterBySelectedDepartments.value).forEach((entry) => {
+        Object.entries(scheduledCourses.perDayPerRoom.value).forEach((entry) => {
             out[entry[0]] = Object.fromEntries(
                 Object.entries(entry[1]).map((e) => {
                     const slots: Array<CalendarSlot> = []
                     e[1].forEach((course) => {
                         // Make sure the course type belongs to the selected departments
-                        const courseType = courseTypes.listFilterBySelectedDepartments.value.find((courseType) => {
+                        let courseType = courseTypes.listFilterBySelectedDepartments.value.find((courseType) => {
                             return courseType.name === course.course.type
                         })
                         if (!courseType) {
                             console.log('is not of a good type')
-                            return
+                            courseType = {
+                                name: 'Unknown',
+                                duration: 60,
+                            }
+                            //return
                         }
 
                         // Get the course's department
-                        const dept = getScheduledCourseDepartment(course)
+                        let dept = getScheduledCourseDepartment(course)
                         if (!dept) {
                             console.log('has no department')
-                            return
+                            dept = {
+                                id: -1,
+                                abbrev: 'UNK',
+                            }
+                            //return
                         }
                         const deptId = `${dept.id}`
                         let courseRoom: Room = {
@@ -614,7 +634,7 @@ const scheduledCoursesSlots: ScheduledCourseSlots = {
                                 // Make sure the course's room is in the selected departments
                                 if (!isRoomInSelectedDepartments(course.room.id)) {
                                     console.log('is not in good department')
-                                    return
+                                    //return
                                 }
                                 slots.push(createScheduledCourseSlot(course, courseType, deptId))
                             } else {
@@ -626,7 +646,7 @@ const scheduledCoursesSlots: ScheduledCourseSlots = {
                                 })
                                 if (!isOneInDepartment) {
                                     console.log('No subrooms in good departments')
-                                    return
+                                    //return
                                 }
                                 courseRoom.basic_rooms.forEach((r) => {
                                     const newCourse: ScheduledCourse = JSON.parse(JSON.stringify(course))
