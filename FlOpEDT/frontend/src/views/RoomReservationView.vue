@@ -151,7 +151,7 @@ import type {
     User,
     WeekDay,
 } from '@/assets/js/types'
-import type { ScheduledCourse, Time } from '@/assets/js/types'
+import { ScheduledCourse, Time } from '@/assets/js/types'
 import HourCalendar from '@/components/HourCalendar.vue'
 import WeekPicker from '@/components/WeekPicker.vue'
 import type { ComputedRef, Ref } from 'vue'
@@ -168,7 +168,7 @@ import ClearableInput from '@/components/ClearableInput.vue'
 import DeletePeriodicReservationDialog from '@/components/DeletePeriodicReservationDialog.vue'
 import type { Department } from '@/stores/department'
 import { useDepartmentStore } from '@/stores/department'
-import { type Room, useRoomStore } from '@/stores/room'
+import { Room, useRoomStore } from '@/stores/room'
 
 const api = ref<FlopAPI>(requireInjection(apiKey))
 const currentWeek = ref(requireInjection(currentWeekKey))
@@ -596,6 +596,11 @@ const scheduledCoursesSlots: ScheduledCourseSlots = {
                 Object.entries(entry[1]).map((e) => {
                     const slots: Array<CalendarSlot> = []
                     e[1].forEach((course) => {
+                        // Make sure the course's room is in the selected departments
+                        if (!isRoomInSelectedDepartments(course.room.id)) {
+                            return
+                        }
+
                         // Make sure the course type belongs to the selected departments
                         let courseType = courseTypes.listFilterBySelectedDepartments.value.find((courseType) => {
                             return courseType.name === course.course.type
@@ -747,6 +752,7 @@ const hourCalendarValues = computed<HourCalendarProps>(() => {
 
 const roomCalendarValues = computed<RoomCalendarProps>(() => {
     const slots: { [day: string]: { [roomId: string]: CalendarSlot[] } } = {}
+
     for (const obj of [
         roomReservationSlots.perDayPerRoomFilterBySelectedDepartments.value,
         scheduledCoursesSlots.perDayPerRoomFilterBySelectedDepartments.value,
@@ -1007,6 +1013,7 @@ function updateScheduledCourses(date: FlopWeek, departments: Array<Department>) 
         hideLoading()
         return
     }
+
     const coursesList: { [p: string]: ScheduledCourse[] } = {}
     departments.forEach((dept) => {
         api.value.fetch.scheduledCourses({ week: week, year: year, department: dept.abbrev }).then((value) => {
@@ -1299,7 +1306,7 @@ function createDateId(day: string | number, month: string | number): string {
  */
 function isRoomInSelectedDepartments(roomId: number): boolean {
     const room = rooms.listFilterBySelectedDepartments.value.find((r) => r.id === roomId)
-    return room !== null && room !== undefined
+    return !(!room || !room.basic_rooms.find((r: { id: number }) => r.id === roomId))
 }
 
 function isRoomSelected(roomId: number): boolean {
