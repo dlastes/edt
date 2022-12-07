@@ -661,6 +661,7 @@ const scheduledCoursesSlots: ScheduledCourseSlots = {
                 })
             )
         })
+        // Restructuring data to put subrooms ids as keys
         const out2: { [day: string]: { [roomId: string]: Array<CalendarSlot> } } = {}
         for (const [dayDate, list_rooms] of Object.entries(out)) {
             out2[dayDate] = {}
@@ -987,6 +988,7 @@ function updateRoomReservations(date: FlopWeek): Promise<void> {
 
     showLoading()
     return api.value.fetch.roomReservations({ week: week, year: year }).then((value) => {
+        console.log('RoomReservation received : ', value)
         roomReservations.list.value = value
         temporaryReservation.value = undefined
         hideLoading()
@@ -1008,6 +1010,7 @@ function updateScheduledCourses(date: FlopWeek, departments: Array<Department>) 
     const coursesList: { [p: string]: ScheduledCourse[] } = {}
     departments.forEach((dept) => {
         api.value.fetch.scheduledCourses({ week: week, year: year, department: dept.abbrev }).then((value) => {
+            console.log('ScheduledCourses received : ', value)
             coursesList[dept.id] = value
             if (--count === 0) {
                 scheduledCourses.perDepartment.value = coursesList
