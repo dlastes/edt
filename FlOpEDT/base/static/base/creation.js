@@ -2317,7 +2317,7 @@ function def_cm_change() {
     go_cm_room_tutor_change();
   };
 
-  for (var level = 0; level < room_cm_settings.length; level++) {
+  for (let level = 0; level < room_cm_settings.length; level++) {
     room_cm_settings[level].click = function (d) {
       context_menu.room_tutor_hold = true;
       if (d.content == '+') {
