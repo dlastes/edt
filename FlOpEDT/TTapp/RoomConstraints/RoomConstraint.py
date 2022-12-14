@@ -103,12 +103,7 @@ class LimitSimultaneousRoomCourses(RoomConstraint):
     Only one course for each considered room on simultaneous slots
     """
     rooms = models.ManyToManyField('base.Room', blank=True)
-    # max_simultaneous_courses = models.PositiveSmallIntegerField(default=1, verbose_name="max simultaneous courses")
-
-    @property
-    def max_simultaneous_courses(self):
-        pass
-    
+    max_simultaneous_courses = models.PositiveSmallIntegerField(default=1, verbose_name="max simultaneous courses")
 
     class Meta:
         verbose_name = _('No simultaneous courses for rooms')
