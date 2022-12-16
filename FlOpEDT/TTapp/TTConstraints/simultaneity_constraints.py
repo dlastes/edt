@@ -131,3 +131,90 @@ class NotAloneForTheseCouseTypes(TTConstraint):
                                                    '<=',
                                                    0)
                             ttmodel.add_to_inst_cost(tutor, self.local_weight()*ponderation*tutor_without_a_guide)
+
+
+class UpperBoundCourseSlotsNumber(TTConstraint):
+    '''
+    TTConstraint : Guarantees that any considered tutor will not be alone to do a course of this type/module
+    (and will be in parallel to one of the guide tutors)
+    '''
+
+    course_types = models.ManyToManyField('base.CourseType', blank=True)
+    modules = models.ManyToManyField('base.Module', blank=True)
+    max_slots_number = models.PositiveSmallIntegerField(verbose_name="max slots number")
+
+
+    class Meta:
+        verbose_name = _('Upper bound for courses slots number')
+        verbose_name_plural = verbose_name
+
+    def get_viewmodel(self):
+        view_model = super().get_viewmodel()
+        details = view_model['details']
+
+        if self.course_types.exists():
+            details.update({'course_types': ', '.join([course_type.name for course_type in self.course_types.all()])})
+
+        if self.modules.exists():
+            details.update({'modules': ', '.join([module.name for module in self.modules.all()])})
+
+        return view_model
+
+    def one_line_description(self):
+        text = f"Les cours sont concentrés en {self.max_slots_number} créneaux"
+
+        if self.course_types.exists():
+            text += ' pour les type(s) ' + ', '.join([course_type.name for course_type in self.course_types.all()])
+
+        if self.modules.exists():
+            text += ' pour chacun des modules ' + ', '.join([course_type.name for course_type in self.course_types.all()])
+        else:
+            text += 'dans chacun des modules.'
+
+        return text
+
+    def enrich_ttmodel(self, ttmodel, week, ponderation=10):
+        considered_course_types = ttmodel.wdb.course_types
+        if self.course_types.exists():
+            considered_course_types &= set(self.course_types.all())
+        considered_modules = set(ttmodel.wdb.modules)
+        if self.modules.exists():
+            considered_modules &= set(self.modules.all())
+        tutors_to_consider = considered_tutors(self, ttmodel)
+        guides_to_consider = set(ttmodel.wdb.instructors)
+        if self.guide_tutors.exists():
+            guides_to_consider &= set(self.guide_tutors.all())
+
+        for tutor in tutors_to_consider:
+            possible_tutor_guides = guides_to_consider - {tutor}
+            for ct in considered_course_types:
+                for m in considered_modules:
+                    courses = set(ttmodel.wdb.courses.filter(module=m, type=ct, week=week))
+                    tutor_courses = courses & ttmodel.wdb.possible_courses[tutor]
+                    if not ttmodel.wdb.possible_courses[tutor] & courses:
+                        continue
+                    for sl in slots_filter(ttmodel.wdb.courses_slots, week=week):
+                        tutor_sum = ttmodel.sum(ttmodel.TTinstructors[sl, c, tutor]
+                                                for c in tutor_courses & ttmodel.wdb.compatible_courses[sl])
+                        guide_tutors_sum = ttmodel.sum(ttmodel.TTinstructors[sl, c, g]
+                                                       for g in possible_tutor_guides
+                                                       for c in courses & ttmodel.wdb.compatible_courses[sl]
+                                                       & ttmodel.wdb.possible_courses[g]
+                                                       )
+                        if self.weight is None:
+                            ttmodel.add_constraint(tutor_sum - guide_tutors_sum, '<=', 0,
+                                                   Constraint(constraint_type=ConstraintType.NOT_ALONE,
+                                                              instructors=tutor, weeks=week)
+                                                   )
+                        else:
+                            tutor_without_a_guide = ttmodel.add_var()
+                            # if new_var is 1, then not_ok
+                            ttmodel.add_constraint(100 * tutor_without_a_guide + (guide_tutors_sum - tutor_sum),
+                                                   '<=',
+                                                   99)
+
+                            # if not_ok (t_s > g_t_s) then new_var is 1
+                            ttmodel.add_constraint((tutor_sum - guide_tutors_sum) - 100 * tutor_without_a_guide,
+                                                   '<=',
+                                                   0)
+                            ttmodel.add_to_inst_cost(tutor, self.local_weight()*ponderation*tutor_without_a_guide)
