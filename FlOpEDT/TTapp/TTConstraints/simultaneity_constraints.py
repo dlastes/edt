@@ -31,6 +31,7 @@ from TTapp.TTConstraints.TTConstraint import TTConstraint
 from TTapp.FlopConstraint import max_weight
 from django.utils.translation import gettext_lazy as _
 from TTapp.TTConstraints.tutors_constraints import considered_tutors
+from base.timing import french_format
 
 
 class NotAloneForTheseCouseTypes(TTConstraint):
@@ -133,19 +134,19 @@ class NotAloneForTheseCouseTypes(TTConstraint):
                             ttmodel.add_to_inst_cost(tutor, self.local_weight()*ponderation*tutor_without_a_guide)
 
 
-class UpperBoundCourseSlotsNumber(TTConstraint):
+class ParallelizeCourses(TTConstraint):
     '''
-    TTConstraint : Guarantees that any considered tutor will not be alone to do a course of this type/module
-    (and will be in parallel to one of the guide tutors)
+    TTConstraint : Guarantees that the total course time of certain class of courses do not exceed
+    a certain bound
     '''
 
     course_types = models.ManyToManyField('base.CourseType', blank=True)
     modules = models.ManyToManyField('base.Module', blank=True)
-    max_slots_number = models.PositiveSmallIntegerField(verbose_name="max slots number")
+    desired_busy_slots_duration = models.PositiveSmallIntegerField(verbose_name="max busy slots duration desired")
 
 
     class Meta:
-        verbose_name = _('Upper bound for courses slots number')
+        verbose_name = _('Parallelize courses')
         verbose_name_plural = verbose_name
 
     def get_viewmodel(self):
@@ -161,7 +162,7 @@ class UpperBoundCourseSlotsNumber(TTConstraint):
         return view_model
 
     def one_line_description(self):
-        text = f"Les cours sont concentrés en {self.max_slots_number} créneaux"
+        text = f"Tous les cours sont concentrés en {french_format(self.desired_busy_slots_duration)}"
 
         if self.course_types.exists():
             text += ' pour les type(s) ' + ', '.join([course_type.name for course_type in self.course_types.all()])
@@ -180,41 +181,29 @@ class UpperBoundCourseSlotsNumber(TTConstraint):
         considered_modules = set(ttmodel.wdb.modules)
         if self.modules.exists():
             considered_modules &= set(self.modules.all())
-        tutors_to_consider = considered_tutors(self, ttmodel)
-        guides_to_consider = set(ttmodel.wdb.instructors)
-        if self.guide_tutors.exists():
-            guides_to_consider &= set(self.guide_tutors.all())
-
-        for tutor in tutors_to_consider:
-            possible_tutor_guides = guides_to_consider - {tutor}
+        for m in considered_modules:
             for ct in considered_course_types:
-                for m in considered_modules:
-                    courses = set(ttmodel.wdb.courses.filter(module=m, type=ct, week=week))
-                    tutor_courses = courses & ttmodel.wdb.possible_courses[tutor]
-                    if not ttmodel.wdb.possible_courses[tutor] & courses:
-                        continue
-                    for sl in slots_filter(ttmodel.wdb.courses_slots, week=week):
-                        tutor_sum = ttmodel.sum(ttmodel.TTinstructors[sl, c, tutor]
-                                                for c in tutor_courses & ttmodel.wdb.compatible_courses[sl])
-                        guide_tutors_sum = ttmodel.sum(ttmodel.TTinstructors[sl, c, g]
-                                                       for g in possible_tutor_guides
-                                                       for c in courses & ttmodel.wdb.compatible_courses[sl]
-                                                       & ttmodel.wdb.possible_courses[g]
-                                                       )
-                        if self.weight is None:
-                            ttmodel.add_constraint(tutor_sum - guide_tutors_sum, '<=', 0,
-                                                   Constraint(constraint_type=ConstraintType.NOT_ALONE,
-                                                              instructors=tutor, weeks=week)
-                                                   )
-                        else:
-                            tutor_without_a_guide = ttmodel.add_var()
-                            # if new_var is 1, then not_ok
-                            ttmodel.add_constraint(100 * tutor_without_a_guide + (guide_tutors_sum - tutor_sum),
-                                                   '<=',
-                                                   99)
+                considered_courses = set(ttmodel.wdb.courses.filter(module=m, type=ct, week=week))
 
-                            # if not_ok (t_s > g_t_s) then new_var is 1
-                            ttmodel.add_constraint((tutor_sum - guide_tutors_sum) - 100 * tutor_without_a_guide,
-                                                   '<=',
-                                                   0)
-                            ttmodel.add_to_inst_cost(tutor, self.local_weight()*ponderation*tutor_without_a_guide)
+                total_courses_duration = ttmodel.lin_expr()
+                for sl in ttmodel.wdb.availability_slots:
+                    used_slot = ttmodel.add_floor(ttmodel.sum(ttmodel.TT[course_slot,course]
+                                                              for course_slot in slots_filter(ttmodel.wdb.courses_slots,
+                                                                                              simultaneous_to=sl)
+                                                              for course in considered_courses &
+                                                              ttmodel.wdb.compatible_courses[course_slot]),
+                                                  1,
+                                                  1000)
+                    total_courses_duration += sl.duration * used_slot
+                if self.weight is None:
+                    ttmodel.add_constraint(total_courses_duration, '<=', self.desired_busy_slots_duration,
+                                           Constraint(constraint_type=ConstraintType.LimitBusySlots))
+                else:
+                    cost = ttmodel.lin_expr()
+                    start = self.desired_busy_slots_duration
+                    end = ct.duration * len(considered_courses)
+                    step = (end - start) // 4
+                    for bound in range(start, end+1, step):
+                        cost *= 2
+                        cost += ttmodel.add_floor(total_courses_duration, bound-1, 100000)
+                    ttmodel.add_to_generic_cost(cost*self.local_weight()*ponderation, week)
