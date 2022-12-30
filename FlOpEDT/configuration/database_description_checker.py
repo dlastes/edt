@@ -533,7 +533,7 @@ def check_groups_sheet(database):
         if root_nb == 0:
             result.append(f"La promotion '{promotion_id}' n'a pas de groupe racine (sans parent).")
         elif root_nb > 1:
-            result.append(f"La promotion '{promotion_id}' a {root_nb} groupes racines (sans parent).")
+            result.append(f"La promotion '{promotion_id}' a {root_nb} groupes racine (sans parent).")
 
     #
     # check group types
